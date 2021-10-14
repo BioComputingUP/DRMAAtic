@@ -1,0 +1,158 @@
+openapi: '3.0.2'
+info:
+  title: Submission server API
+  version: '1.0'
+# Allowed servers
+servers:
+  - url: https://scheduler.biocomputingup.it/api/v1
+# Re-usable components
+components:
+  # Define component schemes
+  schemas:
+    # User object
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the user
+        email:
+          type: string
+          description: Email address of the user
+    # Script object
+    Script:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Unique name of the script to submit
+        params:
+          type: object
+          additionalProperties: true
+          description: Dictionary mapping parameter names to values
+    # Job object
+    Job:
+      type: object
+      # Define required properties
+      required: [ 'status', 'queue' ]
+      # Define property schema
+      properties:
+        id:
+          type: string
+          description: Unique ID of the current job
+        status:
+          type: string
+          description: Current status of the job
+        queue:
+          type: string
+          description: Unique ID of the queue
+        user:
+          $ref: '#/components/schemas/User'
+        script:
+          $ref: '#/components/schemas/Script'
+  # Define security schemes (only access token)
+  securitySchemes:
+    # Access token
+    baererAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+# Global security settings 
+security:
+  # Define scopes
+  - baererAuth: []
+# Implemented paths
+paths:
+  # Check script parameters
+  /script/{name}:
+    get:
+      description: Return parameters, type and validation for given script
+      parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+        description: Unique name of the script
+      responses:
+        '200':
+          description: (Ok) given script exists, parameters are returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Script'
+        '404':
+          description: (Not found) given script does not exist
+  # Operations on jobs
+  /job:
+      # Submit a job
+      post:
+        description: Submit a new job
+        requestBody:
+          description: Optional description in *Markdown*
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        responses:
+          '200':
+            description: (Ok) given job has been submitted
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Job'
+          '400':
+            description: (Bad request) given parameters do not satisfy any job specification
+          '500':
+            description: (Internal server error) given job could not start
+          '403':
+            description: (Forbidden) your request cannot be submitted
+  # Other operations on jobs
+  /job/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: Unique ID of the job
+    # Retrieve a job
+    get:
+      description: Retrieve status of the given job
+      responses:
+        '200':
+          description: (Ok) job has been retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '404':
+          description: (Not found) job does not exist
+        '403':
+          description: (Forbidden) your request cannot be fulfilled
+    # Delete a job
+    delete:
+      description: Delete given job, if any
+      responses:
+        '200':
+          description: (Ok) job has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '404':
+          description: (Not found) job does not exist
+        '403':
+          description: (Forbidden) your request cannot be fulfilled
+        '500':
+          description: (Internal server error) the job was not deleted for whatever reason
+  # Exchange external token for an internal one
+  /token:
+    get:
+      description: Exchanges external/OAuth2 access token with an internal one. It uses email for granting access to authenticated users. Therefore, requesting application is responsible for providing an access token with enough information (for now, email address is required).
+      responses:
+        '200':
+          description: (Ok) you have been authenticated by external service
+        '304':
+          description: (Forbidden) your request has been refused by external authentication service

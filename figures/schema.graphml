@@ -15,7 +15,6 @@
   <graph edgedefault="directed" id="G">
     <data key="d0" xml:space="preserve"/>
     <node id="n0">
-      <data key="d5"/>
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="65.5" width="55.29999923706055" x="542.3500003814697" y="177.25"/>
@@ -31,24 +30,6 @@
       </data>
     </node>
     <node id="n1">
-      <data key="d5"/>
-      <data key="d6">
-        <y:SVGNode>
-          <y:Geometry height="51.19999694824219" width="64.80000305175781" x="597.5999984741211" y="334.4000015258789"/>
-          <y:Fill color="#CCCCFF" transparent="false"/>
-          <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="sandwich" modelPosition="s" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="30.400001525878906" y="55.19999694824219"/>
-          <y:NodeLabel alignment="left" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="106.83203125" x="-7.016014099121094" xml:space="preserve" y="65.6312484741211">Authorized token
-Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.21604937254119816" nodeRatioY="0.5" offsetX="0.0" offsetY="14.431251525878906" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
-          <y:SVGNodeProperties usingVisualBounds="true"/>
-          <y:SVGModel svgBoundsPolicy="0">
-            <y:SVGContent refid="2"/>
-          </y:SVGModel>
-        </y:SVGNode>
-      </data>
-    </node>
-    <node id="n2">
-      <data key="d5"/>
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="63.69999313354492" width="65.49999237060547" x="777.2500038146973" y="178.15000343322754"/>
@@ -58,13 +39,12 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="17.96875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="132.09765625" x="-33.298831939697266" xml:space="preserve" y="67.69999313354492">Submission database<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="true"/>
           <y:SVGModel svgBoundsPolicy="0">
-            <y:SVGContent refid="3"/>
+            <y:SVGContent refid="2"/>
           </y:SVGModel>
         </y:SVGNode>
       </data>
     </node>
-    <node id="n3">
-      <data key="d5"/>
+    <node id="n2">
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="59.20000076293945" width="65.4392318725586" x="777.2803840637207" y="330.3999996185303"/>
@@ -75,13 +55,12 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
 (Ivan Micetic)<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="true"/>
           <y:SVGModel svgBoundsPolicy="0">
-            <y:SVGContent refid="4"/>
+            <y:SVGContent refid="3"/>
           </y:SVGModel>
         </y:SVGNode>
       </data>
     </node>
-    <node id="n4">
-      <data key="d5"/>
+    <node id="n3">
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="46.79999923706055" width="65.5" x="537.25" y="477.25"/>
@@ -91,21 +70,36 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="17.96875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="31.3515625" x="17.07421875" xml:space="preserve" y="50.79999923706055">User<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="true"/>
           <y:SVGModel svgBoundsPolicy="0">
+            <y:SVGContent refid="4"/>
+          </y:SVGModel>
+        </y:SVGNode>
+      </data>
+    </node>
+    <node id="n4">
+      <data key="d6">
+        <y:SVGNode>
+          <y:Geometry height="43.5" width="65.69999694824219" x="237.1500015258789" y="478.8999996185303"/>
+          <y:Fill color="#CCCCFF" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="sandwich" modelPosition="s" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="30.849998474121094" y="47.5"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="133.890625" x="-34.095314025878906" xml:space="preserve" y="47.5">Authentication server
+(OAuth2)<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:SVGNodeProperties usingVisualBounds="true"/>
+          <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="5"/>
           </y:SVGModel>
         </y:SVGNode>
       </data>
     </node>
     <node id="n5">
-      <data key="d5"/>
       <data key="d6">
         <y:SVGNode>
-          <y:Geometry height="43.5" width="65.69999694824219" x="327.1500015258789" y="188.25"/>
+          <y:Geometry height="31.0" width="39.0" x="400.54999923706055" y="404.5"/>
           <y:Fill color="#CCCCFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="sandwich" modelPosition="s" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="30.849998474121094" y="47.5"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="133.890625" x="-34.095314025878906" xml:space="preserve" y="47.5">Authentication server
-(OAuth2)<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="sandwich" modelPosition="s" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="17.5" y="35.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="127.80859375" x="-36.21911299364933" xml:space="preserve" y="40.415626525878906">Access token
+(email address, etc.)<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.20987650977822248" nodeRatioY="0.5" offsetX="0.0" offsetY="9.415626525878906" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="true"/>
           <y:SVGModel svgBoundsPolicy="0">
             <y:SVGContent refid="6"/>
@@ -114,23 +108,6 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
       </data>
     </node>
     <node id="n6">
-      <data key="d5"/>
-      <data key="d6">
-        <y:SVGNode>
-          <y:Geometry height="51.19999694824219" width="64.80000305175781" x="375.0" y="424.4000015258789"/>
-          <y:Fill color="#CCCCFF" transparent="false"/>
-          <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="sandwich" modelPosition="s" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="30.400001525878906" y="55.19999694824219"/>
-          <y:NodeLabel alignment="left" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="17.96875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="106.83203125" x="-7.416015625" xml:space="preserve" y="60.615623474121094">Authorized token<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.20987650977822248" nodeRatioY="0.5" offsetX="0.0" offsetY="9.415626525878906" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
-          <y:SVGNodeProperties usingVisualBounds="true"/>
-          <y:SVGModel svgBoundsPolicy="0">
-            <y:SVGContent refid="2"/>
-          </y:SVGModel>
-        </y:SVGNode>
-      </data>
-    </node>
-    <node id="n7">
-      <data key="d5"/>
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="52.900001525878906" width="65.5999984741211" x="537.2000007629395" y="33.54999923706055"/>
@@ -145,19 +122,17 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
         </y:SVGNode>
       </data>
     </node>
-    <edge id="e0" source="n4" target="n0">
-      <data key="d9"/>
+    <edge id="e0" source="n3" target="n0">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="-38.64999961853027" tx="0.0" ty="63.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="delta"/>
+          <y:Arrows source="delta" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e1" source="n2" target="n0">
-      <data key="d9"/>
+    <edge id="e1" source="n1" target="n0">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-45.0" sy="0.0" tx="40.0" ty="0.0"/>
@@ -167,8 +142,7 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e2" source="n3" target="n2">
-      <data key="d9"/>
+    <edge id="e2" source="n2" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="-42.99999809265137" tx="0.0" ty="62.0"/>
@@ -178,8 +152,7 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e3" source="n4" target="n3">
-      <data key="d9"/>
+    <edge id="e3" source="n3" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="44.0" sy="9.350000381469727" tx="0.0" ty="67.00000190734863">
@@ -191,37 +164,36 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e4" source="n0" target="n5">
+    <edge id="e4" source="n0" target="n6">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="-41.30999999999966" tx="0.0" ty="62.40520000000032"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="delta"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e5" source="n3" target="n4">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="-43.0" sy="0.0" tx="40.0" ty="0.0"/>
+          <y:Path sx="-40.5" sy="0.0" tx="48.76495999999986" ty="0.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="delta" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e5" source="n5" target="n4">
+    <edge id="e6" source="n0" target="n4">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="67.0" tx="-42.0" ty="9.350000381469727">
-            <y:Point x="360.0" y="510.0"/>
+          <y:Path sx="-46.603039999999964" sy="0.0" tx="0.5" ty="-34.14999961853027">
+            <y:Point x="270.0" y="210.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="delta"/>
-          <y:BendStyle smoothed="false"/>
-        </y:PolyLineEdge>
-      </data>
-    </edge>
-    <edge id="e6" source="n0" target="n7">
-      <data key="d9"/>
-      <data key="d10">
-        <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="-41.30999999999966" tx="0.0" ty="62.40520000000032"/>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="none" target="delta"/>
+          <y:Arrows source="delta" target="delta"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -381,63 +353,6 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
    version="1.1"
    x="0px"
    y="0px"
-   viewBox="0 0 64.800003 51.200001"
-   enable-background="new 0 0 65 65"
-   xml:space="preserve"
-   id="svg18"
-   sodipodi:docname="send-token.svg"
-   width="64.800003"
-   height="51.200001"
-   inkscape:version="1.1.1 (1:1.1+202109281949+c3084ef5ed)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"&gt;&lt;defs
-     id="defs22" /&gt;&lt;sodipodi:namedview
-     id="namedview20"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     showgrid="false"
-     inkscape:zoom="10.387692"
-     inkscape:cx="32.394105"
-     inkscape:cy="23.53747"
-     inkscape:window-width="1848"
-     inkscape:window-height="1016"
-     inkscape:window-x="72"
-     inkscape:window-y="27"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg18" /&gt;&lt;g
-     id="g12"
-     transform="translate(-0.1,-6.9)"&gt;&lt;rect
-       x="9.3000002"
-       y="13.5"
-       width="8.8999996"
-       height="1.5"
-       id="rect2" /&gt;&lt;rect
-       x="0.1"
-       y="20.799999"
-       width="18.1"
-       height="1.5"
-       id="rect4" /&gt;&lt;rect
-       x="5.4000001"
-       y="28.1"
-       width="12.8"
-       height="1.5"
-       id="rect6" /&gt;&lt;path
-       d="M 46.7,54.4 45.5,50 c 0.5,-0.6 0.8,-1.3 0.8,-2.1 0,-1.8 -1.4,-3.2 -3.2,-3.2 -1.8,0 -3.2,1.4 -3.2,3.2 0,0.8 0.3,1.5 0.8,2.1 l -1.3,4.4 z m -3.6,-8.2 c 0.9,0 1.7,0.8 1.7,1.7 0,0.5 -0.2,1 -0.6,1.3 l -0.4,0.3 1,3.4 h -3.3 l 1,-3.4 -0.5,-0.3 c -0.4,-0.3 -0.6,-0.8 -0.6,-1.3 0,-1 0.8,-1.7 1.7,-1.7 z"
-       id="path8" /&gt;&lt;path
-       d="m 50.7,36.3 c 0,0 0,-0.1 0,-0.1 H 64.9 V 6.9 H 21.3 v 29.3 h 14.2 c 0,0 0,0.1 0,0.1 v 5.1 H 31.2 V 58.1 H 55 V 41.5 H 50.7 Z M 22.8,33.8 V 9.4 L 36.7,21.5 Z M 24,8.4 H 62.2 L 44.3,24 c -0.7,0.5 -1.7,0.5 -2.3,0 z M 63.4,9.3 V 33.7 L 49.5,21.5 Z M 24,34.7 37.8,22.4 41,25.2 c 0.6,0.4 1.3,0.7 2.1,0.7 0.7,0 1.5,-0.2 2.1,-0.7 l 3.1,-2.8 13.8,12.3 H 50.4 c -0.7,-3.4 -3.8,-6 -7.4,-6 -3.6,0 -6.7,2.6 -7.4,6 z m 13,1.6 c 0,-3.4 2.7,-6.1 6.1,-6.1 3.4,0 6.1,2.7 6.1,6.1 v 5.1 H 37 Z M 53.5,56.6 H 32.7 V 43 h 20.7 v 13.6 z"
-       id="path10" /&gt;&lt;/g&gt;&lt;/svg&gt;
-</y:Resource>
-      <y:Resource id="3" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
-&lt;svg
-   version="1.1"
-   x="0px"
-   y="0px"
    viewBox="0 0 65.5 63.700001"
    enable-background="new 0 0 65 65"
    xml:space="preserve"
@@ -509,7 +424,7 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
        d="m 11.9,45.9 c 0.5,0.1 1,0.1 1.5,0.2 l 0.1,-1.5 c -0.5,0 -1,-0.1 -1.5,-0.2 z"
        id="path38" /&gt;&lt;/g&gt;&lt;/svg&gt;
 </y:Resource>
-      <y:Resource id="4" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
+      <y:Resource id="3" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
 &lt;svg
    version="1.1"
    x="0px"
@@ -547,7 +462,7 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
      d="M 65.2,42.5 53.3,32.1 c -0.3,-0.2 -0.7,-0.2 -1,0 l -3.2,2.8 C 48.8,34.8 48.6,34.7 48.3,34.7 L 37.9,32.3 34.4,27.5 c 2.4,-2 4.3,-5 4.4,-8.2 0.8,-0.7 2.9,-2.6 2.8,-4.7 0,-2.1 -1.5,-2.3 -1.9,-2.3 L 40,9.4 C 40.2,5.8 38.6,4.4 37.4,3.8 38.5,2.3 38.3,1.2 38.2,1 L 37.9,0.1 37.2,0.6 C 36.5,1.1 35.7,1.4 35,1.4 34.5,1.4 34.2,1.3 34.2,1.3 31.9,0.3 27,0 26.8,0 c -5,0 -6.5,2.5 -7,3.6 -4.3,0.5 -4.1,4.8 -4,6.9 0,0.3 0,0.7 0,0.9 0,0.4 0,0.8 0.1,1.2 -0.6,0.1 -1.7,0.4 -1.7,2.2 0,2.1 2,4 2.8,4.7 0.2,3.2 2,6.1 4.4,8.1 l -3.5,4.9 -9.4,2.2 C 5.3,35.4 2.9,38 2.3,41.2 L 0,53.5 h 40.2 v 5 c 0,0.4 0.3,0.7 0.7,0.7 h 23.8 c 0.4,0 0.7,-0.3 0.7,-0.7 V 43.1 c 0.1,-0.2 0,-0.4 -0.2,-0.6 z m -23.5,2.2 7.2,6.3 -7.2,5.9 z m 11.1,4.9 9.8,8.1 H 43 Z m 4,1.4 7.2,-6.3 v 12.2 z m -4,-17.3 10.8,9.4 -7.9,6.9 -2.4,-1.9 c -0.3,-0.2 -0.7,-0.2 -1,0 L 49.9,50 42.1,43.1 Z M 37.5,32.9 v 0 z M 20.3,5 h 0.6 L 21,4.4 c 0,0 0.6,-2.9 5.7,-3 0,0 4.8,0.3 6.8,1.2 0.1,0 0.6,0.3 1.4,0.3 0.5,0 1,-0.1 1.5,-0.2 -0.2,0.3 -0.4,0.6 -0.8,1 l -1.1,1.1 1.6,0.1 c 0.1,0 2.7,0.3 2.4,4.4 l -0.3,3 -1.4,0.5 C 36.4,12.4 36,12.2 35.7,12.1 35.2,12 34.4,11.9 33.5,11.9 c -1.5,0 -2.9,0.1 -2.9,0.2 -1.1,0.1 -1.9,0.6 -2.3,1.3 0,0 0,0.1 0,0.1 h -1 c 0,0 0,-0.1 0,-0.1 -0.4,-0.7 -1.1,-1.1 -2.3,-1.3 -0.1,0 -1.5,-0.1 -2.9,-0.1 -0.9,0 -1.6,0.1 -2.1,0.2 -0.3,0.1 -0.7,0.3 -1.1,0.7 l -1.6,-0.6 c 0,-0.3 0,-0.6 0,-0.8 0,-0.3 0,-0.6 0,-1 C 17.1,7.6 17.2,5.2 20.3,5 Z M 36,15 35.9,15.6 c -0.2,1.5 -0.3,1.7 -1,1.9 0,0 -0.8,0.2 -1.8,0.2 -1.1,0 -1.8,-0.2 -2.2,-0.6 -0.1,-0.2 -0.7,-1.2 -1.1,-2.3 0,0 -0.2,-0.4 0,-0.6 0.1,-0.2 0.5,-0.4 1.1,-0.5 0,0 1.4,-0.1 2.8,-0.1 0.8,0 1.4,0 1.9,0.1 -0.1,0 0.6,0.1 0.4,1.3 z M 26,14.8 c -0.4,1.1 -1,2 -1.1,2.2 -0.4,0.4 -1.2,0.6 -2.2,0.6 C 21.8,17.6 21,17.4 21,17.4 20.3,17.2 20.2,17 20,15.5 l -0.1,-0.6 c -0.2,-1 0.3,-1.3 0.5,-1.3 0.5,-0.1 1.1,-0.1 1.9,-0.1 1.4,0 2.7,0.1 2.7,0.1 0.6,0.1 1,0.2 1.1,0.5 0,0.3 -0.1,0.6 -0.1,0.7 z m -7.6,4.3 V 18.7 L 18.1,18.5 C 17.4,18 15.5,16.2 15.6,14.8 15.6,14 15.9,14 16.1,14 c 0.3,0 0.6,-0.1 0.9,-0.4 l 1.3,0.5 c 0,0.3 0,0.6 0,1 l 0.1,0.6 c 0.2,1.5 0.4,2.6 2.2,3.1 0,0 1,0.2 2.1,0.2 1.6,0 2.7,-0.4 3.4,-1.1 l 0.1,-0.1 c 0,0 0.8,-1.2 1.2,-2.5 0,0 0.1,-0.2 0.2,-0.4 h 0.8 c 0.1,0.2 0.1,0.3 0.1,0.3 0.5,1.4 1.2,2.5 1.3,2.6 l 0.1,0.1 c 0.7,0.7 1.8,1.1 3.4,1.1 1.1,0 2.1,-0.2 2.2,-0.2 1.7,-0.5 1.8,-1.6 2.1,-3.1 l 0.1,-0.6 c 0.1,-0.4 0.1,-0.7 0,-1 l 1.2,-0.5 c 0.2,0.1 0.3,0.1 0.5,0.1 h 0.2 c 0.1,0 0.2,0 0.3,0 0.2,0 0.4,0 0.4,0.8 0,1.4 -1.8,3.1 -2.5,3.7 l -0.3,0.2 v 0.4 c 0,5.4 -5.7,9.8 -9.5,9.8 -4.3,0.1 -9.5,-4.2 -9.6,-9.5 z M 1.7,52 3.7,41.5 c 0.5,-2.7 2.5,-4.8 5.1,-5.4 l 9,-2.1 4.8,17.9 H 1.7 Z m 24,0 1.1,-11.7 h 2.1 L 30,52 Z m 3.5,-13.2 h -2.6 l -1.2,-2 h 4.9 z M 31.5,52 30.4,39.7 32.3,36.4 c 0.1,-0.2 0.1,-0.5 0,-0.7 -0.1,-0.2 -0.4,-0.4 -0.6,-0.4 h -7.5 c -0.3,0 -0.5,0.1 -0.6,0.4 -0.1,0.2 -0.1,0.5 0,0.7 l 1.9,3.3 -1.3,12.3 h -0.1 l -5,-18.7 3.4,-4.8 c 1.7,1.1 3.6,1.8 5.4,1.8 1.7,0 3.6,-0.7 5.4,-1.9 l 3.5,4.7 -5.1,18.9 z m 1.7,0 4.9,-18.2 9.7,2.3 -7.4,6.4 c -0.1,0.2 -0.2,0.4 -0.2,0.6 V 52 Z"
      id="path2" /&gt;&lt;/svg&gt;
 </y:Resource>
-      <y:Resource id="5" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
+      <y:Resource id="4" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
 &lt;svg
    version="1.1"
    x="0px"
@@ -663,7 +578,7 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
        height="1.5"
        id="rect36" /&gt;&lt;/g&gt;&lt;/svg&gt;
 </y:Resource>
-      <y:Resource id="6" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
+      <y:Resource id="5" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
 &lt;svg
    version="1.1"
    x="0px"
@@ -714,6 +629,63 @@ Job parameters<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelMode
        width="7.8000002"
        height="1.5"
        id="rect8" /&gt;&lt;/g&gt;&lt;/svg&gt;
+</y:Resource>
+      <y:Resource id="6" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
+&lt;svg
+   version="1.1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 64.800003 51.200001"
+   enable-background="new 0 0 65 65"
+   xml:space="preserve"
+   id="svg18"
+   sodipodi:docname="send-token.svg"
+   width="64.800003"
+   height="51.200001"
+   inkscape:version="1.1.1 (1:1.1+202109281949+c3084ef5ed)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"&gt;&lt;defs
+     id="defs22" /&gt;&lt;sodipodi:namedview
+     id="namedview20"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="10.387692"
+     inkscape:cx="32.394105"
+     inkscape:cy="23.53747"
+     inkscape:window-width="1848"
+     inkscape:window-height="1016"
+     inkscape:window-x="72"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg18" /&gt;&lt;g
+     id="g12"
+     transform="translate(-0.1,-6.9)"&gt;&lt;rect
+       x="9.3000002"
+       y="13.5"
+       width="8.8999996"
+       height="1.5"
+       id="rect2" /&gt;&lt;rect
+       x="0.1"
+       y="20.799999"
+       width="18.1"
+       height="1.5"
+       id="rect4" /&gt;&lt;rect
+       x="5.4000001"
+       y="28.1"
+       width="12.8"
+       height="1.5"
+       id="rect6" /&gt;&lt;path
+       d="M 46.7,54.4 45.5,50 c 0.5,-0.6 0.8,-1.3 0.8,-2.1 0,-1.8 -1.4,-3.2 -3.2,-3.2 -1.8,0 -3.2,1.4 -3.2,3.2 0,0.8 0.3,1.5 0.8,2.1 l -1.3,4.4 z m -3.6,-8.2 c 0.9,0 1.7,0.8 1.7,1.7 0,0.5 -0.2,1 -0.6,1.3 l -0.4,0.3 1,3.4 h -3.3 l 1,-3.4 -0.5,-0.3 c -0.4,-0.3 -0.6,-0.8 -0.6,-1.3 0,-1 0.8,-1.7 1.7,-1.7 z"
+       id="path8" /&gt;&lt;path
+       d="m 50.7,36.3 c 0,0 0,-0.1 0,-0.1 H 64.9 V 6.9 H 21.3 v 29.3 h 14.2 c 0,0 0,0.1 0,0.1 v 5.1 H 31.2 V 58.1 H 55 V 41.5 H 50.7 Z M 22.8,33.8 V 9.4 L 36.7,21.5 Z M 24,8.4 H 62.2 L 44.3,24 c -0.7,0.5 -1.7,0.5 -2.3,0 z M 63.4,9.3 V 33.7 L 49.5,21.5 Z M 24,34.7 37.8,22.4 41,25.2 c 0.6,0.4 1.3,0.7 2.1,0.7 0.7,0 1.5,-0.2 2.1,-0.7 l 3.1,-2.8 13.8,12.3 H 50.4 c -0.7,-3.4 -3.8,-6 -7.4,-6 -3.6,0 -6.7,2.6 -7.4,6 z m 13,1.6 c 0,-3.4 2.7,-6.1 6.1,-6.1 3.4,0 6.1,2.7 6.1,6.1 v 5.1 H 37 Z M 53.5,56.6 H 32.7 V 43 h 20.7 v 13.6 z"
+       id="path10" /&gt;&lt;/g&gt;&lt;/svg&gt;
 </y:Resource>
       <y:Resource id="7" xml:space="preserve">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
 &lt;svg
