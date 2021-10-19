@@ -148,7 +148,14 @@ paths:
         '500':
           description: (Internal server error) the job was not deleted for whatever reason
   # Exchange external token for an internal one
-  /token:
+  /token/{orcid-id}:
+    parameters:
+      - in: path
+        name: orcid-id
+        schema:
+          type: string
+        required: true
+        description: unique ID of the user trying to authenticate
     get:
       description: Exchanges external/OAuth2 access token with an internal one. It uses email for granting access to authenticated users. Therefore, requesting application is responsible for providing an access token with enough information (for now, email address is required).
       responses:
