@@ -154,5 +154,10 @@ paths:
       responses:
         '200':
           description: (Ok) you have been authenticated by external service
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: isthisanaccesstoken?
         '304':
           description: (Forbidden) your request has been refused by external authentication service
