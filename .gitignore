@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.idea/
+submission/migrations/*
+!submission/migrations/__init__.py
+
 # C extensions
 *.so
 
