@@ -2,6 +2,8 @@
 from rest_framework import serializers
 # Import default user module
 from django.contrib.auth.models import User
+# Import custom models
+from submission.models import Script, Parameter
 
 
 # Define user serializer
@@ -17,6 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 # Define script serializer
 class ScriptSerializer(serializers.ModelSerializer):
+    # # Define parameters
+    # params = serializers.NestedBoundField
 
     # Define metadata
     class Meta:

@@ -13,8 +13,8 @@ from rest_framework import viewsets
 
 
 # Define token view
-class TokenViewSet(viewsets.ViewSet):
-
+class TokenView(viewsets.ViewSet):
+    
     # Define authentication class
     authentication_classes = [RemoteAuthentication]
 
@@ -22,16 +22,10 @@ class TokenViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk):
         # Define current authenticated user
         user = request.user
-        # Get/create internal access token
-        access_token, _ = Token.objects.get_or_create(user=user)
-        # Return current access token
-        return Response({ 'access_token': access_token.key, 'orcid_id': user.username })
-
-
-# Define script view
-# NOTE this view is readonly!
-class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
-    # Define query set
-    queryset = Script.objects.all()
-    # Define serializer
-    serializer_class = ScriptSerializer
+        # Define token
+        access_token = request.auth
+        # # Get/create internal access token
+        # access_token = Token.objects.get_or_create(user=user)
+        # # Return current access token
+        # return Response({ 'access_token': access_token.key, 'orcid_id': user.username })
+        return Response({ 'orcid_id': user.username })
