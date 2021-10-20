@@ -73,14 +73,15 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-        'default' : {
-                'ENGINE' : 'djongo',
-                'NAME' : 'submission_ws'
-        },
-        # 'old': {
-        #         'ENGINE': 'django.db.backends.sqlite3',
-        #         'NAME'  : BASE_DIR / 'db.sqlite3',
-        # }
+        # 'default' : {
+        #         'ENGINE' : 'djongo',
+        #         'NAME' : 'submission_ws',
+        #         'ENFORCE_SCHEMA': False
+        # },
+        'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME'  : BASE_DIR / 'db.sqlite3',
+        }
 }
 
 # Password validation

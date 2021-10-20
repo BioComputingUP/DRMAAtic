@@ -15,7 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.generics import ListCreateAPIView
+
+from submission.models import Script
+from submission.serializers import ScriptSerializer
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+        path('admin/', admin.site.urls),
+        path('scripts/', ListCreateAPIView.as_view(queryset=Script.objects.all(), serializer_class=ScriptSerializer),
+             name='script-list')
 ]

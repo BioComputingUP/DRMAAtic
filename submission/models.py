@@ -1,11 +1,10 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
-# from django.db import models
-from djongo import models
+from django.db import models
+
 
 # TODO: If we want we can create a model for the queues instead of hard-coding them as choices
 # class DRMQueue(models.Model):
 #     name = models.CharField(max_length=20, null=False, blank=False)
-
 
 # Create your models here.
 class DRMJob(models.Model):
@@ -16,16 +15,15 @@ class DRMJob(models.Model):
     class DRMEmailType(models.Choices):
         ALL = "ALL"
 
+    # Name of the job, should describe the environment of execution e.g. 2cpus_qlocal
     name = models.CharField(max_length=50, null=False, blank=False, unique=True)
+    # Name of the stout file
     stdout_file = models.CharField(max_length=50, default="log.o", null=False, blank=False)
+    # Name of the sterr file
     stderr_file = models.CharField(max_length=50, default="log.e", null=False, blank=False)
-    queue = models.CharField(
-            max_length=20,
-            choices=DRMQueue.choices,
-            default=DRMQueue.LOCAL,
-            null=False,
-            blank=False
-    )
+    # Name of the queue where the scripts has to run
+    queue = models.CharField(max_length=20, choices=DRMQueue.choices, default=DRMQueue.LOCAL, null=False, blank=False)
+    # Number of cpus for the task
     cpus_per_task = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(64)])
 
     # email_type = models.CharField(
@@ -52,17 +50,15 @@ class Script(models.Model):
 
     job = models.ForeignKey(DRMJob, on_delete=models.SET_NULL, null=True)
 
-    models.fields.Di
-
     def __str__(self):
-        return self.command
+        return self.name
 
     class Meta:
-        ordering = ['command']
+        ordering = ['name']
+
 
 # Define parameter in script
 class Parameter(models.Model):
-
     class Type(models.Choices):
         ANY = 'any'
         INTEGER = 'int'
@@ -78,6 +74,11 @@ class Parameter(models.Model):
     # Define parameter type
     type = models.CharField(max_length=100, choices=Type.choices, blank=True, default=Type.ANY)
     # Define default value
-    default = models.CharField(max_length=1000)
+    default = models.CharField(max_length=1000, blank=True)
     # Define parameter description
-    description = models.TextField(blank=False, default='')
+    description = models.CharField(max_length=300, blank=True, default='')
+
+    script = models.ForeignKey(Script, related_name="param", on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return "{} {}".format(self.flag, self.default).strip()
