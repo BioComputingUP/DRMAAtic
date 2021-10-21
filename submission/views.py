@@ -15,8 +15,8 @@ from rest_framework import viewsets
 # Define token view
 class TokenView(viewsets.ViewSet):
     
-    # # Define authentication class
-    # authentication_classes = [RemoteAuthentication]
+    # Define authentication class
+    authentication_classes = [RemoteAuthentication]
 
     # Retrieve internal authorization token
     def retrieve(self, request, pk=None):

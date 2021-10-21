@@ -45,7 +45,7 @@ class RemoteAuthentication(BearerAuthentication):
     }
 
     # Override authenticate method
-    def authenticate(self, *args, **kwargs):
+    def authenticate(self, request):
         """ Remote authentication
         
         This authentication exchanges an external access token with an internal one.
@@ -63,16 +63,16 @@ class RemoteAuthentication(BearerAuthentication):
 
     # Authenticate user
     def authenticate_user(self, request: any) -> User:
-        # Retrieve orcid ID
-        orcid_id = request.query_params.get('orcid-id', '')
+        # Retrieve user ID (orcid ID)
+        user_id = request.parser_context.get('kwargs', {}).get('pk', '')
         # Check that both orcid ID is valid
-        valid_id = bool(re.match('^([0-9a-z]{4}-){3}([0-9a-z]{4})$', orcid_id, re.IGNORECASE))
+        valid_id = bool(re.match('^([0-9a-z]{4}-){3}([0-9a-z]{4})$', user_id, re.IGNORECASE))
         # Case orcid ID is not valid
         if not valid_id:
             # Raise authentication error
             raise exceptions.AuthenticationFailed(_('Issued ORCID ID is not valid'))
         # Define current User
-        user = User.objects.get(username=orcid_id)
+        user = User.objects.get(username=user_id)
         # Case user is not available
         if user is None:
             # Raise authentication error
