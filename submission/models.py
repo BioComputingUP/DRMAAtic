@@ -7,6 +7,8 @@ from django.db import models
 #     name = models.CharField(max_length=20, null=False, blank=False)
 
 # Create your models here.
+
+
 class DRMJob(models.Model):
     class DRMQueue(models.Choices):
         LOCAL = "local"
@@ -17,9 +19,9 @@ class DRMJob(models.Model):
 
     # Name of the job, should describe the environment of execution e.g. 2cpus_qlocal
     name = models.CharField(max_length=50, null=False, blank=False, unique=True)
-    # Name of the stout file
+    # Name of the stdout file
     stdout_file = models.CharField(max_length=50, default="log.o", null=False, blank=False)
-    # Name of the sterr file
+    # Name of the stderr file
     stderr_file = models.CharField(max_length=50, default="log.e", null=False, blank=False)
     # Name of the queue where the scripts has to run
     queue = models.CharField(max_length=20, choices=DRMQueue.choices, default=DRMQueue.LOCAL, null=False, blank=False)
@@ -67,8 +69,8 @@ class Parameter(models.Model):
         BOOL = 'bool'
         FILE = 'file'
 
-    # # Define parameter name
-    # name = models.
+    # Define parameter name
+    name = models.CharField(max_length=100, blank=False, null=False)
     # Define substitution flag
     flag = models.CharField(max_length=100, blank=True, default='')
     # Define parameter type
@@ -77,8 +79,50 @@ class Parameter(models.Model):
     default = models.CharField(max_length=1000, blank=True)
     # Define parameter description
     description = models.CharField(max_length=300, blank=True, default='')
+    # Define if parameter can be changed by users or only admin
+    private = models.BooleanField(default=False, null=False, blank=False)
+    # Define if parameter can be changed by users or only admin
+    required = models.BooleanField(default=True, null=False, blank=False)
 
-    script = models.ForeignKey(Script, related_name="param", on_delete=models.SET_NULL, null=True)
+    script = models.ForeignKey(Script, related_name="param", on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return "{} {}".format(self.flag, self.default).strip()
+        return "{} {} {}".format(self.name, self.flag, self.default).strip()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["name", "script"], name="param_name")]
+
+
+class Task(models.Model):
+    name = models.ForeignKey(Script, to_field="name", on_delete=models.SET_NULL, null=True)
+
+    creation_date = models.DateTimeField(auto_now_add=True, auto_created=True)
+    update_date = models.DateTimeField(auto_now=True, auto_created=True)
+
+    class Status(models.Choices):
+        RECEIVED = "task has been received from the ws"
+        CREATED = "task has been created and sent to the DRM"
+        UNDETERMINED = "process status cannot be determined"
+        QUEUED_ACTIVE = "job is queued and active"
+        SYSTEM_ON_HOLD = "job is queued and in system hold"
+        USER_ON_HOLD = "job is queued and in user hold"
+        USER_SYSTEM_ON_HOLD = "job is queued and in user and system hold"
+        RUNNING = "job is running"
+        SYSTEM_SUSPENDED = "job is system suspended"
+        USER_SUSPENDED = "job is user suspended"
+        DONE = "job finished normally"
+        FAILED = "job finished, but failed"
+
+    status = models.CharField(max_length=200, choices=Status.choices, blank=False, null=False, default=Status.RECEIVED)
+
+    def __str__(self):
+        return self.name.name
+
+
+class TaskParameter(models.Model):
+    task = models.ForeignKey(Task, related_name="params", on_delete=models.CASCADE, null=True)
+    param = models.ForeignKey(Parameter, on_delete=models.CASCADE)
+    value = models.CharField(max_length=1000)
+
+    def __str__(self):
+        return "{} : {} ".format(self.param, self.value)

@@ -14,14 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from rest_framework.generics import ListCreateAPIView
 
 from submission.models import Script
 from submission.serializers import ScriptSerializer
 
 urlpatterns = [
+        path('', include("submission.urls")),
         path('admin/', admin.site.urls),
-        path('scripts/', ListCreateAPIView.as_view(queryset=Script.objects.all(), serializer_class=ScriptSerializer),
-             name='script-list')
 ]

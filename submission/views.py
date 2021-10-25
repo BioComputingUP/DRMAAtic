@@ -1,9 +1,13 @@
-from rest_framework import generics
+from rest_framework import viewsets
 
-from .models import Script
-from .serializers import ScriptSerializer
+from .serializers import *
 
 
-class ScriptList(generics.ListCreateAPIView):
+class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Script.objects.all()
     serializer_class = ScriptSerializer
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
