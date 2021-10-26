@@ -2,6 +2,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from rest_framework import serializers
 
+
 class DRMJob(models.Model):
     class DRMQueue(models.Choices):
         LOCAL = "local"
@@ -113,7 +114,6 @@ class Task(models.Model):
     status = models.CharField(max_length=200, choices=Status.choices, blank=False, null=False, default=Status.RECEIVED)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     drm_job_id = models.PositiveIntegerField(null=True, blank=True)
-
 
     # TODO : Add a reference to the user whose submitted the job
 
