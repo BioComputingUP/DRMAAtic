@@ -1,4 +1,5 @@
-from rest_framework import exceptions, serializers
+from rest_framework import exceptions
+from rest_framework.exceptions import ValidationError
 from rest_framework.fields import ReadOnlyField
 
 from .models import *
@@ -40,11 +41,12 @@ class TaskParameterSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     params = TaskParameterSerializer(many=True, read_only=True)
     custom_params = serializers.DictField(child=serializers.CharField(), write_only=True, required=False)
-    status = serializers.ReadOnlyField()
+    status = serializers.CharField(read_only=True)
+    drm_job_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Task
-        fields = ["name", "status", "creation_date", "update_date", "params", "custom_params"]
+        fields = ["id", "name", "status", "drm_job_id", "creation_date", "update_date", "params", "custom_params"]
 
     def create(self, validated_data):
         user_param = dict()
@@ -56,17 +58,22 @@ class TaskSerializer(serializers.ModelSerializer):
         parameters_of_task = Parameter.objects.filter(script=task.name)
 
         for task_param in parameters_of_task:
+            param = Parameter.objects.get(script=task.name, name=task_param.name)
             # Param not private and user has set it
             if not task_param.private and task_param.name in user_param.keys():
-                param = Parameter.objects.get(script=task.name, name=task_param.name)
-                TaskParameter.objects.create(task=task, param=param, value=user_param[task_param.name])
+                # If the validation on the creation fails then the task (and all related param) will be deleted
+                try:
+                    TaskParameter.objects.create(task=task, param=param, value=user_param[task_param.name])
+                except ValidationError as e:
+                    task.delete()
+                    raise e
             # Param is required and user did not set it
             elif task_param.required and task_param.name not in user_param.keys():
-                raise exceptions.NotAcceptable(
-                        "The parameter {} must be specified for the {} task".format(task_param.name, task.name))
+                task.delete()  # The submitted task was not created with proper params, destroy it
+                raise exceptions.NotAcceptable("The parameter {} must be specified for the {} task"
+                                               .format(task_param.name, task.name))
             # Param is private and hase to be set
             elif task_param.private:
-                param = Parameter.objects.get(script=task.name, name=task_param.name)
                 TaskParameter.objects.create(task=task, param=param, value=task_param.default)
 
         return task

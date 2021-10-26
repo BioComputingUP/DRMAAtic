@@ -1,0 +1,3 @@
+[submodule "submission-ws"]
+	path = submission-ws
+	url = https://github.com/damiclem/submission-ws

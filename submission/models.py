@@ -1,13 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
-
-# TODO: If we want we can create a model for the queues instead of hard-coding them as choices
-# class DRMQueue(models.Model):
-#     name = models.CharField(max_length=20, null=False, blank=False)
-
-# Create your models here.
-
+from rest_framework import serializers
 
 class DRMJob(models.Model):
     class DRMQueue(models.Choices):
@@ -47,9 +40,11 @@ class DRMJob(models.Model):
 
 # Create your models here.
 class Script(models.Model):
+    # Identifier name of the script
     name = models.CharField(max_length=100, null=False, blank=False, unique=True)
+    # Name of the command to execute (example.sh)
     command = models.CharField(max_length=100, null=False, blank=False)
-
+    # Link to the DRM job template that will run the script
     job = models.ForeignKey(DRMJob, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
@@ -94,12 +89,14 @@ class Parameter(models.Model):
 
 
 class Task(models.Model):
+    # The name of the task should be one of the script names
     name = models.ForeignKey(Script, to_field="name", on_delete=models.SET_NULL, null=True)
 
     creation_date = models.DateTimeField(auto_now_add=True, auto_created=True)
     update_date = models.DateTimeField(auto_now=True, auto_created=True)
 
     class Status(models.Choices):
+        REJECTED = "task has been rejected from the ws"
         RECEIVED = "task has been received from the ws"
         CREATED = "task has been created and sent to the DRM"
         UNDETERMINED = "process status cannot be determined"
@@ -114,9 +111,14 @@ class Task(models.Model):
         FAILED = "job finished, but failed"
 
     status = models.CharField(max_length=200, choices=Status.choices, blank=False, null=False, default=Status.RECEIVED)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    drm_job_id = models.PositiveIntegerField(null=True, blank=True)
+
+
+    # TODO : Add a reference to the user whose submitted the job
 
     def __str__(self):
-        return self.name.name
+        return "{} : {}".format(self.pk, self.name.name)
 
 
 class TaskParameter(models.Model):
@@ -126,3 +128,24 @@ class TaskParameter(models.Model):
 
     def __str__(self):
         return "{} : {} ".format(self.param, self.value)
+
+    # Override necessary to run validation when a model is created via create() method
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.validate_value(self.value)
+        super(TaskParameter, self).save()
+
+    # Validate the value passed in input, that has to be of the type specified in the Param
+    def validate_value(self, value: str):
+        try:
+            if self.param.type == Parameter.Type.INTEGER.value:
+                int(value)
+            if self.param.type == Parameter.Type.BOOL.value:
+                bool(value)
+            if self.param.type == Parameter.Type.FLOAT.value:
+                float(value)
+            # TODO : if self.param.type == Parameter.Type.FILE:
+
+        except ValueError:
+            raise serializers.ValidationError(
+                    "The value for the {} parameter has to be of type {}".format(self.param.name, self.param.type))
+        return value
