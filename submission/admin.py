@@ -4,7 +4,7 @@ from django.contrib import admin
 from .models import *
 
 
-@admin.register(DRMJob)
+@admin.register(DRMJobTemplate)
 class DRMJobtAdmin(admin.ModelAdmin):
     list_display = ('name', 'cpus_per_task', 'queue')
 

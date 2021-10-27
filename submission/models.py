@@ -3,7 +3,7 @@ from django.db import models
 from rest_framework import serializers
 
 
-class DRMJob(models.Model):
+class DRMJobTemplate(models.Model):
     class DRMQueue(models.Choices):
         LOCAL = "local"
         # TODO: add the queues
@@ -46,7 +46,7 @@ class Script(models.Model):
     # Name of the command to execute (example.sh)
     command = models.CharField(max_length=100, null=False, blank=False)
     # Link to the DRM job template that will run the script
-    job = models.ForeignKey(DRMJob, on_delete=models.SET_NULL, null=True)
+    job = models.ForeignKey(DRMJobTemplate, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name
@@ -58,7 +58,6 @@ class Script(models.Model):
 # Define parameter in script
 class Parameter(models.Model):
     class Type(models.Choices):
-        ANY = 'any'
         INTEGER = 'int'
         FLOAT = 'float'
         STRING = 'string'
@@ -68,9 +67,9 @@ class Parameter(models.Model):
     # Define parameter name
     name = models.CharField(max_length=100, blank=False, null=False)
     # Define substitution flag
-    flag = models.CharField(max_length=100, blank=True, default='')
+    flag = models.CharField(max_length=100, blank=False, default='')
     # Define parameter type
-    type = models.CharField(max_length=100, choices=Type.choices, blank=True, default=Type.ANY)
+    type = models.CharField(max_length=100, choices=Type.choices, blank=True, default=Type.STRING)
     # Define default value
     default = models.CharField(max_length=1000, blank=True)
     # Define parameter description
@@ -140,7 +139,8 @@ class TaskParameter(models.Model):
             if self.param.type == Parameter.Type.INTEGER.value:
                 int(value)
             if self.param.type == Parameter.Type.BOOL.value:
-                bool(value)
+                if type(self.value) != bool:
+                    raise ValueError
             if self.param.type == Parameter.Type.FLOAT.value:
                 float(value)
             # TODO : if self.param.type == Parameter.Type.FILE:

@@ -6,6 +6,8 @@ __pycache__/
 .idea/
 submission/migrations/*
 !submission/migrations/__init__.py
+outputs/*
+!outputs/.gitkeep
 
 # C extensions
 *.so
