@@ -1,43 +1,81 @@
-# Import default user model
-from django.contrib.auth.models import User
 # Import token authentication
-from rest_framework.authentication import TokenAuthentication, get_authorization_header
-# Import model for token
-from rest_framework.authtoken.models import Token
+from datetime import datetime
+from rest_framework.authentication import BaseAuthentication, get_authorization_header
 # Define translation utils
 from django.utils.translation import gettext_lazy as _
-# Import response
-from rest_framework.response import Response
+# Define authentication exception
+from rest_framework.exceptions import AuthenticationFailed
 # Import status codes
 from rest_framework import status
-# Import exceptions
-from rest_framework import exceptions
+# Import models
+from .models import *
 # Import requests
 import requests
-# Import regular expression
-import re
+# Import JSON web tokens
+import jwt
+# # Import regular expression
+# import re
 
 
 # Extend token autentication in order to create Bearer authentication
-class BearerAuthentication(TokenAuthentication):
-
+class BearerAuthentication(BaseAuthentication):
+    # Define user model
+    user = ExternalUser
+    # Define token model
+    token = InternalToken
     # Define keyword as Bearer
     keyword = 'Bearer'
+    # Define secret
+    secret = 'This is not really secret'
 
+    # Override authenticate method
+    def authenticate(self, request):
+        # Initialize user and token
+        user, token = None, None
+        # Try authenticating
+        try:
+            # Authenticate token
+            token = self.authenticate_token(request)
+            # Define user
+            user = token.user 
+            # Return both user and token
+            return user, token
+        # Catch authentication exceptions
+        except:
+            raise AuthenticationFailed(_('Issued token is not valid'))
+
+    # Authenticate token against database
+    def authenticate_token(self, request):
+        # Split authentication binary header (token key, value)
+        header = get_authorization_header(request).split()
+        # Retrieve authentication key
+        keyword = header[0] if len(header) > 0 else None
+        # Case keyword specified is not the expected one
+        if (keyword != self.keyword):
+            raise AuthenticationFailed(_('Authentication header is not correctly formatted'))
+        # Retrieve authentication value (token)
+        hash = header[1].decode() if len(header) > 1 else None
+        # Retrieve token from database
+        token = self.token.objects.get(hash=hash)
+        # Retrieve user from token
+        user = self.user.get(user=token.user)
+        # Decode payload from token
+        payload = jwt.decode(token, self.secret, algorithm='HS256')
+        # Case user id in payload does not match expected
+        if (payload.get('iss', '') != user.id):
+            raise AuthenticationFailed(_('User data is corrupted'))
+        
 
 # Extend Bearer token authentication to exchange it with an external service
 class RemoteAuthentication(BearerAuthentication):
-
     # Define URL to remote service
     # url = r'https://orcid.org/v3.0/{0:s}/record'  # Production
     url = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'  # Development
-
     # Define headers
     headers = {
         'Content-Type': 'application/json',
         'Bearer': '',  # Must be set on the fly
     }
-
     # Define request parameters
     request = {
         # Authentication request timeout
@@ -62,51 +100,44 @@ class RemoteAuthentication(BearerAuthentication):
         return user, token
 
     # Authenticate user
-    def authenticate_user(self, request: any) -> User:
-        # Retrieve user ID (orcid ID)
-        user_id = request.parser_context.get('kwargs', {}).get('pk', '')
-        # Check that both orcid ID is valid
-        valid_id = bool(re.match('^([0-9a-z]{4}-){3}([0-9a-z]{4})$', user_id, re.IGNORECASE))
-        # Case orcid ID is not valid
-        if not valid_id:
-            # Raise authentication error
-            raise exceptions.AuthenticationFailed(_('Issued ORCID ID is not valid'))
-        # Define current User
-        user = User.objects.get(username=user_id)
-        # Case user is not available
-        if user is None:
-            # Raise authentication error
-            raise exceptions.AuthenticationFailed(_('No user is associated with given ORCID ID'))
+    def authenticate_user(self, request):
+        # Define username
+        username = request.parser_context.get('kwargs', {}).get('pk', '')
+        # Define current user
+        # NOTE might raise not-found exception
+        user = self.user.objects.get(username=username)
         # TODO Check that user is active
         # Return user
         return user
         
     # Authenticate token
-    def authenticate_token(self, request: any, user: User) -> Token:
-        # Split authentication header (token key, value)
-        auth_header = get_authorization_header(request).split()
+    def authenticate_token(self, request, user):
+        # Split authentication binary header (token key, value)
+        header = get_authorization_header(request).split()
         # Retrieve authentication key
-        auth_key = auth_header[0] if len(auth_header) > 0 else None
+        keyword = header[0] if len(header) > 0 else None
         # Retrieve authentication token
-        auth_token = auth_header[1].decode() if len(auth_header) > 1 else None
-        # Check authentication header
-        if ((auth_key != self.keyword.lower().encode()) or (auth_token is None)):
-            # Raise error
-            raise exceptions.AuthenticationFailed(_('Issued authentication header is not valid'))
+        hash = header[1].decode() if len(header) > 1 else None
+        # Case keyword does not match expected one
+        if (keyword != self.keyword):
+            # Just raise authentication error
+            raise AuthenticationFailed(_('Authentication header is not valid'))
         # Define authentication endpoint (user username a s orcid ID)
-        auth_url = self.url.format(user.username)
-        # Define authentication header
-        auth_header = { **self.header, self.keyword: auth_token }
+        url = self.url.format(user.username)
         # Make a request against authorization URL
-        response = requests.get(auth_url, auth_header **self.request)
+        response = requests.get(url, { **self.header, keyword: hash }, **self.request)
         # Case response return 200 OK
         if not status.is_success(response.status_code):
-            # Raise error
-            raise exceptions.AuthenticationFailed(_('Issued token is not valid'))
-        # Define token model
-        Token = self.get_model()
+            # Just raise authentication error
+            raise AuthenticationFailed(_('Issued token is not valid'))
+        # Define creation time
+        created = datetime.now()
+        # Define expiration time
+        expires = timezone.now() + timedelta(days=30)
+        # Create a new hash
+        hash = jwt.encode({'iss': created, 'exp': expires, 'iss': user.id }, secret=self.secret, algorithm='HS256')
         # Create token from user
-        token = Token.objects.get_or_create(user=user)
+        token, _ = self.token.objects.get_or_create(user=user, defaults={ 'hash': hash, 'created': created, 'expires': expires })
         # Return user's token
         return token
 
