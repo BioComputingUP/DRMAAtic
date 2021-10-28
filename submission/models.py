@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from datetime import timedelta, timezone
 
+from django.db.models.deletion import CASCADE
+
 
 # Define custom user model
 class User(AbstractUser):
@@ -15,18 +17,20 @@ class ExternalUser(models.Model):
     ORCID = 'ORCID'
 
     # Define source choices
-    SOURCES = (
+    SOURCES = [
         (ORCID, 'ORCID')
-    )
+    ]
 
     # Define source
-    source = models.Choices(choices=SOURCES)
+    source = models.CharField(max_length=100, choices=SOURCES)
     # Define username
     username = models.CharField(max_length=100)
     # Define (optional) email
-    email = models.CharField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
     # Define (optional) telephone
     phone = models.CharField(max_length=100, blank=True, null=True)
+    # Defines whether the user is enabled
+    active = models.BooleanField(default=True, blank=False, null=False)
 
     # Metadata
     class Meta:
@@ -37,19 +41,29 @@ class ExternalUser(models.Model):
 # Define internal token (associated to external user)
 class InternalToken(models.Model):
     # Define hash
-    hash = models.CharField(max_length=1000)
+    hash = models.CharField(max_length=1000, editable=False)
     # Defines when the token has been created
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(blank=False, null=False, editable=False)
     # Defines expiration time
-    expires = models.DateTimeField(default=lambda: timezone.now() + timedelta(days=30), blank=True, null=True)
-    # Define associated user source
-    source = models.ForeignKey(ExternalUser, to_field='source', on_delete=models.CASCADE)
-    # Define associated user ID
-    username = models.ForeignKey(ExternalUser, to_field='username', on_delete=models.CASCADE)
+    expires = models.DateTimeField(blank=False, null=False, editable=False)
+    # # Define associated user source
+    # source = models.ForeignKey(ExternalUser, to_field='source', related_name='has_source', on_delete=models.CASCADE)
+    # # Define associated user ID
+    # username = models.ForeignKey(ExternalUser, to_field='username', related_name='has_username', on_delete=models.CASCADE)
     # Define foreign key constraint
-    user = models.ForeignObject(ExternalUser, from_fields=['source', 'username'], to_fields=['source', 'username'])
+    user = models.ForeignKey(ExternalUser, to_field='id', related_name='has_user', on_delete=models.CASCADE, editable=False)
+    # user = models.ForeignObject(ExternalUser, from_fields=['source', 'username'], to_fields=['source', 'username'], related_name='has_user', on_delete=models.CASCADE)
 
-    # Define default method for creating a token
-    def generate_hash(self, *args, **kwargs):
+    @staticmethod
+    def generate_hash(*args, **kwargs):
         # TODO Create token
         raise NotImplementedError
+
+
+# Define a test job
+class TestJob(models.Model):
+    # Define created datetime
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    # Define foreign key to user
+    user = models.ForeignKey(ExternalUser, related_name='owned_by', blank=True, null=True, on_delete=models.CASCADE)
+

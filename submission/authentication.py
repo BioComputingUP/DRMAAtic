@@ -38,41 +38,48 @@ class BearerAuthentication(BaseAuthentication):
             token = self.authenticate_token(request)
             # Define user
             user = token.user 
-            # Return both user and token
-            return user, token
         # Catch authentication exceptions
         except:
-            raise AuthenticationFailed(_('Issued token is not valid'))
+            # Unset both user and token
+            user, token = None, None
+            # raise AuthenticationFailed(_('Issued token is not valid'))
+        # Return both user and token
+        return user, token
 
     # Authenticate token against database
     def authenticate_token(self, request):
+        # Define user and token classes
+        User, Token = self.user, self.token
         # Split authentication binary header (token key, value)
         header = get_authorization_header(request).split()
         # Retrieve authentication key
         keyword = header[0] if len(header) > 0 else None
         # Case keyword specified is not the expected one
-        if (keyword != self.keyword):
+        if (keyword != self.keyword.encode()):
             raise AuthenticationFailed(_('Authentication header is not correctly formatted'))
         # Retrieve authentication value (token)
         hash = header[1].decode() if len(header) > 1 else None
-        # Retrieve token from database
-        token = self.token.objects.get(hash=hash)
-        # Retrieve user from token
-        user = self.user.get(user=token.user)
+        # Retrieve token out of hash
+        token = Token.objects.get(hash=hash)
         # Decode payload from token
-        payload = jwt.decode(token, self.secret, algorithm='HS256')
-        # Case user id in payload does not match expected
-        if (payload.get('iss', '') != user.id):
-            raise AuthenticationFailed(_('User data is corrupted'))
-        
+        payload = jwt.decode(hash, self.secret, algorithms=['HS256',])
+        # # Retrieve user out payload
+        # user = User.objects.get(id=payload.get('iss', ''))
+        # Case retrieved user is not allowed
+        if ((token.user.id != payload.get('iss', None)) or (not token.user.active)):
+            # Raise an authentication error
+            raise AuthenticationFailed(_('User is forbidden'))
+        # Define token
+        return token
+
 
 # Extend Bearer token authentication to exchange it with an external service
 class RemoteAuthentication(BearerAuthentication):
     # Define URL to remote service
     # url = r'https://orcid.org/v3.0/{0:s}/record'  # Production
     url = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'  # Development
-    # Define headers
-    headers = {
+    # Define header
+    header = {
         'Content-Type': 'application/json',
         'Bearer': '',  # Must be set on the fly
     }
@@ -90,14 +97,20 @@ class RemoteAuthentication(BearerAuthentication):
         Both ORCID ID and access token must be issued. Then, access token will be used
         to authenticate given orcid ID.
         """
-        # Initialize user and token
-        user, token = None, None
-        # Authenticate user
-        user = self.authenticate_user(request)
-        # Authenticate token
-        token = self.authenticate_token(request, user)
-        # Return both user and token
-        return user, token
+        # Try executing
+        try:
+            # Initialize user and token
+            user, token = None, None
+            # Authenticate user
+            user = self.authenticate_user(request)
+            # Authenticate token
+            token = self.authenticate_token(request, user)
+            # Return both user and token
+            return user, token
+        # Catch any exception
+        except:
+            # Substitute with authentication exception
+            raise AuthenticationFailed(_('Could not authenticate user'))
 
     # Authenticate user
     def authenticate_user(self, request):
@@ -106,7 +119,10 @@ class RemoteAuthentication(BearerAuthentication):
         # Define current user
         # NOTE might raise not-found exception
         user = self.user.objects.get(username=username)
-        # TODO Check that user is active
+        # Check that user is active
+        if (not user.active):
+            # Just raise authentication error
+            raise AuthenticationFailed(_('User is forbidden'))
         # Return user
         return user
         
@@ -119,7 +135,7 @@ class RemoteAuthentication(BearerAuthentication):
         # Retrieve authentication token
         hash = header[1].decode() if len(header) > 1 else None
         # Case keyword does not match expected one
-        if (keyword != self.keyword):
+        if (keyword != self.keyword.encode()):
             # Just raise authentication error
             raise AuthenticationFailed(_('Authentication header is not valid'))
         # Define authentication endpoint (user username a s orcid ID)
@@ -131,13 +147,13 @@ class RemoteAuthentication(BearerAuthentication):
             # Just raise authentication error
             raise AuthenticationFailed(_('Issued token is not valid'))
         # Define creation time
-        created = datetime.now()
+        created = datetime.utcnow()
         # Define expiration time
-        expires = timezone.now() + timedelta(days=30)
+        expires = created + timedelta(days=1)
         # Create a new hash
-        hash = jwt.encode({'iss': created, 'exp': expires, 'iss': user.id }, secret=self.secret, algorithm='HS256')
+        hash = jwt.encode({ 'nbf': created, 'exp': expires, 'iss': user.id }, self.secret, algorithm='HS256')
         # Create token from user
-        token, _ = self.token.objects.get_or_create(user=user, defaults={ 'hash': hash, 'created': created, 'expires': expires })
+        token = self.token.objects.create(user=user, hash=hash, created=created, expires=expires)
         # Return user's token
         return token
 

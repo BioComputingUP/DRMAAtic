@@ -8,11 +8,18 @@ class ExternalUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExternalUser
-        fields = '__ALL__'
+        fields = '__all__'
 
 
 class InternalTokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InternalToken
-        fields = '__ALL__'
+        fields = '__all__'
+
+
+class TestJobSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TestJob
+        fields = '__all__'
