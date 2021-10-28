@@ -13,6 +13,8 @@ class ParamForm(forms.ModelForm):
     def clean(self):
         if self.cleaned_data["private"] and self.cleaned_data["required"]:
             raise forms.ValidationError({'private': "Cannot be set with required", 'required': "Cannot be set with private"})
+        if self.cleaned_data["name"] == "task_name":
+            raise forms.ValidationError({'name': "name cannot be set to 'task_name'"})
 
 
 class ParamAdminInline(admin.TabularInline):
@@ -34,5 +36,5 @@ class TaskParamAdminInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'status', 'creation_date')
+    list_display = ('id', 'task_name', 'status', 'creation_date')
     inlines = [TaskParamAdminInline]

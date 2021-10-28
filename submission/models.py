@@ -90,7 +90,7 @@ class Parameter(models.Model):
 
 class Task(models.Model):
     # The name of the task should be one of the script names
-    name = models.ForeignKey(Script, to_field="name", on_delete=models.SET_NULL, null=True)
+    task_name = models.ForeignKey(Script, to_field="name", on_delete=models.CASCADE, null=False)
 
     creation_date = models.DateTimeField(auto_now_add=True, auto_created=True)
     update_date = models.DateTimeField(auto_now=True, auto_created=True)
@@ -117,7 +117,7 @@ class Task(models.Model):
     # TODO : Add a reference to the user whose submitted the job
 
     def __str__(self):
-        return "{} : {}".format(self.pk, self.name.name)
+        return "{} : {}".format(self.pk, self.task_name.name)
 
 
 class TaskParameter(models.Model):

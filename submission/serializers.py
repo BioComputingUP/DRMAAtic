@@ -1,11 +1,12 @@
 import logging
+import os
 
-from rest_framework import exceptions
+from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import ReadOnlyField
 
 from submission_lib.manage import start_job
-from .models import *
+from .models import DRMJobTemplate, Parameter, Script, Task, TaskParameter
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,8 @@ class ParameterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs["private"] and attrs["required"]:
             raise serializers.ValidationError("Private and Required fields can't be set together")
+        if attrs["name"] == "task_name":
+            raise serializers.ValidationError("task_name cannot be set as name of a parameter")
         return attrs
 
 
@@ -43,31 +46,6 @@ class TaskParameterSerializer(serializers.ModelSerializer):
         fields = ["name", "value"]
 
 
-def define_params_of_task(parameters_of_task, task, user_param):
-    created_params = set()
-    for task_param in parameters_of_task:
-        param = Parameter.objects.get(script=task.name, name=task_param.name)
-        # Param not private and user has set it
-        if not task_param.private and task_param.name in user_param.keys():
-            # If the validation on the creation fails then the task (and all related param) will be deleted
-            try:
-                new_param = TaskParameter.objects.create(task=task, param=param, value=user_param[task_param.name])
-                created_params.add(new_param)
-            except ValidationError as e:
-                task.delete()
-                raise e
-        # Param is required and user did not set it
-        elif task_param.required and task_param.name not in user_param.keys():
-            task.delete()  # The submitted task was not created with proper params, destroy it
-            raise exceptions.NotAcceptable("The parameter {} must be specified for the {} task"
-                                           .format(task_param.name, task.name))
-        # Param is private and hase to be set
-        elif task_param.private:
-            new_param = TaskParameter.objects.create(task=task, param=param, value=task_param.default)
-            created_params.add(new_param)
-    return created_params
-
-
 def format_task_params(passed_params):
     formatted_params = []
     for passed_param in passed_params:
@@ -84,34 +62,80 @@ def format_task_params(passed_params):
     return formatted_params
 
 
+def get_extension(param_name, file_name):
+    if '.' not in file_name:
+        raise exceptions.NotAcceptable("The file parameter {} must have a file extension".format(param_name))
+    return file_name.split('.')[-1]
+
+
+def get_params(user_param, task, parameters_of_task):
+    created_params = set()
+    for param in parameters_of_task:
+        param = Parameter.objects.get(script=task.task_name, name=param.name)
+        # Param not private and user has set it
+        if not param.private and param.name in user_param.keys():
+            # If the validation on the creation fails then the task (and all related param) will be deleted
+            try:
+                if param.type == Parameter.Type.FILE.value:
+                    ext = get_extension(param.name, user_param[param.name].name)
+                    file_pth = "/home/alessio/projects/submission_ws/outputs/{}/{}.{}".format(task.pk, param.name, ext)
+                    with open(file_pth, "wb+") as f:
+                        for chunk in user_param[param.name].chunks():
+                            f.write(chunk)
+                    new_param = TaskParameter.objects.create(task=task, param=param, value=file_pth)
+                else:
+                    new_param = TaskParameter.objects.create(task=task, param=param,
+                                                             value=user_param[param.name])
+                created_params.add(new_param)
+            except ValidationError as e:
+                task.delete()
+                raise e
+        # Param is required and user did not set it
+        elif param.required and param.name not in user_param.keys():
+            task.delete()  # The submitted task was not created with proper params, destroy it
+            raise exceptions.NotAcceptable("The parameter {} must be specified for the {} task"
+                                           .format(param.name, task.task_name))
+        # Param is private and hase to be set
+        elif param.private:
+            new_param = TaskParameter.objects.create(task=task, param=param, value=param.default)
+            created_params.add(new_param)
+    return created_params
+
+
+def create_task_folder(wd):
+    # TODO : Change base path
+    os.makedirs(os.path.join("/home/alessio/projects/submission_ws/outputs", str(wd)), exist_ok=True)
+
+
 class TaskSerializer(serializers.ModelSerializer):
     params = TaskParameterSerializer(many=True, read_only=True)
-    custom_params = serializers.JSONField(write_only=True, required=False)
     status = serializers.CharField(read_only=True)
     drm_job_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Task
-        fields = ["id", "name", "status", "drm_job_id", "creation_date", "update_date", "params", "custom_params"]
+        fields = ["id", "task_name", "status", "drm_job_id", "creation_date", "update_date", "params"]
 
     def create(self, validated_data):
-        user_param = dict()
         # Check if user passed the params keyword
-        if "custom_params" in validated_data.keys():
-            user_param = validated_data.pop('custom_params')
+        if "task_name" not in validated_data.keys():
+            raise exceptions.NotAcceptable("The task_name parameter needs to be specified")
+
         # Create the task with the name
-        task = Task.objects.create(**validated_data)
-        parameters_of_task = Parameter.objects.filter(script=task.name)
+        task = Task.objects.create(task_name=validated_data["task_name"])
 
-        created_params = define_params_of_task(parameters_of_task, task, user_param)
+        create_task_folder(task.pk)
 
-        formatted_params = format_task_params(created_params)
+        parameters_of_task = Parameter.objects.filter(script=task.task_name)
+
+        task_params = get_params(self.initial_data, task, parameters_of_task)
+        formatted_params = format_task_params(task_params)
 
         logger.info(formatted_params)
-        drm_params = DRMJobTemplate.objects.get(name=task.name.job).__dict__
+        drm_params = DRMJobTemplate.objects.get(name=task.task_name.job).__dict__
 
-        j_id, name = start_job(**drm_params, task_name=task.name.name,
-                               command=task.name.command,
+        j_id, name = start_job(**drm_params, task_name=task.task_name.name,
+                               command=task.task_name.command,
                                script_args=formatted_params,
                                working_dir=str(task.pk))
         if j_id is None:
