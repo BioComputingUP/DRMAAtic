@@ -15,10 +15,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from rest_framework.generics import ListCreateAPIView
-
-from submission.models import Script
-from submission.serializers import ScriptSerializer
 
 urlpatterns = [
         path('', include("submission.urls")),
