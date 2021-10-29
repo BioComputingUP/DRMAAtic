@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission
-from .models import ExternalUser, InternalToken
 
 
 class IsOwner(BasePermission):

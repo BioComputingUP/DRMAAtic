@@ -1,5 +1,4 @@
-# Import token authentication
-from datetime import datetime
+# Import authentication
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 # Define translation utils
 from django.utils.translation import gettext_lazy as _
@@ -9,20 +8,20 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import status
 # Import models
 from .models import *
+# Define time utils
+from datetime import datetime, timedelta
 # Import requests
 import requests
 # Import JSON web tokens
 import jwt
-# # Import regular expression
-# import re
 
 
 # Extend token autentication in order to create Bearer authentication
 class BearerAuthentication(BaseAuthentication):
     # Define user model
-    user = ExternalUser
+    user = User
     # Define token model
-    token = InternalToken
+    token = Token
     # Define keyword as Bearer
     keyword = 'Bearer'
     # Define secret

@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -124,7 +124,7 @@ STATIC_URL = '/static/'
 
 # Define user model
 # NOTE https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#auth-custom-user
-AUTH_USER_MODEL = 'submission.User'
+AUTH_USER_MODEL = 'submission.Admin'
 
 # Define automaic field
 # NOTE https://stackoverflow.com/questions/67783120/warning-auto-created-primary-key-used-when-not-defining-a-primary-key-type-by

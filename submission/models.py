@@ -1,17 +1,18 @@
 from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
 from django.db import models
-from datetime import timedelta, timezone
-
-from django.db.models.deletion import CASCADE
 
 
 # Define custom user model
-class User(AbstractUser):
-    pass
+class Admin(AbstractUser):
+    # Update names
+    class Meta:
+        verbose_name = _('admin')
+        verbose_name_plural = _('admins')
 
 
 # Define external user (logs in from external source)
-class ExternalUser(models.Model):
+class User(models.Model):
     
     # Hardcode external sources
     ORCID = 'ORCID'
@@ -39,7 +40,7 @@ class ExternalUser(models.Model):
 
 
 # Define internal token (associated to external user)
-class InternalToken(models.Model):
+class Token(models.Model):
     # Define hash
     hash = models.CharField(max_length=1000, editable=False)
     # Defines when the token has been created
@@ -51,7 +52,7 @@ class InternalToken(models.Model):
     # # Define associated user ID
     # username = models.ForeignKey(ExternalUser, to_field='username', related_name='has_username', on_delete=models.CASCADE)
     # Define foreign key constraint
-    user = models.ForeignKey(ExternalUser, to_field='id', related_name='has_user', on_delete=models.CASCADE, editable=False)
+    user = models.ForeignKey(User, to_field='id', related_name='has_user', on_delete=models.CASCADE, editable=False)
     # user = models.ForeignObject(ExternalUser, from_fields=['source', 'username'], to_fields=['source', 'username'], related_name='has_user', on_delete=models.CASCADE)
 
     @staticmethod
@@ -65,5 +66,5 @@ class TestJob(models.Model):
     # Define created datetime
     created = models.DateTimeField(auto_now_add=True, editable=False)
     # Define foreign key to user
-    user = models.ForeignKey(ExternalUser, related_name='owned_by', blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='owned_by', blank=True, null=True, on_delete=models.CASCADE)
 

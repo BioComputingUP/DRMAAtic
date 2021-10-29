@@ -1,23 +1,23 @@
 from django.contrib import admin
 from django.contrib.admin.decorators import display
 from django.contrib.auth import admin as auth
-from .models import ExternalUser, InternalToken, User
+from .models import Admin, User, Token, User
 
 
 # Register user in the admin web interface, using the default interface
-admin.site.register(User, auth.UserAdmin)
+admin.site.register(Admin, auth.UserAdmin)
 
 
 # Register external user in the admin web interface
-@admin.register(ExternalUser)
-class ExternalUserAdmin(admin.ModelAdmin):
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
     # Define columns to show
     list_display = ('source', 'username', 'email', 'phone', 'active')
 
 
 # Register token in the admin web interface
-@admin.register(InternalToken)
-class InternalTokenAdmin(admin.ModelAdmin):
+@admin.register(Token)
+class TokenAdmin(admin.ModelAdmin):
     # Define columns to show
     list_display = ('get_short_hash', 'get_user_source', 'get_user_name', 'created', 'expires')
     # Define readonly fields

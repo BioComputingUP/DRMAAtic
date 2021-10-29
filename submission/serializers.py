@@ -7,14 +7,14 @@ from submission.models import *
 class ExternalUserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = ExternalUser
+        model = User
         fields = '__all__'
 
 
 class InternalTokenSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = InternalToken
+        model = Token
         fields = '__all__'
 
 
