@@ -8,6 +8,8 @@ from .serializers import *
 from .authentication import *
 # Import custom permissions
 from .permissions import *
+# Import custom throttles
+from .throttles import *
 # Import custom models
 from .models import *
 
@@ -37,6 +39,8 @@ class JobViewSet(viewsets.ModelViewSet):
     authentication_classes = [BearerAuthentication]
     # Define permissions
     permission_classes = [IsOwner]
+    # Define throttles
+    throttle_classes = [CustomThrottle]
 
     # Retrieve status of a job
     def retrieve(self, request, *args, **kwargs):
