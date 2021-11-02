@@ -10,12 +10,10 @@ class IsOwner(BasePermission):
     the resource is owned by someone, accession token must be issued.
     """
 
-
     # Override `has_permission` method
     def has_permission(self, request, view):
         # Call parent method
         return super().has_permission(request, view)
-
 
     # Override `has_object_permission` method
     def has_object_permission(self, request, view, obj):
@@ -37,4 +35,3 @@ class IsOwner(BasePermission):
         # Otherwise, do not grant permission
         else:
             return False
-

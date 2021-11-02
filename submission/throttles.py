@@ -1,6 +1,6 @@
 # Dependencies
-from rest_framework.throttling import BaseThrottle
 from rest_framework.settings import api_settings
+from rest_framework.throttling import BaseThrottle
 
 
 # TODO Define throttling for authenticated user
@@ -14,7 +14,7 @@ class CustomThrottle(BaseThrottle):
         identity = self.get_ident(request)
         # Just return true
         return True
-     
+
     def get_ident(self, request):
         """
         Identify the machine making the request by parsing HTTP_X_FORWARDED_FOR

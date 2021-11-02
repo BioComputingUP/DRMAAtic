@@ -1,14 +1,14 @@
 import mimetypes
-from .authentication import *
-from .permissions import *
 
 from django.http import FileResponse
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
 from submission_lib.manage import get_job_status
+from .authentication import *
+from .permissions import *
 from .serializers import *
 
 
@@ -32,6 +32,16 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(task)
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     @action(methods=['GET'], detail=True)
     def download(self, request, **kwargs):
         att = self.get_object()
@@ -48,42 +58,18 @@ class ParamsViewSet(viewsets.ModelViewSet):
     queryset = Parameter.objects.all()
     serializer_class = ParameterSerializer
 
+
 # Define token view
-class TokenViewSet(viewsets.ViewSet):
+class TokenViewSet(viewsets.ViewSet, mixins.RetrieveModelMixin):
     # Define authentication class
     authentication_classes = [RemoteAuthentication]
 
     # Retrieve internal authorization token
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, *args, **kwargs):
         # Define current authenticated user
         user = request.user
         # Define token
         access_token = request.auth
         # return Response({ 'access_token': access_token.key, 'orcid_id': user.username })
-        return Response({ 'user_source': user.source, 'user_unsername': user.username, 'access_token': access_token.hash })
-
-
-    # Retrieve status of a job
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    # Send single job
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    # Create single job
-    def perform_create(self, serializer):
-        # Request can be accessed like this
-        request = self.request
-        # Then, user can be retrieved from it
-        user = request.user or None
-        # Finally, just save model with user
-        serializer.save(user=user)
-
-    # TODO Delete a job
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
+        return Response(
+                {'user_source': user.source, 'user_unsername': user.username, 'access_token': access_token.hash})

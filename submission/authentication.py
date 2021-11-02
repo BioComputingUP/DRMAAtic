@@ -1,19 +1,13 @@
-# Import authentication
-from rest_framework.authentication import BaseAuthentication, get_authorization_header
-# Define translation utils
-from django.utils.translation import gettext_lazy as _
-# Define authentication exception
-from rest_framework.exceptions import AuthenticationFailed
-# Import status codes
-from rest_framework import status
-# Import models
-from .models import *
-# Define time utils
 from datetime import datetime, timedelta
-# Import requests
-import requests
-# Import JSON web tokens
+
 import jwt
+import requests
+from django.utils.translation import gettext_lazy as _
+from rest_framework import status
+from rest_framework.authentication import BaseAuthentication, get_authorization_header
+from rest_framework.exceptions import AuthenticationFailed
+
+from .models import *
 
 
 # Extend token autentication in order to create Bearer authentication
@@ -36,9 +30,9 @@ class BearerAuthentication(BaseAuthentication):
             # Authenticate token
             token = self.authenticate_token(request)
             # Define user
-            user = token.user 
-        # Catch authentication exceptions
-        except:
+            user = token.user
+            # Catch authentication exceptions
+        except Exception:
             # Unset both user and token
             user, token = None, None
             # raise AuthenticationFailed(_('Issued token is not valid'))
@@ -61,7 +55,7 @@ class BearerAuthentication(BaseAuthentication):
         # Retrieve token out of hash
         token = Token.objects.get(hash=hash)
         # Decode payload from token
-        payload = jwt.decode(hash, self.secret, algorithms=['HS256',])
+        payload = jwt.decode(hash, self.secret, algorithms=['HS256', ])
         # # Retrieve user out payload
         # user = User.objects.get(id=payload.get('iss', ''))
         # Case retrieved user is not allowed
@@ -79,13 +73,13 @@ class RemoteAuthentication(BearerAuthentication):
     url = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'  # Development
     # Define header
     header = {
-        'Content-Type': 'application/json',
-        'Bearer': '',  # Must be set on the fly
+            'Content-Type': 'application/json',
+            'Bearer'      : '',  # Must be set on the fly
     }
     # Define request parameters
     request = {
-        # Authentication request timeout
-        'timeout': 100
+            # Authentication request timeout
+            'timeout': 100
     }
 
     # Override authenticate method
@@ -107,7 +101,7 @@ class RemoteAuthentication(BearerAuthentication):
             # Return both user and token
             return user, token
         # Catch any exception
-        except:
+        except Exception:
             # Substitute with authentication exception
             raise AuthenticationFailed(_('Could not authenticate user'))
 
@@ -119,12 +113,12 @@ class RemoteAuthentication(BearerAuthentication):
         # NOTE might raise not-found exception
         user = self.user.objects.get(username=username)
         # Check that user is active
-        if (not user.active):
+        if not user.active:
             # Just raise authentication error
             raise AuthenticationFailed(_('User is forbidden'))
         # Return user
         return user
-        
+
     # Authenticate token
     def authenticate_token(self, request, user):
         # Split authentication binary header (token key, value)
@@ -134,13 +128,13 @@ class RemoteAuthentication(BearerAuthentication):
         # Retrieve authentication token
         hash = header[1].decode() if len(header) > 1 else None
         # Case keyword does not match expected one
-        if (keyword != self.keyword.encode()):
+        if keyword != self.keyword.encode():
             # Just raise authentication error
             raise AuthenticationFailed(_('Authentication header is not valid'))
         # Define authentication endpoint (user username a s orcid ID)
         url = self.url.format(user.username)
         # Make a request against authorization URL
-        response = requests.get(url, { **self.header, keyword: hash }, **self.request)
+        response = requests.get(url, {**self.header, keyword: hash}, **self.request)
         # Case response return 200 OK
         if not status.is_success(response.status_code):
             # Just raise authentication error
@@ -150,9 +144,8 @@ class RemoteAuthentication(BearerAuthentication):
         # Define expiration time
         expires = created + timedelta(days=1)
         # Create a new hash
-        hash = jwt.encode({ 'nbf': created, 'exp': expires, 'iss': user.id }, self.secret, algorithm='HS256')
+        hash = jwt.encode({'nbf': created, 'exp': expires, 'iss': user.id}, self.secret, algorithm='HS256')
         # Create token from user
         token = self.token.objects.create(user=user, hash=hash, created=created, expires=expires)
         # Return user's token
         return token
-

@@ -1,8 +1,61 @@
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.translation import gettext_lazy
 from rest_framework import serializers
+
+
+# Define custom user model
+class Admin(AbstractUser):
+    # Update names
+    class Meta:
+        verbose_name = gettext_lazy('admin')
+        verbose_name_plural = gettext_lazy('admins')
+
+
+# Define external user (logs in from external source)
+class User(models.Model):
+    # Hardcode external sources
+    ORCID = 'ORCID'
+
+    # Define source choices
+    SOURCES = [
+            (ORCID, 'ORCID')
+    ]
+
+    # Define source
+    source = models.CharField(max_length=100, choices=SOURCES)
+    # Define username
+    username = models.CharField(max_length=100)
+    # Define (optional) email
+    email = models.EmailField(blank=True, null=True)
+    # Define (optional) telephone
+    phone = models.CharField(max_length=100, blank=True, null=True)
+    # Defines whether the user is enabled
+    active = models.BooleanField(default=True, blank=False, null=False)
+
+    def __str__(self):
+        return self.username
+
+    # Metadata
+    class Meta:
+        # Force source, username to be unique
+        unique_together = ('source', 'username')
+
+
+# Define internal token (associated to external user)
+class Token(models.Model):
+    # Define hash
+    hash = models.CharField(max_length=1000, editable=False)
+    # Defines when the token has been created
+    created = models.DateTimeField(blank=False, null=False, editable=False)
+    # Defines expiration time
+    expires = models.DateTimeField(blank=False, null=False, editable=False)
+    # Define foreign key constraint
+    user = models.ForeignKey(User, to_field='id', related_name='has_user', on_delete=models.CASCADE, editable=False)
+
+    # user = models.ForeignObject(ExternalUser, from_fields=['source', 'username'], to_fields=['source', 'username'], related_name='has_user', on_delete=models.CASCADE)
+
 
 class DRMJobTemplate(models.Model):
     class DRMQueue(models.Choices):
@@ -35,13 +88,13 @@ class DRMJobTemplate(models.Model):
 
     def __str__(self):
         return self.name
-    class Meta:
 
+    class Meta:
         ordering = ['name']
 
 
 class Script(models.Model):
-# Create your models here.
+    # Create your models here.
     # Identifier name of the script
     name = models.CharField(max_length=100, null=False, blank=False, unique=True)
     # Name of the command to execute (example.sh)
@@ -92,6 +145,7 @@ class Parameter(models.Model):
 class Task(models.Model):
     # The name of the task should be one of the script names
     task_name = models.ForeignKey(Script, to_field="name", on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     creation_date = models.DateTimeField(auto_now_add=True, auto_created=True)
     update_date = models.DateTimeField(auto_now=True, auto_created=True)
@@ -150,56 +204,3 @@ class TaskParameter(models.Model):
             raise serializers.ValidationError(
                     "The value for the {} parameter has to be of type {}".format(self.param.name, self.param.type))
         return value
-
-# Define custom user model
-class Admin(AbstractUser):
-    # Update names
-    class Meta:
-        verbose_name = _('admin')
-        verbose_name_plural = _('admins')
-
-
-# Define external user (logs in from external source)
-class User(models.Model):
-    
-    # Hardcode external sources
-    ORCID = 'ORCID'
-
-    # Define source choices
-    SOURCES = [
-        (ORCID, 'ORCID')
-    ]
-
-    # Define source
-    source = models.CharField(max_length=100, choices=SOURCES)
-    # Define username
-    username = models.CharField(max_length=100)
-    # Define (optional) email
-    email = models.EmailField(blank=True, null=True)
-    # Define (optional) telephone
-    phone = models.CharField(max_length=100, blank=True, null=True)
-    # Defines whether the user is enabled
-    active = models.BooleanField(default=True, blank=False, null=False)
-
-    # Metadata
-    class Meta:
-        # Force source, username to be unique
-        unique_together = ('source', 'username')
-
-
-# Define internal token (associated to external user)
-class Token(models.Model):
-    # Define hash
-    hash = models.CharField(max_length=1000, editable=False)
-    # Defines when the token has been created
-    created = models.DateTimeField(blank=False, null=False, editable=False)
-    # Defines expiration time
-    expires = models.DateTimeField(blank=False, null=False, editable=False)
-    # Define foreign key constraint
-    user = models.ForeignKey(User, to_field='id', related_name='has_user', on_delete=models.CASCADE, editable=False)
-    # user = models.ForeignObject(ExternalUser, from_fields=['source', 'username'], to_fields=['source', 'username'], related_name='has_user', on_delete=models.CASCADE)
-
-    @staticmethod
-    def generate_hash(*args, **kwargs):
-        # TODO Create token
-        raise NotImplementedError

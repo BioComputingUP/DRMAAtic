@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.admin.decorators import display
+from django.contrib.admin import display
 from django.contrib.auth import admin as auth
+
 from .models import *
 
 
@@ -13,7 +14,8 @@ class DRMJobtAdmin(admin.ModelAdmin):
 class ParamForm(forms.ModelForm):
     def clean(self):
         if self.cleaned_data["private"] and self.cleaned_data["required"]:
-            raise forms.ValidationError({'private': "Cannot be set with required", 'required': "Cannot be set with private"})
+            raise forms.ValidationError(
+                    {'private': "Cannot be set with required", 'required': "Cannot be set with private"})
         if self.cleaned_data["name"] == "task_name":
             raise forms.ValidationError({'name': "name cannot be set to 'task_name'"})
 
@@ -39,6 +41,7 @@ class TaskParamAdminInline(admin.TabularInline):
 class TaskAdmin(admin.ModelAdmin):
     list_display = ('id', 'task_name', 'status', 'creation_date')
     inlines = [TaskParamAdminInline]
+
 
 # Register user in the admin web interface, using the default interface
 admin.site.register(Admin, auth.UserAdmin)
@@ -68,7 +71,7 @@ class TokenAdmin(admin.ModelAdmin):
     @display(ordering='user_source', description='User source')
     def get_user_source(self, obj):
         return obj.user.source
-    
+
     # Add user's username
     @display(ordering='user_name', description='Username')
     def get_user_name(self, obj):

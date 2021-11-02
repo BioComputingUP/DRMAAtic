@@ -1,10 +1,9 @@
 import logging
 
-from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
 
 from submission_lib.manage import start_job
-from .models import DRMJobTemplate, Script, Task
+from .models import *
 from .utils import *
 
 logger = logging.getLogger(__name__)
@@ -49,10 +48,11 @@ class TaskSerializer(serializers.ModelSerializer):
     params = TaskParameterSerializer(many=True, read_only=True)
     status = serializers.CharField(read_only=True)
     drm_job_id = serializers.IntegerField(read_only=True)
+    user = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = Task
-        fields = ["id", "task_name", "status", "drm_job_id", "creation_date", "update_date", "params"]
+        fields = ["id", "task_name", "status", "drm_job_id", "user",  "creation_date", "update_date", "params"]
 
     def create(self, validated_data):
         # Check if user passed the params keyword
@@ -60,7 +60,7 @@ class TaskSerializer(serializers.ModelSerializer):
             raise exceptions.NotAcceptable("The task_name parameter needs to be specified")
 
         # Create the task with the name
-        task = Task.objects.create(task_name=validated_data["task_name"])
+        task = Task.objects.create(task_name=validated_data["task_name"], user=validated_data["user"])
 
         create_task_folder(task.pk)
 
@@ -88,15 +88,14 @@ class TaskSerializer(serializers.ModelSerializer):
         task.save()
         return task
 
-class ExternalUserSerializer(serializers.ModelSerializer):
 
+class ExternalUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
 
 
 class InternalTokenSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Token
         fields = '__all__'
