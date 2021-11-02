@@ -1,8 +1,12 @@
 import os
+import zipfile
+from pathlib import Path
+from typing import Union
 
 from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
 
+from server.settings import BASE_DIR
 from .models import Parameter, TaskParameter
 
 
@@ -38,7 +42,7 @@ def get_params(user_param, task, parameters_of_task):
             try:
                 if param.type == Parameter.Type.FILE.value:
                     ext = get_extension(param.name, user_param[param.name].name)
-                    file_pth = "/home/alessio/projects/submission_ws/outputs/{}/{}.{}".format(task.pk, param.name, ext)
+                    file_pth = os.path.join(BASE_DIR, "outputs/{}/{}.{}".format(task.pk, param.name, ext))
                     with open(file_pth, "wb+") as f:
                         for chunk in user_param[param.name].chunks():
                             f.write(chunk)
@@ -64,4 +68,13 @@ def get_params(user_param, task, parameters_of_task):
 
 def create_task_folder(wd):
     # TODO : Change base path
-    os.makedirs(os.path.join("/home/alessio/projects/submission_ws/outputs", str(wd)), exist_ok=True)
+    os.makedirs(os.path.join(BASE_DIR, "outputs/{}".format(str(wd))), exist_ok=True)
+
+
+def zip_dir(dir_pth: Union[Path, str], filename: Union[Path, str]):
+    # Convert to Path object
+    dir_pth = Path(dir_pth)
+
+    with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for entry in dir_pth.rglob("*"):
+            zip_file.write(entry, entry.relative_to(dir_pth))

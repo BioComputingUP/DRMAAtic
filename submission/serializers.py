@@ -5,7 +5,7 @@ from rest_framework.fields import ReadOnlyField
 
 from submission_lib.manage import start_job
 from .models import DRMJobTemplate, Script, Task
-from .serializers_utils import *
+from .utils import *
 
 logger = logging.getLogger(__name__)
 
