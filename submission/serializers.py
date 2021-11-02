@@ -87,3 +87,16 @@ class TaskSerializer(serializers.ModelSerializer):
         # Must save the instance since it has been modified with the new status/job_id
         task.save()
         return task
+
+class ExternalUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
+class InternalTokenSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Token
+        fields = '__all__'

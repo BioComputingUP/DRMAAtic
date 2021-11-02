@@ -29,14 +29,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-        'rest_framework',
-        'submission.apps.SubmissionConfig'
+    'rest_framework',
+    # 'rest_framework.authtoken',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'submission.apps.SubmissionConfig',
 ]
 
 MIDDLEWARE = [
@@ -119,3 +120,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Define user model
+# NOTE https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#auth-custom-user
+AUTH_USER_MODEL = 'submission.Admin'
+
+# Define automaic field
+# NOTE https://stackoverflow.com/questions/67783120/warning-auto-created-primary-key-used-when-not-defining-a-primary-key-type-by
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

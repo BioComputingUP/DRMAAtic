@@ -1,7 +1,8 @@
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from rest_framework import serializers
-
 
 class DRMJobTemplate(models.Model):
     class DRMQueue(models.Choices):
@@ -15,8 +16,8 @@ class DRMJobTemplate(models.Model):
     name = models.CharField(max_length=50, null=False, blank=False, unique=True)
     # Name of the stdout file
     stdout_file = models.CharField(max_length=50, default="log.o", null=False, blank=False)
-    # Name of the stderr file
     stderr_file = models.CharField(max_length=50, default="log.e", null=False, blank=False)
+    # Name of the stderr file
     # Name of the queue where the scripts has to run
     queue = models.CharField(max_length=20, choices=DRMQueue.choices, default=DRMQueue.LOCAL, null=False, blank=False)
     # Number of cpus for the task
@@ -26,26 +27,26 @@ class DRMJobTemplate(models.Model):
     #         max_length=10,
     #         choices=DRMEmailType.choices,
     #         default=DRMEmailType.ALL,
-    #         null=True,
     #         blank=True
+    #         null=True,
     # )
     # email_addr = models.EmailField(blank=True, null=True)
     # account = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
-
     class Meta:
+
         ordering = ['name']
 
 
-# Create your models here.
 class Script(models.Model):
+# Create your models here.
     # Identifier name of the script
     name = models.CharField(max_length=100, null=False, blank=False, unique=True)
     # Name of the command to execute (example.sh)
-    command = models.CharField(max_length=100, null=False, blank=False)
     # Link to the DRM job template that will run the script
+    command = models.CharField(max_length=100, null=False, blank=False)
     job = models.ForeignKey(DRMJobTemplate, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
@@ -149,3 +150,56 @@ class TaskParameter(models.Model):
             raise serializers.ValidationError(
                     "The value for the {} parameter has to be of type {}".format(self.param.name, self.param.type))
         return value
+
+# Define custom user model
+class Admin(AbstractUser):
+    # Update names
+    class Meta:
+        verbose_name = _('admin')
+        verbose_name_plural = _('admins')
+
+
+# Define external user (logs in from external source)
+class User(models.Model):
+    
+    # Hardcode external sources
+    ORCID = 'ORCID'
+
+    # Define source choices
+    SOURCES = [
+        (ORCID, 'ORCID')
+    ]
+
+    # Define source
+    source = models.CharField(max_length=100, choices=SOURCES)
+    # Define username
+    username = models.CharField(max_length=100)
+    # Define (optional) email
+    email = models.EmailField(blank=True, null=True)
+    # Define (optional) telephone
+    phone = models.CharField(max_length=100, blank=True, null=True)
+    # Defines whether the user is enabled
+    active = models.BooleanField(default=True, blank=False, null=False)
+
+    # Metadata
+    class Meta:
+        # Force source, username to be unique
+        unique_together = ('source', 'username')
+
+
+# Define internal token (associated to external user)
+class Token(models.Model):
+    # Define hash
+    hash = models.CharField(max_length=1000, editable=False)
+    # Defines when the token has been created
+    created = models.DateTimeField(blank=False, null=False, editable=False)
+    # Defines expiration time
+    expires = models.DateTimeField(blank=False, null=False, editable=False)
+    # Define foreign key constraint
+    user = models.ForeignKey(User, to_field='id', related_name='has_user', on_delete=models.CASCADE, editable=False)
+    # user = models.ForeignObject(ExternalUser, from_fields=['source', 'username'], to_fields=['source', 'username'], related_name='has_user', on_delete=models.CASCADE)
+
+    @staticmethod
+    def generate_hash(*args, **kwargs):
+        # TODO Create token
+        raise NotImplementedError
