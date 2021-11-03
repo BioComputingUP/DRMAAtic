@@ -7,7 +7,7 @@ from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
 
 from server.settings import BASE_DIR
-from .models import Parameter, TaskParameter
+from .models import Parameter, Task, TaskParameter
 
 
 def format_task_params(passed_params):
@@ -42,7 +42,8 @@ def get_params(user_param, task, parameters_of_task):
             try:
                 if param.type == Parameter.Type.FILE.value:
                     ext = get_extension(param.name, user_param[param.name].name)
-                    file_pth = os.path.join(BASE_DIR, "outputs/{}/{}.{}".format(task.pk, param.name, ext))
+                    p_task = get_ancestor(task)
+                    file_pth = os.path.join(BASE_DIR, "outputs/{}/{}.{}".format(p_task.uuid, param.name, ext))
                     with open(file_pth, "wb+") as f:
                         for chunk in user_param[param.name].chunks():
                             f.write(chunk)
@@ -78,3 +79,10 @@ def zip_dir(dir_pth: Union[Path, str], filename: Union[Path, str]):
     with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as zip_file:
         for entry in dir_pth.rglob("*"):
             zip_file.write(entry, entry.relative_to(dir_pth))
+
+
+def get_ancestor(task: Task):
+    while task.parent is not None:
+        task = task.parent
+
+    return task

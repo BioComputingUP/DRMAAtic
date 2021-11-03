@@ -8,11 +8,13 @@ submission/migrations/*
 !submission/migrations/__init__.py
 outputs/*
 !outputs/.gitkeep
+downloads/*
+!downloads/.gitkeep
 
 # C extensions
 *.so
 
- .idea/
+.idea/
 
 # Distribution / packaging
 .Python

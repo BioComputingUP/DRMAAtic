@@ -30,6 +30,7 @@ class ParameterSerializer(serializers.ModelSerializer):
 
 class ScriptSerializer(serializers.ModelSerializer):
     param = ParameterSerializer(many=True, read_only=True)
+    job = serializers.CharField(source="job.name")
 
     class Meta:
         model = Script
@@ -47,12 +48,12 @@ class TaskParameterSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     params = TaskParameterSerializer(many=True, read_only=True)
     status = serializers.CharField(read_only=True)
-    drm_job_id = serializers.IntegerField(read_only=True)
+    drm_job_id = serializers.CharField(read_only=True)
     user = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = Task
-        fields = ["id", "task_name", "status", "drm_job_id", "user",  "creation_date", "update_date", "params"]
+        fields = ["uuid", "task_name", "status", "drm_job_id", "user", "creation_date", "update_date", "params"]
 
     def create(self, validated_data):
         # Check if user passed the params keyword
@@ -60,9 +61,10 @@ class TaskSerializer(serializers.ModelSerializer):
             raise exceptions.NotAcceptable("The task_name parameter needs to be specified")
 
         # Create the task with the name
-        task = Task.objects.create(task_name=validated_data["task_name"], user=validated_data["user"])
+        task = Task.objects.create(task_name=validated_data["task_name"], user=validated_data.get("user"))
 
-        create_task_folder(task.pk)
+        if task.parent is None:
+            create_task_folder(task.uuid)
 
         parameters_of_task = Parameter.objects.filter(script=task.task_name)
 
@@ -75,7 +77,7 @@ class TaskSerializer(serializers.ModelSerializer):
         j_id, name = start_job(**drm_params, task_name=task.task_name.name,
                                command=task.task_name.command,
                                script_args=formatted_params,
-                               working_dir=str(task.pk))
+                               working_dir=task.uuid if task.parent is None else task.parent.uuid)
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the task as rejected
             task.status = Task.Status.REJECTED.value

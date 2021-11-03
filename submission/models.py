@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -145,6 +147,7 @@ class Parameter(models.Model):
 class Task(models.Model):
     # The name of the task should be one of the script names
     task_name = models.ForeignKey(Script, to_field="name", on_delete=models.CASCADE, null=False)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     creation_date = models.DateTimeField(auto_now_add=True, auto_created=True)

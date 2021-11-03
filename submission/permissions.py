@@ -25,11 +25,11 @@ class IsOwner(BasePermission):
         # if (not (isinstance(user, User) and (isinstance(token, Token)))):
         #     # Otheriwse, do not grant permission
         # Check that object has user attribute
-        if (not hasattr(obj, 'user')):
+        if not hasattr(obj, 'user') or getattr(obj, 'user') is None:
             # Otherwise, just grant permission
             return True
         # Case given user matches expected one
-        elif (getattr(obj, 'user') == user):
+        elif getattr(obj, 'user') == user:
             # Grant permission
             return True
         # Otherwise, do not grant permission
