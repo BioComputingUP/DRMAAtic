@@ -91,4 +91,4 @@ class TokenViewSet(viewsets.ViewSet, mixins.RetrieveModelMixin):
         access_token = request.auth
         # return Response({ 'access_token': access_token.key, 'orcid_id': user.username })
         return Response(
-                {'user_source': user.source, 'user_unsername': user.username, 'access_token': access_token.hash})
+                {'user_source': user.source, 'user_name': user.username, 'access_token': access_token.hash})
