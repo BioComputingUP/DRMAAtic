@@ -70,25 +70,31 @@ class TaskViewSet(viewsets.ModelViewSet):
             response['Content-Disposition'] = "attachment; filename={}".format("{}.zip".format(p_task.uuid))
             return response
         else:
-            return Response({'status': 'Output files not available, check task status'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'status': 'Output files not available, check task status'},
+                            status=status.HTTP_404_NOT_FOUND)
 
     @action(methods=['GET'], detail=True)
-    def file(self, request, **kwargs):
+    def file(self, request, path, **kwargs):
         task = self.get_object()
 
-        if task.drm_job_id is not None and not task.has_finished():
-            task.status = get_job_status(str(task.drm_job_id))
-            task.save()
+        p_task = get_ancestor(task)
 
-        if task.status == Task.Status.DONE.value:
-            p_task = get_ancestor(task)
+        root = os.path.join(BASE_DIR, "outputs/{}/".format(p_task.uuid))
+        files = [os.path.join(dp.replace(root, ''), f) for dp, dn, fn in os.walk(root) for f in fn]
 
-            root = os.path.join(BASE_DIR, "outputs/{}/".format(p_task.uuid))
-            files = [os.path.join(dp.replace(root, ''), f) for dp, dn, fn in os.walk(root) for f in fn]
+        if path:
+            if path in files:
+                file = os.path.join(root, path)
+                file_handle = open(file, "rb")
+                mimetype, _ = mimetypes.guess_type(file)
+                response = FileResponse(file_handle, content_type=mimetype or 'text/plain', )
+                response['Content-Length'] = os.path.getsize(file)
+                response['Content-Disposition'] = "inline"  # ; filename={}".format(os.path.basename(file))
+                return response
+            else:
+                raise exceptions.NotFound()
 
-            return Response(files)
-        else:
-            return Response({'status': 'Output files not available, check task status'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(files)
 
 
 class ParamsViewSet(viewsets.ModelViewSet):
