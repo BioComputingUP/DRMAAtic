@@ -141,7 +141,7 @@ class Task(models.Model):
     # The name of the task should be one of the script names
     task_name = models.ForeignKey(Script, to_field="name", on_delete=models.CASCADE, null=False)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     creation_date = models.DateTimeField(auto_now_add=True, auto_created=True)
     update_date = models.DateTimeField(auto_now=True, auto_created=True)
@@ -166,6 +166,9 @@ class Task(models.Model):
     drm_job_id = models.PositiveIntegerField(null=True, blank=True)
 
     # TODO : Add a reference to the user whose submitted the job
+
+    def has_finished(self):
+        return self.status in {self.Status.DONE.value, self.Status.FAILED.value}
 
     def __str__(self):
         return "{} : {}".format(self.pk, self.task_name.name)

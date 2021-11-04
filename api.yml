@@ -30,19 +30,19 @@ components:
           type: object
           additionalProperties: true
           description: Dictionary mapping parameter names to values
-    # Job object
-    Job:
+    # Task object
+    Task:
       type: object
       # Define required properties
       required: [ 'status', 'queue' ]
       # Define property schema
       properties:
-        id:
+        uuid:
           type: string
-          description: Unique ID of the current job
+          description: Unique ID of the current task
         status:
           type: string
-          description: Current status of the job
+          description: Current status of the task
         queue:
           type: string
           description: Unique ID of the queue
@@ -60,7 +60,7 @@ components:
 # Global security settings 
 security:
   # Define scopes
-  - baererAuth: []
+  - baererAuth: [ ]
 # Implemented paths
 paths:
   # Check script parameters
@@ -68,12 +68,12 @@ paths:
     get:
       description: Return parameters, type and validation for given script
       parameters:
-      - in: path
-        name: name
-        schema:
-          type: string
-        required: true
-        description: Unique name of the script
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+          description: Unique name of the script
       responses:
         '200':
           description: (Ok) given script exists, parameters are returned
@@ -83,75 +83,128 @@ paths:
                 $ref: '#/components/schemas/Script'
         '404':
           description: (Not found) given script does not exist
-  # Operations on jobs
-  /job:
-      # Submit a job
-      post:
-        description: Submit a new job
-        requestBody:
-          description: Optional description in *Markdown*
-          required: true
+  /script/:
+    get:
+      description: Return parameters, type and validation for given script
+      responses:
+        '200':
+          description: (Ok) given script exists, parameters are returned
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Job'
-        responses:
-          '200':
-            description: (Ok) given job has been submitted
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Job'
-          '400':
-            description: (Bad request) given parameters do not satisfy any job specification
-          '500':
-            description: (Internal server error) given job could not start
-          '403':
-            description: (Forbidden) your request cannot be submitted
-  # Other operations on jobs
-  /job/{id}:
+                $ref: '#/components/schemas/Script'
+        '404':
+          description: (Not found) given script does not exist
+  # Operations on tasks
+  /task/:
+    # Submit a task
+    post:
+      description: Submit a new task
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '201':
+          description: (Created) given task has been submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: (Bad request) given parameters do not satisfy any task specification
+        '500':
+          description: (Internal server error) given task could not start
+        '403':
+          description: (Forbidden) your request cannot be submitted
+  # Other operations on tasks
+  /task/{uuid}/:
     parameters:
       - in: path
-        name: id
+        name: uuid
         schema:
           type: string
         required: true
-        description: Unique ID of the job
-    # Retrieve a job
+        description: Unique ID of the task
+    # Retrieve a task
     get:
-      description: Retrieve status of the given job
+      description: Retrieve status of the given task
       responses:
         '200':
-          description: (Ok) job has been retrieved
+          description: (Ok) task has been retrieved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Job'
+                $ref: '#/components/schemas/Task'
         '404':
-          description: (Not found) job does not exist
+          description: (Not found) task does not exist
         '403':
           description: (Forbidden) your request cannot be fulfilled
-    # Delete a job
+    # Delete a task
     delete:
-      description: Delete given job, if any
+      description: Delete given task, if any
       responses:
-        '200':
-          description: (Ok) job has been deleted
+        '204':
+          description: (No content) task has been deleted
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Job'
+                $ref: '#/components/schemas/Task'
         '404':
-          description: (Not found) job does not exist
+          description: (Not found) task does not exist
         '403':
           description: (Forbidden) your request cannot be fulfilled
         '500':
-          description: (Internal server error) the job was not deleted for whatever reason
-  # Exchange external token for an internal one
-  /token/{orcid-id}:
+          description: (Internal server error) the task was not deleted for whatever reason
+  /task/{uuid}/download/:
     parameters:
       - in: path
-        name: orcid-id
+        name: uuid
+        schema:
+          type: string
+        required: true
+        description: Unique ID of the task
+    # Retrieve a task
+    get:
+      description: Download current working dir as zip of the given task
+      responses:
+        '200':
+          description: (Ok) task has been retrieved
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: (Not found) task does not exist
+        '403':
+          description: (Forbidden) your request cannot be fulfilled
+  /task/{uuid}/files/:
+    parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+        required: true
+        description: Unique ID of the task
+    # Retrieve a task
+    get:
+      description: Get the content of the working directory as list of files
+      responses:
+        '200':
+          description: (Ok)
+        '404':
+          description: (Not found) task does not exist
+        '403':
+          description: (Forbidden) your request cannot be fulfilled
+  # Exchange external token for an internal one
+  /token/{username}/:
+    parameters:
+      - in: path
+        name: username
         schema:
           type: string
         required: true
@@ -166,5 +219,5 @@ paths:
               schema:
                 type: string
                 example: isthisanaccesstoken?
-        '304':
+        '403':
           description: (Forbidden) your request has been refused by external authentication service

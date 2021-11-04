@@ -32,7 +32,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         Retreive the task and update the status of the DRM job
         """
         task = self.get_object()
-        if task.drm_job_id is not None:
+        if task.drm_job_id is not None and not task.has_finished():
             task.status = get_job_status(str(task.drm_job_id))
             task.save()
         serializer = self.get_serializer(task)
@@ -58,7 +58,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             task.status = get_job_status(str(task.drm_job_id))
             task.save()
 
-        if task.status == Task.Status.DONE.value:
+        if task.status == Task.Status.DONE.value and not task.has_finished():
             p_task = get_ancestor(task)
 
             zip_file = os.path.join(BASE_DIR, "downloads/{}.zip".format(p_task.uuid, p_task.uuid))
@@ -70,7 +70,25 @@ class TaskViewSet(viewsets.ModelViewSet):
             response['Content-Disposition'] = "attachment; filename={}".format("{}.zip".format(p_task.uuid))
             return response
         else:
-            return Response({'status': 'Output files not ready, check task status'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'status': 'Output files not available, check task status'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['GET'], detail=True)
+    def file(self, request, **kwargs):
+        task = self.get_object()
+
+        if task.drm_job_id is not None and not task.has_finished():
+            task.status = get_job_status(str(task.drm_job_id))
+            task.save()
+
+        if task.status == Task.Status.DONE.value:
+            p_task = get_ancestor(task)
+
+            root = os.path.join(BASE_DIR, "outputs/{}/".format(p_task.uuid))
+            files = [os.path.join(dp.replace(root, ''), f) for dp, dn, fn in os.walk(root) for f in fn]
+
+            return Response(files)
+        else:
+            return Response({'status': 'Output files not available, check task status'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ParamsViewSet(viewsets.ModelViewSet):
