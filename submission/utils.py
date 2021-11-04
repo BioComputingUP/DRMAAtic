@@ -82,7 +82,7 @@ def zip_dir(dir_pth: Union[Path, str], filename: Union[Path, str]):
 
 
 def get_ancestor(task: Task):
-    while task.parent is not None:
-        task = task.parent
+    while task.parent_task is not None:
+        task = task.parent_task
 
     return task

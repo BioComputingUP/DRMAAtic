@@ -77,16 +77,9 @@ class DRMJobTemplate(models.Model):
     queue = models.CharField(max_length=20, choices=DRMQueue.choices, default=DRMQueue.LOCAL, null=False, blank=False)
     # Number of cpus for the task
     cpus_per_task = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(64)])
-
-    # email_type = models.CharField(
-    #         max_length=10,
-    #         choices=DRMEmailType.choices,
-    #         default=DRMEmailType.ALL,
-    #         blank=True
-    #         null=True,
-    # )
-    # email_addr = models.EmailField(blank=True, null=True)
-    # account = models.CharField(max_length=30)
+    n_tasks = models.PositiveIntegerField(default=1)
+    mem_per_node = models.CharField(max_length=20, null=True, blank=True)
+    mem_per_cpu = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -169,7 +162,7 @@ class Task(models.Model):
         FAILED = "job finished, but failed"
 
     status = models.CharField(max_length=200, choices=Status.choices, blank=False, null=False, default=Status.RECEIVED)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    parent_task = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     drm_job_id = models.PositiveIntegerField(null=True, blank=True)
 
     # TODO : Add a reference to the user whose submitted the job
