@@ -1,16 +1,18 @@
-from datetime import datetime, timedelta
-
-import jwt
-import requests
 from django.utils.translation import gettext_lazy as _
-from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import status
 
-from .models import *
+from server.settings import SECRET_KEY
+
+from .models import User, Token
+
+from datetime import datetime, timedelta
+import requests
+import jwt
 
 
-# Extend token autentication in order to create Bearer authentication
+# Extend token authentication in order to create Bearer authentication
 class BearerAuthentication(BaseAuthentication):
     # Define user model
     user = User
@@ -19,7 +21,8 @@ class BearerAuthentication(BaseAuthentication):
     # Define keyword as Bearer
     keyword = 'Bearer'
     # Define secret
-    secret = 'This is not really secret'
+    # NOTE by default it is set as server's secret
+    secret = SECRET_KEY
 
     # Override authenticate method
     def authenticate(self, request):
@@ -40,7 +43,7 @@ class BearerAuthentication(BaseAuthentication):
         return user, token
 
     # Authenticate token against database
-    def authenticate_token(self, request):
+    def authenticate_token(self, request, user=None):
         # Define user and token classes
         User, Token = self.user, self.token
         # Split authentication binary header (token key, value)
@@ -120,13 +123,13 @@ class RemoteAuthentication(BearerAuthentication):
         return user
 
     # Authenticate token
-    def authenticate_token(self, request, user):
+    def authenticate_token(self, request, user=None):
         # Split authentication binary header (token key, value)
         header = get_authorization_header(request).split()
         # Retrieve authentication key
         keyword = header[0] if len(header) > 0 else None
         # Retrieve authentication token
-        hash = header[1].decode() if len(header) > 1 else None
+        secret = header[1].decode() if len(header) > 1 else None
         # Case keyword does not match expected one
         if keyword != self.keyword.encode():
             # Just raise authentication error
@@ -134,7 +137,7 @@ class RemoteAuthentication(BearerAuthentication):
         # Define authentication endpoint (user username a s orcid ID)
         url = self.url.format(user.username)
         # Make a request against authorization URL
-        response = requests.get(url, {**self.header, keyword: hash}, **self.request)
+        response = requests.get(url, {**self.header, keyword: secret}, **self.request)
         # Case response return 200 OK
         if not status.is_success(response.status_code):
             # Just raise authentication error
@@ -144,8 +147,8 @@ class RemoteAuthentication(BearerAuthentication):
         # Define expiration time
         expires = created + timedelta(days=1)
         # Create a new hash
-        hash = jwt.encode({'nbf': created, 'exp': expires, 'iss': user.id}, self.secret, algorithm='HS256')
+        secret = jwt.encode({'nbf': created, 'exp': expires, 'iss': user.id}, self.secret, algorithm='HS256')
         # Create token from user
-        token = self.token.objects.create(user=user, hash=hash, created=created, expires=expires)
+        token = self.token.objects.create(user=user, hash=secret, created=created, expires=expires)
         # Return user's token
         return token
