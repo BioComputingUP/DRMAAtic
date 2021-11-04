@@ -164,7 +164,7 @@ class TaskViewSetTest(TestCase):
     # # TODO Test task status
     # def test_get_task(self) -> None:
     #     raise NotImplementedError
-
+    #
     # # TODO Test task deletion
     # def test_del_task(self) -> None:
     #     raise NotImplementedError
