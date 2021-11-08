@@ -51,7 +51,7 @@ admin.site.register(Admin, auth.UserAdmin)
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     # Define columns to show
-    list_display = ('source', 'username', 'email', 'phone', 'active')
+    list_display = ('username', 'source', 'account', 'email', 'phone', 'active')
 
 
 # Register token in the admin web interface

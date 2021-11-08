@@ -128,7 +128,8 @@ class TaskSerializer(serializers.ModelSerializer):
                                is_array=task.task_name.is_array,
                                begin_index=task.task_name.begin_index,
                                end_index=task.task_name.end_index,
-                               step_index=task.task_name.step_index)
+                               step_index=task.task_name.step_index,
+                               account=task.user.account if task.user is not None else None)
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the task as rejected
             task.status = Task.Status.REJECTED.value

@@ -17,6 +17,12 @@ class Admin(AbstractUser):
 
 # Define external user (logs in from external source)
 class User(models.Model):
+
+    class Account(models.Choices):
+        base = 'base'
+        biocomp = 'biocomp'
+        admin = 'admin'
+
     # Hardcode external sources
     ORCID = 'ORCID'
 
@@ -35,6 +41,8 @@ class User(models.Model):
     phone = models.CharField(max_length=100, blank=True, null=True)
     # Defines whether the user is enabled
     active = models.BooleanField(default=True, blank=False, null=False)
+
+    account = models.CharField(max_length=50, choices=Account.choices, default=Account.base.value)
 
     def __str__(self):
         return self.username
