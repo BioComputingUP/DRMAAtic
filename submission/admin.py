@@ -27,7 +27,7 @@ class ParamAdminInline(admin.TabularInline):
 
 @admin.register(Script)
 class ScriptAdmin(admin.ModelAdmin):
-    fields = (('name', 'command'), 'job')
+    fields = (('name', 'command'), 'job', ('is_array', 'begin_index', 'end_index', 'step_index'))
     list_display = ('name', 'command')
 
     inlines = [ParamAdminInline]
@@ -39,7 +39,7 @@ class TaskParamAdminInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('id', 'task_name', 'status', 'creation_date')
+    list_display = ('id', 'task_name', 'status', 'creation_date', 'user')
     inlines = [TaskParamAdminInline]
 
 

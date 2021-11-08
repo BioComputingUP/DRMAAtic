@@ -1,6 +1,6 @@
 #!/bin/bash
 ###
-echo "first" >> output
+echo "I'm job array ${SLURM_ARRAY_TASK_ID}, hello!" >> output
 rnd=30
 yes > /dev/null &
 ypid=$!
@@ -9,4 +9,6 @@ sleep $rnd
 ####
 # Prepare output files in a zip
 ####
-zip ../../downloads/"$(basename "$PWD")".zip ./*
+if [[ ${SLURM_ARRAY_TASK_ID} == "${SLURM_ARRAY_TASK_MAX}" ]]; then
+  zip ../../downloads/"$(basename "$PWD")".zip ./* >/dev/null
+fi

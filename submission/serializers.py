@@ -36,10 +36,22 @@ class ParameterSerializer(serializers.ModelSerializer):
 class ScriptSerializer(serializers.ModelSerializer):
     param = ParameterSerializer(many=True, read_only=True)
     job = serializers.CharField(source="job.name")
+    is_array = serializers.ReadOnlyField()
+    begin_index = serializers.ReadOnlyField()
+    end_index = serializers.ReadOnlyField()
+    step_index = serializers.ReadOnlyField()
 
     class Meta:
         model = Script
-        fields = ["name", "command", "job", "param"]
+        fields = ["name", "command", "job", "is_array", "begin_index", "end_index", "step_index", "param"]
+
+    def validate(self, attrs):
+        # Private and required cannot be set together
+        if attrs["is_array"] and (
+                attrs["begin_index"] is None or attrs["end_index"] is None or attrs["step_index"] is None):
+            raise serializers.ValidationError(
+                "When is_array is defined, begin_index, end_index and step_index have to be defined")
+        return attrs
 
 
 class TaskParameterSerializer(serializers.ModelSerializer):
@@ -105,13 +117,18 @@ class TaskSerializer(serializers.ModelSerializer):
 
         p_task = get_ancestor(task)
 
-        j_id, name = start_job(**drm_params, task_name=task.task_name.name,
+        j_id, name = start_job(**drm_params,
+                               task_name=task.task_name.name,
                                script_dir=os.path.join(BASE_DIR, "scripts/"),
                                out_dir=os.path.join(BASE_DIR, "outputs/"),
                                command=task.task_name.command,
                                script_args=formatted_params,
                                working_dir=p_task.uuid,
-                               dependency=parent_task.drm_job_id if parent_task is not None else None)
+                               dependency=parent_task.drm_job_id if parent_task is not None else None,
+                               is_array=task.task_name.is_array,
+                               begin_index=task.task_name.begin_index,
+                               end_index=task.task_name.end_index,
+                               step_index=task.task_name.step_index)
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the task as rejected
             task.status = Task.Status.REJECTED.value

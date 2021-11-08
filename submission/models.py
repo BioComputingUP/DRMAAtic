@@ -97,6 +97,11 @@ class Script(models.Model):
     command = models.CharField(max_length=100, null=False, blank=False)
     job = models.ForeignKey(DRMJobTemplate, on_delete=models.SET_NULL, null=True)
 
+    is_array = models.BooleanField(default=False)
+    begin_index = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(1)])
+    end_index = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(1)])
+    step_index = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(1)])
+
     def __str__(self):
         return self.name
 
