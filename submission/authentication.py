@@ -24,10 +24,14 @@ class BearerAuthentication(BaseAuthentication):
     # NOTE by default it is set as server's secret
     secret = SECRET_KEY
 
+    def get_user_class(self):
+        return self.user
+
+    def get_token_class(self):
+        return self.token
+
     # Override authenticate method
     def authenticate(self, request):
-        # Initialize user and token
-        user, token = None, None
         # Try authenticating
         try:
             # Authenticate token
@@ -35,7 +39,7 @@ class BearerAuthentication(BaseAuthentication):
             # Define user
             user = token.user
             # Catch authentication exceptions
-        except Exception:
+        except AuthenticationFailed:
             # Unset both user and token
             user, token = None, None
             # raise AuthenticationFailed(_('Issued token is not valid'))
@@ -45,24 +49,24 @@ class BearerAuthentication(BaseAuthentication):
     # Authenticate token against database
     def authenticate_token(self, request, user=None):
         # Define user and token classes
-        User, Token = self.user, self.token
+        user_class, token_class = self.get_user_class(), self.get_token_class()
         # Split authentication binary header (token key, value)
         header = get_authorization_header(request).split()
         # Retrieve authentication key
         keyword = header[0] if len(header) > 0 else None
         # Case keyword specified is not the expected one
-        if (keyword != self.keyword.encode()):
+        if keyword != self.keyword.encode():
             raise AuthenticationFailed(_('Authentication header is not correctly formatted'))
         # Retrieve authentication value (token)
         hash = header[1].decode() if len(header) > 1 else None
         # Retrieve token out of hash
-        token = Token.objects.get(hash=hash)
+        token = token_class.objects.get(hash=hash)
         # Decode payload from token
         payload = jwt.decode(hash, self.secret, algorithms=['HS256', ])
         # # Retrieve user out payload
         # user = User.objects.get(id=payload.get('iss', ''))
         # Case retrieved user is not allowed
-        if ((token.user.id != payload.get('iss', None)) or (not token.user.active)):
+        if (token.user.id != payload.get('iss', None)) or not token.user.active:
             # Raise an authentication error
             raise AuthenticationFailed(_('User is forbidden'))
         # Define token

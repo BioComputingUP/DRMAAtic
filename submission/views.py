@@ -11,6 +11,7 @@ from submission_lib.manage import terminate_job
 from .authentication import *
 from .permissions import *
 from .serializers import *
+from .throttles import IPRateThrottle
 
 
 class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
@@ -22,6 +23,7 @@ class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     # serializer_class = TaskSerializer
+    throttle_classes = [IPRateThrottle]
     parser_classes = (FormParser, MultiPartParser)
     authentication_classes = [BearerAuthentication]
     permission_classes = [IsOwner | IsSuper]
@@ -84,11 +86,9 @@ class TaskViewSet(viewsets.ModelViewSet):
     def download(self, request, **kwargs):
         task = self.get_object()
 
-        if task.drm_job_id is not None:
-            task.status = get_job_status(str(task.drm_job_id))
-            task.save()
+        task.update_drm_status()
 
-        if task.status == Task.Status.DONE.value and not task.has_finished():
+        if task.has_finished():
             p_task = get_ancestor(task)
 
             zip_file = os.path.join(BASE_DIR, "downloads/{}.zip".format(p_task.uuid, p_task.uuid))

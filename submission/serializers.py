@@ -16,6 +16,9 @@ class DRMJobSerializer(serializers.ModelSerializer):
 
 
 class ParameterSerializer(serializers.ModelSerializer):
+    """
+    Serializes the parameters of a script. Validates the data in input in order to ensure that everything is ok
+    """
     class Meta:
         model = Parameter
         fields = ["flag", "type", "default", "description", "private", "required"]
@@ -36,6 +39,8 @@ class ParameterSerializer(serializers.ModelSerializer):
 class ScriptSerializer(serializers.ModelSerializer):
     param = ParameterSerializer(many=True, read_only=True)
     job = serializers.CharField(source="job.name")
+
+    # Array task fields
     is_array = serializers.ReadOnlyField()
     begin_index = serializers.ReadOnlyField()
     end_index = serializers.ReadOnlyField()
@@ -50,11 +55,14 @@ class ScriptSerializer(serializers.ModelSerializer):
         if attrs["is_array"] and (
                 attrs["begin_index"] is None or attrs["end_index"] is None or attrs["step_index"] is None):
             raise serializers.ValidationError(
-                "When is_array is defined, begin_index, end_index and step_index have to be defined")
+                    "When is_array is defined, begin_index, end_index and step_index have to be defined")
         return attrs
 
 
 class TaskParameterSerializer(serializers.ModelSerializer):
+    """
+    Serializes a parameter associated to a task, removing private parameters for non-admin users
+    """
     name = ReadOnlyField(source='param.name')
 
     def to_representation(self, instance):
@@ -70,6 +78,10 @@ class TaskParameterSerializer(serializers.ModelSerializer):
 
 
 class TaskParentField(serializers.RelatedField):
+    """
+    Serializer for the nested relationship of a task with another task through the task UUID
+    """
+
     def to_representation(self, instance):
         return instance.uuid
 
@@ -96,11 +108,26 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = ["uuid", "task_name", "parent_task", "status", "params"]
 
     def to_representation(self, instance):
+        """
+        Modify the task representation removing k:v pairs with v=None and null items in the param list
+        """
         data = super().to_representation(instance)
         data["params"] = [p for p in data["params"] if p is not None]
         return {k: v for k, v in data.items() if v is not None}
 
     def create(self, validated_data):
+        """
+        Creates a new task in the ws and in the DRM
+
+        After the creation of the task, the relative parameters (passed and private) are set, and linked to the created task.
+        Once task and parameters are created, the task is sent to the DRM in order to be executed. The DRM returns an ID that is
+        then associated to the task in order to check the status on the DRM.
+
+        The task can be associated to an user if a user is passed.
+
+        A task can have a parent if necessary, in this case the working directory of the new task is the same as the parent task.
+        """
+
         # Check if user passed the params keyword
         if "task_name" not in validated_data.keys():
             raise exceptions.NotAcceptable("The task_name parameter needs to be specified")
@@ -121,7 +148,6 @@ class TaskSerializer(serializers.ModelSerializer):
         task_params = get_params(self.initial_data, task, parameters_of_task)
         formatted_params = format_task_params(task_params)
 
-        logger.info(formatted_params)
         drm_params = DRMJobTemplate.objects.get(name=task.task_name.job).__dict__
 
         p_task = get_ancestor(task)
@@ -153,6 +179,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class SuperTaskSerializer(TaskSerializer):
+    """
+    Task serializer for admin users with more info regarding the task
+    """
     drm_job_id = serializers.CharField(read_only=True)
     user = serializers.CharField(source="user.username", read_only=True)
 

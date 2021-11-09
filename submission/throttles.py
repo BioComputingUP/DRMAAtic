@@ -1,6 +1,19 @@
 # Dependencies
 from rest_framework.settings import api_settings
-from rest_framework.throttling import BaseThrottle
+from rest_framework.throttling import AnonRateThrottle, BaseThrottle
+
+
+class IPRateThrottle(AnonRateThrottle):
+    THROTTLE_RATES = {'anon': '10/day'}
+
+    def get_cache_key(self, request, view):
+        if request.user is not None:
+            return None  # Only throttle unauthenticated requests.
+
+        return self.cache_format % {
+                'scope': self.scope,
+                'ident': self.get_ident(request)
+        }
 
 
 # TODO Define throttling for authenticated user

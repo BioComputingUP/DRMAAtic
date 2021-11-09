@@ -103,6 +103,21 @@ AUTH_PASSWORD_VALIDATORS = [
         },
 ]
 
+# Throttling
+# https://www.django-rest-framework.org/api-guide/throttling/
+
+REST_FRAMEWORK = {
+        'DEFAULT_THROTTLE_CLASSES': [
+                'submission.throttles.AnonRateThrottle',
+                'rest_framework.throttling.UserRateThrottle'
+        ],
+        'DEFAULT_THROTTLE_RATES': {
+                'anon': '1/day',
+                'user': '1000/day'
+        },
+        'NUM_PROXIES' : 1
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
