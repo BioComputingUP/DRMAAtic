@@ -35,3 +35,23 @@ class IsOwner(BasePermission):
         # Otherwise, do not grant permission
         else:
             return False
+
+
+class IsSuper(BasePermission):
+    """ Grants admin access to super users
+
+    This permission allows the owner to execute CRUD operations
+    on a resource. If the resource is not owned by anyone, knowing
+    the identifier of the resource will be sufficient. Instead, if
+    the resource is owned by someone, accession token must be issued.
+    """
+
+    # Override `has_object_permission` method
+    def has_object_permission(self, request, view, obj):
+        # Retrieve user token from request
+        user, token = request.user, request.auth
+        # Check that requesting user is an admin to give access to the obj
+        if user is not None and user.is_admin():
+            return True
+        else:
+            return False

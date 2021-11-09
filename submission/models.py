@@ -8,6 +8,9 @@ from rest_framework import serializers
 
 
 # Define custom user model
+from submission_lib.manage import get_job_status
+
+
 class Admin(AbstractUser):
     # Update names
     class Meta:
@@ -17,7 +20,6 @@ class Admin(AbstractUser):
 
 # Define external user (logs in from external source)
 class User(models.Model):
-
     class Account(models.Choices):
         base = 'base'
         biocomp = 'biocomp'
@@ -46,6 +48,9 @@ class User(models.Model):
 
     def __str__(self):
         return self.username
+
+    def is_admin(self):
+        return self.account == self.Account.admin.value
 
     # Metadata
     class Meta:
@@ -182,6 +187,11 @@ class Task(models.Model):
 
     def has_finished(self):
         return self.status in {self.Status.DONE.value, self.Status.FAILED.value}
+
+    def update_drm_status(self):
+        if self.drm_job_id is not None and not self.has_finished():
+            self.status = get_job_status(str(self.drm_job_id))
+            self.save()
 
     def __str__(self):
         return "{} : {}".format(self.pk, self.task_name.name)

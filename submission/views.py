@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
-from submission_lib.manage import get_job_status, terminate_job
+from submission_lib.manage import terminate_job
 from .authentication import *
 from .permissions import *
 from .serializers import *
@@ -21,20 +21,50 @@ class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    # serializer_class = TaskSerializer
     parser_classes = (FormParser, MultiPartParser)
     authentication_classes = [BearerAuthentication]
-    permission_classes = [IsOwner]
+    permission_classes = [IsOwner | IsSuper]
     lookup_field = "uuid"
+
+    def get_serializer_class(self):
+        if self.request.user and self.request.user.is_admin():
+            return SuperTaskSerializer
+        else:
+            return TaskSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        if request.user is not None:
+            queryset = self.filter_queryset(self.get_queryset())
+
+            if not request.user.is_admin():
+                queryset = queryset.filter(user=request.user)
+
+            # Update the drm status of the task
+            for task in queryset:
+                task.update_drm_status()
+
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, **kwargs):
         """
         Retreive the task and update the status of the DRM job
         """
         task = self.get_object()
-        if task.drm_job_id is not None and not task.has_finished():
-            task.status = get_job_status(str(task.drm_job_id))
-            task.save()
+        # Update the drm status before returning the task
+        task.update_drm_status()
+
         serializer = self.get_serializer(task)
         return Response(serializer.data)
 

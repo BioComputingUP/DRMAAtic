@@ -57,6 +57,13 @@ class ScriptSerializer(serializers.ModelSerializer):
 class TaskParameterSerializer(serializers.ModelSerializer):
     name = ReadOnlyField(source='param.name')
 
+    def to_representation(self, instance):
+        user = getattr(self.context.get('request'), 'user', None)
+        if (instance.param.private and user is not None and user.is_admin()) or not instance.param.private:
+            return super().to_representation(instance)
+        else:
+            return None
+
     class Meta:
         model = TaskParameter
         fields = ["name", "value"]
@@ -80,16 +87,18 @@ class TaskParentField(serializers.RelatedField):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    params = TaskParameterSerializer(many=True, read_only=True)
+    params = TaskParameterSerializer(many=True, read_only=True, required=False)
     status = serializers.CharField(read_only=True)
-    drm_job_id = serializers.CharField(read_only=True)
-    user = serializers.CharField(source="user.username", read_only=True)
     parent_task = TaskParentField(queryset=Task.objects.all(), required=False)
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "parent_task", "status", "drm_job_id", "user", "creation_date", "update_date",
-                  "params"]
+        fields = ["uuid", "task_name", "parent_task", "status", "params"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["params"] = [p for p in data["params"] if p is not None]
+        return {k: v for k, v in data.items() if v is not None}
 
     def create(self, validated_data):
         # Check if user passed the params keyword
@@ -141,6 +150,16 @@ class TaskSerializer(serializers.ModelSerializer):
         # Must save the instance since it has been modified with the new status/job_id
         task.save()
         return task
+
+
+class SuperTaskSerializer(TaskSerializer):
+    drm_job_id = serializers.CharField(read_only=True)
+    user = serializers.CharField(source="user.username", read_only=True)
+
+    class Meta:
+        model = Task
+        fields = ["uuid", "task_name", "parent_task", "status", "drm_job_id", "user", "creation_date", "update_date",
+                  "params"]
 
 
 class ExternalUserSerializer(serializers.ModelSerializer):
