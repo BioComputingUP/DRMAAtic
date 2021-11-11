@@ -1,15 +1,16 @@
+from datetime import timedelta
+
+import jwt
+import requests
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from pytimeparse.timeparse import timeparse
+from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework import status
 
 from server.settings import SECRET_KEY
-
-from .models import User, Token
-
-from datetime import datetime, timedelta
-import requests
-import jwt
+from .models import Token, User
 
 
 # Extend token authentication in order to create Bearer authentication
@@ -147,9 +148,9 @@ class RemoteAuthentication(BearerAuthentication):
             # Just raise authentication error
             raise AuthenticationFailed(_('Issued token is not valid'))
         # Define creation time
-        created = datetime.utcnow()
+        created = timezone.now()
         # Define expiration time
-        expires = created + timedelta(days=1)
+        expires = created + timedelta(seconds=timeparse(user.get_token_renewal_time))
         # Create a new hash
         secret = jwt.encode({'nbf': created, 'exp': expires, 'iss': user.id}, self.secret, algorithm='HS256')
         # Create token from user

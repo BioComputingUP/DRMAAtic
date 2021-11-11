@@ -19,9 +19,17 @@ class ParameterSerializer(serializers.ModelSerializer):
     """
     Serializes the parameters of a script. Validates the data in input in order to ensure that everything is ok
     """
+
     class Meta:
         model = Parameter
-        fields = ["flag", "type", "default", "description", "private", "required"]
+        fields = ["name", "flag", "type", "default", "description", "private", "required"]
+
+    def to_representation(self, instance):
+        user = getattr(self.context.get('request'), 'user', None)
+        if (instance.private and user is not None and user.is_admin()) or not instance.private:
+            return super().to_representation(instance)
+        else:
+            return None
 
     def validate(self, attrs):
         # Private and required cannot be set together
@@ -57,6 +65,14 @@ class ScriptSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                     "When is_array is defined, begin_index, end_index and step_index have to be defined")
         return attrs
+
+    def to_representation(self, instance):
+        """
+        Modify the task representation removing k:v pairs with v=None and null items in the param list
+        """
+        data = super().to_representation(instance)
+        data["param"] = [p for p in data["param"] if p is not None]
+        return {k: v for k, v in data.items() if v is not None}
 
 
 class TaskParameterSerializer(serializers.ModelSerializer):
@@ -164,7 +180,7 @@ class TaskSerializer(serializers.ModelSerializer):
                                begin_index=task.task_name.begin_index,
                                end_index=task.task_name.end_index,
                                step_index=task.task_name.step_index,
-                               account=task.user.account if task.user is not None else None)
+                               account=task.user.group.name if task.user is not None else None)
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the task as rejected
             task.status = Task.Status.REJECTED.value

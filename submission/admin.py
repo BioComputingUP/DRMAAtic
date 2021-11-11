@@ -51,7 +51,13 @@ admin.site.register(Admin, auth.UserAdmin)
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     # Define columns to show
-    list_display = ('username', 'source', 'account', 'email', 'phone', 'active')
+    list_display = ('username', 'source', 'group', 'email', 'phone', 'active')
+
+
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    # Define columns to show
+    list_display = ('name', 'has_full_access', 'throttling_rate', 'token_renewal_time')
 
 
 # Register token in the admin web interface

@@ -6,6 +6,7 @@ from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
 from submission_lib.manage import terminate_job
 from .authentication import *
@@ -16,6 +17,7 @@ from .throttles import IPRateThrottle
 
 class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Script.objects.all()
+    authentication_classes = [api_settings.DEFAULT_AUTHENTICATION_CLASSES[0], BearerAuthentication]
     serializer_class = ScriptSerializer
     lookup_field = "name"
 
@@ -25,7 +27,8 @@ class TaskViewSet(viewsets.ModelViewSet):
     # serializer_class = TaskSerializer
     throttle_classes = [IPRateThrottle]
     parser_classes = (FormParser, MultiPartParser)
-    authentication_classes = [BearerAuthentication]
+    # TODO : Remove/ change the authentication classes
+    authentication_classes = [api_settings.DEFAULT_AUTHENTICATION_CLASSES[0], BearerAuthentication]
     permission_classes = [IsOwner | IsSuper]
     lookup_field = "uuid"
 

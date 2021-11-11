@@ -1,13 +1,12 @@
 # from rest_framework.test import APIRequestFactory
 import time
-
-from rest_framework.test import APIClient
-from rest_framework import status
-from django.test import TestCase
-from .models import DRMJobTemplate, Script, Parameter, User, Token, Task
-from .views import ScriptViewSet
-
 from datetime import datetime, timedelta
+
+from django.test import TestCase
+from rest_framework import status
+from rest_framework.test import APIClient
+
+from .models import DRMJobTemplate, Parameter, Script, Task, Token, User
 
 # # Define request factory
 # factory = APIRequestFactory()
@@ -128,11 +127,11 @@ class TaskViewSetTest(TestCase):
     def test_task_lifecycle(self) -> None:
         # Submit a job
         response = client.post('/task/', data={
-            'task_name': 'first',  # Name of the script which must be run
-            # 'parent_task': None,  # UUID of the parent task
-            # # Task parameters
-            # 'query': 'This is a query',
-            # 'database': 'And this is a database',
+                'task_name': 'first',  # Name of the script which must be run
+                # 'parent_task': None,  # UUID of the parent task
+                # # Task parameters
+                # 'query': 'This is a query',
+                # 'database': 'And this is a database',
         })
         # Test response
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

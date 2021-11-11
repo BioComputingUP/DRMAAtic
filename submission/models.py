@@ -6,8 +6,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy
 from rest_framework import serializers
 
-
-# Define custom user model
 from submission_lib.manage import get_job_status
 
 
@@ -17,14 +15,23 @@ class Admin(AbstractUser):
         verbose_name = gettext_lazy('admin')
         verbose_name_plural = gettext_lazy('admins')
 
+    @staticmethod
+    def is_admin():
+        return True
+
+
+class Group(models.Model):
+    name = models.CharField(max_length=50)
+    has_full_access = models.BooleanField(default=False, blank=False, null=False)
+    throttling_rate = models.CharField(max_length=30, default="10/s", null=False, blank=False)
+    token_renewal_time = models.CharField(default="1 day", null=False, blank=False, max_length=40)
+
+    def __str__(self):
+        return self.name
+
 
 # Define external user (logs in from external source)
 class User(models.Model):
-    class Account(models.Choices):
-        base = 'base'
-        biocomp = 'biocomp'
-        admin = 'admin'
-
     # Hardcode external sources
     ORCID = 'ORCID'
 
@@ -34,9 +41,13 @@ class User(models.Model):
     ]
 
     # Define source
-    source = models.CharField(max_length=100, choices=SOURCES)
+    source = models.CharField(max_length=50, choices=SOURCES)
     # Define username
     username = models.CharField(max_length=100)
+
+    name = models.CharField(max_length=20, blank=True, null=True)
+    surname = models.CharField(max_length=20, blank=True, null=True)
+
     # Define (optional) email
     email = models.EmailField(blank=True, null=True)
     # Define (optional) telephone
@@ -44,13 +55,26 @@ class User(models.Model):
     # Defines whether the user is enabled
     active = models.BooleanField(default=True, blank=False, null=False)
 
-    account = models.CharField(max_length=50, choices=Account.choices, default=Account.base.value)
+    token_renewal_time = models.CharField(max_length=40, blank=True, null=True)
+
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False, blank=False)
 
     def __str__(self):
         return self.username
 
     def is_admin(self):
-        return self.account == self.Account.admin.value
+        return self.group.has_full_access
+
+    @property
+    def throttling_rate(self):
+        return self.group.throttling_rate
+
+    @property
+    def get_token_renewal_time(self):
+        if self.token_renewal_time is not None and self.token_renewal_time != '':
+            return self.token_renewal_time
+        else:
+            return self.group.token_renewal_time
 
     # Metadata
     class Meta:
@@ -216,7 +240,7 @@ class TaskParameter(models.Model):
             if self.param.type == Parameter.Type.INTEGER.value:
                 int(value)
             if self.param.type == Parameter.Type.BOOL.value:
-                if type(self.value) != bool:
+                if isinstance(self.value, bool):
                     raise ValueError
             if self.param.type == Parameter.Type.FLOAT.value:
                 float(value)
