@@ -12,7 +12,7 @@ from submission_lib.manage import terminate_job
 from .authentication import *
 from .permissions import *
 from .serializers import *
-from .throttles import IPRateThrottle
+from .throttles import IPRateThrottle, UserBasedThrottle
 
 
 class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
@@ -25,7 +25,7 @@ class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     # serializer_class = TaskSerializer
-    throttle_classes = [IPRateThrottle]
+    throttle_classes = [IPRateThrottle, UserBasedThrottle]
     parser_classes = (FormParser, MultiPartParser)
     # TODO : Remove/ change the authentication classes
     authentication_classes = [api_settings.DEFAULT_AUTHENTICATION_CLASSES[0], BearerAuthentication]

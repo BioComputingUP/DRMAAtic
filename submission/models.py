@@ -19,6 +19,10 @@ class Admin(AbstractUser):
     def is_admin():
         return True
 
+    @property
+    def is_authenticated(self):
+        return True
+
 
 class Group(models.Model):
     name = models.CharField(max_length=50)
@@ -64,6 +68,10 @@ class User(models.Model):
 
     def is_admin(self):
         return self.group.has_full_access
+
+    @property
+    def is_authenticated(self):
+        return True
 
     @property
     def throttling_rate(self):

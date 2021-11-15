@@ -24,12 +24,16 @@ SECRET_KEY = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+CORS_ORIGIN_ALLOW_ALL = DEBUG
+
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
 INSTALLED_APPS = [
         'rest_framework',
+        'corsheaders',
+        'django_extensions',
         # 'rest_framework.authtoken',
         'django.contrib.admin',
         'django.contrib.auth',
@@ -43,6 +47,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -102,21 +107,6 @@ AUTH_PASSWORD_VALIDATORS = [
                 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
         },
 ]
-
-# Throttling
-# https://www.django-rest-framework.org/api-guide/throttling/
-
-# REST_FRAMEWORK = {
-#         'DEFAULT_THROTTLE_CLASSES': [
-#                 'submission.throttles.AnonRateThrottle',
-#                 'rest_framework.throttling.UserRateThrottle'
-#         ],
-#         'DEFAULT_THROTTLE_RATES': {
-#                 'anon': '1000/day',
-#                 'user': '1000/day'
-#         },
-#         'NUM_PROXIES' : 1
-# }
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

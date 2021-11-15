@@ -43,11 +43,12 @@ def get_params(user_param, task, parameters_of_task):
                 if param.type == Parameter.Type.FILE.value:
                     ext = get_extension(param.name, user_param[param.name].name)
                     p_task = get_ancestor(task)
-                    file_pth = os.path.join(BASE_DIR, "outputs/{}/{}.{}".format(p_task.uuid, param.name, ext))
+                    file_name = "{}.{}".format(param.name, ext)
+                    file_pth = os.path.join(BASE_DIR, "outputs/{}/{}".format(p_task.uuid, file_name))
                     with open(file_pth, "wb+") as f:
                         for chunk in user_param[param.name].chunks():
                             f.write(chunk)
-                    new_param = TaskParameter.objects.create(task=task, param=param, value=file_pth)
+                    new_param = TaskParameter.objects.create(task=task, param=param, value=file_name)
                 else:
                     new_param = TaskParameter.objects.create(task=task, param=param,
                                                              value=user_param[param.name])

@@ -39,7 +39,7 @@ class TaskParamAdminInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('id', 'task_name', 'status', 'creation_date', 'user')
+    list_display = ('uuid', 'task_name', 'status', 'creation_date', 'user')
     inlines = [TaskParamAdminInline]
 
 
