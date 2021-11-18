@@ -6,13 +6,12 @@ from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 
 from submission_lib.manage import terminate_job
 from .authentication import *
 from .permissions import *
 from .serializers import *
-from .throttles import IPRateThrottle, UserBasedThrottle
+from .throttles import *
 
 
 class ScriptViewSet(viewsets.ReadOnlyModelViewSet):

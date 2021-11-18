@@ -4,7 +4,7 @@ from rest_framework.throttling import AnonRateThrottle, BaseThrottle, SimpleRate
 
 
 class IPRateThrottle(AnonRateThrottle):
-    THROTTLE_RATES = {'anon': '10/day'}
+    THROTTLE_RATES = {'anon': '100/second'}
 
     def get_cache_key(self, request, view):
         if request.user is not None:

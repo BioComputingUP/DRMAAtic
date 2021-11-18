@@ -107,6 +107,7 @@ class Token(models.Model):
 class DRMJobTemplate(models.Model):
     class DRMQueue(models.Choices):
         LOCAL = "local"
+        SUPER = "super"
         # TODO: add the queues
 
     class DRMEmailType(models.Choices):

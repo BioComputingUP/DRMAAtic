@@ -39,6 +39,16 @@ class TaskParamAdminInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
+    list_filter = [
+            "task_name",
+            "status",
+            "user"
+    ]
+    search_fields = (
+            "task_name__name",
+            "user__username",
+    )
+
     list_display = ('uuid', 'task_name', 'status', 'creation_date', 'user')
     inlines = [TaskParamAdminInline]
 
@@ -63,6 +73,12 @@ class GroupAdmin(admin.ModelAdmin):
 # Register token in the admin web interface
 @admin.register(Token)
 class TokenAdmin(admin.ModelAdmin):
+    list_filter = [
+            "user__username",
+    ]
+    search_fields = [
+            "user__username",
+    ]
     # Define columns to show
     list_display = ('get_short_hash', 'get_user_source', 'get_user_name', 'created', 'expires')
     # Define readonly fields
