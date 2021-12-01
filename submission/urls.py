@@ -9,6 +9,7 @@ router = DefaultRouter()
 router.register(r'task', views.TaskViewSet)
 router.register(r'script', views.ScriptViewSet)
 router.register(r'params', views.ParamsViewSet)
+# router.register(r'user', views.UserViewSet)
 router.register(r'token', views.TokenViewSet, basename='Token')
 
 # Define file view

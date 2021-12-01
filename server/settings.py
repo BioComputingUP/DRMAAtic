@@ -13,7 +13,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# TODO: CHANGE THIS!!
+BASE_DIR = Path('/home/aledc/sftp/submission_ws').resolve()
+
+# Group for base users, which are automatically created upon request
+BASE_GROUP = 'base'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/

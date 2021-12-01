@@ -6,6 +6,7 @@ from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
 from submission_lib.manage import terminate_job
 from .authentication import *
@@ -41,9 +42,31 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def list(self, request, *args, **kwargs):
-        if request.user is not None:
-            queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset())
 
+        ids = request.query_params.get('ids', '')
+
+        # If ids are passed in query params
+        if len(ids) > 0:
+            ids = ids.split(',')
+
+            if request.user and request.user.is_admin():
+                queryset = queryset.filter(uuid__in=ids)
+            else:
+                queryset = queryset.filter(user=request.user, uuid__in=ids)
+
+            for task in queryset:
+                task.update_drm_status()
+
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+
+        elif request.user is not None:
             if not request.user.is_admin():
                 queryset = queryset.filter(user=request.user)
 
@@ -132,6 +155,12 @@ class TaskViewSet(viewsets.ModelViewSet):
 class ParamsViewSet(viewsets.ModelViewSet):
     queryset = Parameter.objects.all()
     serializer_class = ParameterSerializer
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = ExternalUserSerializer
+    lookup_field = "username"
 
 
 # Define token view

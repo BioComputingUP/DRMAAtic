@@ -9,8 +9,8 @@ from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
-from server.settings import SECRET_KEY
-from .models import Token, User
+from server.settings import BASE_GROUP, SECRET_KEY
+from .models import Group, Token, User
 
 
 # Extend token authentication in order to create Bearer authentication
@@ -119,7 +119,9 @@ class RemoteAuthentication(BearerAuthentication):
         username = request.parser_context.get('kwargs', {}).get('pk', '')
         # Define current user
         # NOTE might raise not-found exception
-        user = self.user.objects.get(username=username)
+        user, _ = self.user.objects.get_or_create(username=username,
+                                                  defaults={'source': User.ORCID, 'active': True,
+                                                            'group' : Group.objects.get(name=BASE_GROUP)})
         # Check that user is active
         if not user.active:
             # Just raise authentication error

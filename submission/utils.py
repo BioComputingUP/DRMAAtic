@@ -41,14 +41,24 @@ def get_params(user_param, task, parameters_of_task):
             # If the validation on the creation fails then the task (and all related param) will be deleted
             try:
                 if param.type == Parameter.Type.FILE.value:
-                    ext = get_extension(param.name, user_param[param.name].name)
-                    p_task = get_ancestor(task)
-                    file_name = "{}.{}".format(param.name, ext)
-                    file_pth = os.path.join(BASE_DIR, "outputs/{}/{}".format(p_task.uuid, file_name))
-                    with open(file_pth, "wb+") as f:
-                        for chunk in user_param[param.name].chunks():
-                            f.write(chunk)
-                    new_param = TaskParameter.objects.create(task=task, param=param, value=file_name)
+                    files = []
+                    num_files = len(user_param.getlist(param.name))
+                    for file_idx, file in enumerate(user_param.getlist(param.name)):
+                        ext = get_extension(param.name, file.name)
+                        p_task = get_ancestor(task)
+                        # If multiple files are passed on the same input name, then save them with different names
+                        if num_files > 1:
+                            file_name = "{}_{}.{}".format(param.name, file_idx, ext)
+                        else:
+                            file_name = "{}.{}".format(param.name, ext)
+                        files.append(file_name)
+                        file_pth = os.path.join(BASE_DIR, "outputs/{}/{}".format(p_task.uuid, file_name))
+                        with open(file_pth, "wb+") as f:
+                            for chunk in file.chunks():
+                                f.write(chunk)
+
+                    files = ','.join(files)
+                    new_param = TaskParameter.objects.create(task=task, param=param, value=files)
                 else:
                     new_param = TaskParameter.objects.create(task=task, param=param,
                                                              value=user_param[param.name])

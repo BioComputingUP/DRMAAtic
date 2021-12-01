@@ -1,7 +1,7 @@
 #!/bin/bash
 ###
 echo "I'm job array ${SLURM_ARRAY_TASK_ID}, hello!" >> output
-rnd=30
+rnd=10
 yes > /dev/null &
 ypid=$!
 sleep $rnd

@@ -26,10 +26,16 @@ class ParameterSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         user = getattr(self.context.get('request'), 'user', None)
-        if (instance.private and user is not None and user.is_admin()) or not instance.private:
+        if not instance.private:
             return super().to_representation(instance)
         else:
-            return None
+            try:
+                if user is not None and user.is_admin():
+                    return super().to_representation(instance)
+                else:
+                    return None
+            except AttributeError:
+                return None
 
     def validate(self, attrs):
         # Private and required cannot be set together
@@ -121,7 +127,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "parent_task", "status", "params"]
+        fields = ["uuid", "task_name", "parent_task", "creation_date", "status", "params"]
 
     def to_representation(self, instance):
         """
@@ -208,9 +214,11 @@ class SuperTaskSerializer(TaskSerializer):
 
 
 class ExternalUserSerializer(serializers.ModelSerializer):
+    is_admin = serializers.BooleanField(source="group.has_full_access")
+
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ["is_admin"]
 
 
 class InternalTokenSerializer(serializers.ModelSerializer):
