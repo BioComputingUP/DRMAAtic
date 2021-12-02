@@ -1,3 +1,4 @@
+import json
 import os
 import zipfile
 from pathlib import Path
@@ -34,6 +35,9 @@ def get_extension(param_name, file_name):
 
 def get_params(user_param, task, parameters_of_task):
     created_params = set()
+    renamed_files = dict()
+
+    p_task = get_ancestor(task)
     for param in parameters_of_task:
         param = Parameter.objects.get(script=task.task_name, name=param.name)
         # Param not private and user has set it
@@ -45,12 +49,15 @@ def get_params(user_param, task, parameters_of_task):
                     num_files = len(user_param.getlist(param.name))
                     for file_idx, file in enumerate(user_param.getlist(param.name)):
                         ext = get_extension(param.name, file.name)
-                        p_task = get_ancestor(task)
                         # If multiple files are passed on the same input name, then save them with different names
                         if num_files > 1:
                             file_name = "{}_{}.{}".format(param.name, file_idx, ext)
                         else:
                             file_name = "{}.{}".format(param.name, ext)
+
+                        # Save original file name and new file name to a dict
+                        renamed_files.setdefault(file_name, file.name)
+                        # Manage multiple files for a single parameter
                         files.append(file_name)
                         file_pth = os.path.join(BASE_DIR, "outputs/{}/{}".format(p_task.uuid, file_name))
                         with open(file_pth, "wb+") as f:
@@ -75,6 +82,11 @@ def get_params(user_param, task, parameters_of_task):
         elif param.private:
             new_param = TaskParameter.objects.create(task=task, param=param, value=param.default)
             created_params.add(new_param)
+
+    # Write in a file all the association between new file name and original file name, if files are passed
+    with open(os.path.join(BASE_DIR, "outputs/{}/{}".format(p_task.uuid, "files.json")), 'a') as f:
+        json.dump(renamed_files, f)
+
     return created_params
 
 
