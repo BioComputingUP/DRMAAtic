@@ -164,7 +164,7 @@ def get_freq(obj, interchain=False, intrachain=False) -> Dict[str, Dict[Edge, fl
     conn_freq = dict()
     for inter in intTypeMap.keys():
         conn_freq.setdefault(inter, dict())
-        with open("/tmp/ring/md/{}.gfreq_{}".format(obj, inter), 'r') as f:
+        with open("md/{}.gfreq_{}".format(obj, inter), 'r') as f:
             for line in f:
                 node1, _, node2, perc = line.split('\t')
                 node1 = Node(node1)
@@ -186,7 +186,12 @@ def export_network_graph(model='input_file'):
     # Add the nodes to the graph
     is_md = "md" in os.listdir('.')
 
-    file_pth = model + ".cif_ringNodes"
+    if "input_file.cif_ringNodes" in os.listdir("."):
+        ext = "cif"
+    else:
+        ext = "pdb"
+
+    file_pth = model + ".{}_ringNodes".format(ext)
     df = pd.read_csv(file_pth, sep='\t')
     if len(df) == 0:
         return IndexError
@@ -197,7 +202,7 @@ def export_network_graph(model='input_file'):
         G.add_node(node, degree=round(degree, 3), chain=node.chain, resi=node.resi, resn=node.resn)
 
     # Add the edges to the graph
-    file_pth = model + ".cif_ringEdges"
+    file_pth = model + ".{}_ringEdges".format(ext)
     df = pd.read_csv(file_pth, sep='\t')
 
     distance_dict = dict()
@@ -210,6 +215,7 @@ def export_network_graph(model='input_file'):
         edge = Edge(node1, node2)
         distance_dict.setdefault(intType, dict()).setdefault(edge, distance)
 
+    conn_freq = dict()
     if is_md:
         conn_freq = get_freq(model)
 

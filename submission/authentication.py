@@ -4,6 +4,7 @@ import jwt
 import requests
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from jwt import ExpiredSignatureError
 from pytimeparse.timeparse import timeparse
 from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
@@ -63,7 +64,10 @@ class BearerAuthentication(BaseAuthentication):
         # Retrieve token out of hash
         token = token_class.objects.get(hash=hash)
         # Decode payload from token
-        payload = jwt.decode(hash, self.secret, algorithms=['HS256', ])
+        try:
+            payload = jwt.decode(hash, self.secret, algorithms=['HS256', ])
+        except ExpiredSignatureError:
+            raise AuthenticationFailed(_('Authentication token expired'))
         # # Retrieve user out payload
         # user = User.objects.get(id=payload.get('iss', ''))
         # Case retrieved user is not allowed
