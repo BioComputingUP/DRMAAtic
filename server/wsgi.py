@@ -14,7 +14,6 @@ os.environ['DJANGO_CSRF_COOKIE_SECURE'] = 'False'
 os.environ['DJANGO_SESSION_COOKIE_SECURE'] = 'False'
 
 # os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "['https://scheduler.biocomputingup.it']"
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
 
 application = get_wsgi_application()
