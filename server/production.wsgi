@@ -12,7 +12,7 @@ os.environ['DJANGO_CORS_ORIGIN_ALLOW_ALL'] = 'False'
 # HTTPS flags
 os.environ['DJANGO_CSRF_COOKIE_SECURE'] = 'True'
 os.environ['DJANGO_SESSION_COOKIE_SECURE'] = 'True'
-os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "['https://scheduler.biocomputingup.it']"
+os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "https://scheduler.biocomputingup.it"
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
 
