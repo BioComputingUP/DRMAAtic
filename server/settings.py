@@ -13,16 +13,15 @@ os.environ.setdefault("DRMAA_LIBRARY_PATH", "/usr/lib/slurm-drmaa/libdrmaa.so")
 # Group for base users, which are automatically created upon request
 BASE_GROUP = 'base'
 
-SECRET_KEY = env.str('DJANGO_SECRET_KEY', '6e4ee5f46b1606b0819d6b4d78a4d78935538a00e1badddb85db3cb9083d165a73e6be5ebd8d620621e4ecccb3f339e66d7787c5a9eb0f692d00862e5ad167113468734036b836292e3bdbb2db9cdb678960ca447a45cf52f463d25ddabdfdfe48579b45')
+SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DJANGO_DEBUG', False)
-
-CORS_ORIGIN_ALLOW_ALL = env.bool('DJANGO_CORS_ORIGIN_ALLOW_ALL', DEBUG)
+DEBUG = env.bool('DJANGO_DEBUG', True)
+CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 # HTTPS flags
-CSRF_COOKIE_SECURE = env.bool('DJANGO_CSRF_COOKIE_SECURE', True)
-SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', True)
+CSRF_COOKIE_SECURE = env.bool('DJANGO_CSRF_COOKIE_SECURE', False)
+SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', False)
 CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', [])
 
 ALLOWED_HOSTS = ['*']
