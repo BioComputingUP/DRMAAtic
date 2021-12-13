@@ -13,6 +13,7 @@ os.environ['DJANGO_CORS_ORIGIN_ALLOW_ALL'] = 'False'
 os.environ['DJANGO_CSRF_COOKIE_SECURE'] = 'True'
 os.environ['DJANGO_SESSION_COOKIE_SECURE'] = 'True'
 os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "https://scheduler.biocomputingup.it"
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
 
 application = get_wsgi_application()
