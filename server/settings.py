@@ -19,6 +19,10 @@ SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv
 DEBUG = env.bool('DJANGO_DEBUG', True)
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
+CORS_ALLOWED_ORIGINS = [
+        'http://localhost:4200',
+]
+
 # HTTPS flags
 CSRF_COOKIE_SECURE = env.bool('DJANGO_CSRF_COOKIE_SECURE', False)
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', False)
