@@ -8,4 +8,4 @@ CORS_ORIGIN_ALLOW_ALL = DEBUG
 # HTTPS flags
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = ['https://scheduler.biocomputingup.it']
+CSRF_TRUSTED_ORIGINS = ['https://dev.scheduler.biocomputingup.it']
