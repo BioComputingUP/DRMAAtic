@@ -20,7 +20,7 @@ DEBUG = env.bool('DJANGO_DEBUG', True)
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 CORS_ALLOWED_ORIGINS = [
-        'http://localhost:4200',
+        'http://147.162.172.249:4200',
 ]
 
 # HTTPS flags
