@@ -1,3 +1,5 @@
+# USE ONLY FOR LOCAL TESTING
+
 import os
 
 from django.core.wsgi import get_wsgi_application
