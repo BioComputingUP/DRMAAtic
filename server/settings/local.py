@@ -1,5 +1,3 @@
-from .base import *
-
 SECRET_KEY = '21247137661a2c17846ce0a42b201c32aa2eccd4eb193236283f7c563427836a063a9ee5bb3ca76471d4c4aabdcb273aaa3642d9837f9ea01c3d2e30304bdd980fe4fe97e2672650cb27d275840f364d249c6d876f001a9b8a9dc9737304cabd552d750b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
