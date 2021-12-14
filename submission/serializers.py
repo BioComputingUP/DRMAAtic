@@ -164,7 +164,7 @@ class TaskSerializer(serializers.ModelSerializer):
                                    parent_task=parent_task)
 
         if task.parent_task is None:
-            create_task_folder(task.uuid)
+            create_task_folder(str(task.uuid))
 
         parameters_of_task = Parameter.objects.filter(script=task.task_name)
 
