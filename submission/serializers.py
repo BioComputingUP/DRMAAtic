@@ -2,6 +2,7 @@ import logging
 
 from rest_framework.fields import ReadOnlyField
 
+from server.settings import SUBMISSION_OUTPUT_DIR, SUBMISSION_SCRIPT_DIR
 from submission_lib.manage import start_job
 from .models import *
 from .utils import *
