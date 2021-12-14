@@ -116,7 +116,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         if task.has_finished():
             p_task = get_ancestor(task)
 
-            zip_file = os.path.join(BASE_DIR, "downloads/{}.zip".format(p_task.uuid, p_task.uuid))
+            zip_file = os.path.join(SUBMISSION_OUTPUT_DIR, p_task.uuid, "downloads/{}.zip".format(p_task.uuid))
             file_handle = open(zip_file, "rb")
 
             mimetype, _ = mimetypes.guess_type(zip_file)
@@ -134,7 +134,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         p_task = get_ancestor(task)
 
-        root = os.path.join(BASE_DIR, "outputs/{}/".format(p_task.uuid))
+        root = os.path.join(SUBMISSION_OUTPUT_DIR, p_task.uuid)
         files = [os.path.join(dp.replace(root, ''), f) for dp, dn, fn in os.walk(root) for f in fn]
 
         if path:

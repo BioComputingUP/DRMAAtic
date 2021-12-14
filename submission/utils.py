@@ -7,7 +7,7 @@ from typing import Union
 from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
 
-from server.settings import BASE_DIR
+from server.settings import SUBMISSION_OUTPUT_DIR
 from .models import Parameter, Task, TaskParameter
 
 
@@ -59,7 +59,7 @@ def get_params(user_param, task, parameters_of_task):
                         renamed_files.setdefault(file_name, file.name)
                         # Manage multiple files for a single parameter
                         files.append(file_name)
-                        file_pth = os.path.join(BASE_DIR, "outputs/{}/{}".format(p_task.uuid, file_name))
+                        file_pth = os.path.join(SUBMISSION_OUTPUT_DIR, p_task.uuid, file_name)
                         with open(file_pth, "wb+") as f:
                             for chunk in file.chunks():
                                 f.write(chunk)
@@ -84,7 +84,7 @@ def get_params(user_param, task, parameters_of_task):
             created_params.add(new_param)
 
     # Write in a file all the association between new file name and original file name, if files are passed
-    with open(os.path.join(BASE_DIR, "outputs/{}/{}".format(p_task.uuid, "files.json")), 'a') as f:
+    with open(os.path.join(SUBMISSION_OUTPUT_DIR, p_task.uuid, "files.json"), 'a') as f:
         json.dump(renamed_files, f)
 
     return created_params
@@ -92,7 +92,7 @@ def get_params(user_param, task, parameters_of_task):
 
 def create_task_folder(wd):
     # TODO : Change base path
-    os.makedirs(os.path.join(BASE_DIR, "outputs/{}".format(str(wd))), exist_ok=True)
+    os.makedirs(os.path.join(SUBMISSION_OUTPUT_DIR, wd), exist_ok=True)
 
 
 def zip_dir(dir_pth: Union[Path, str], filename: Union[Path, str]):
