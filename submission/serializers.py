@@ -176,8 +176,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
         j_id, name = start_job(**drm_params,
                                task_name=task.task_name.name,
-                               script_dir=os.path.join(BASE_DIR, "scripts/"),
-                               out_dir=os.path.join(BASE_DIR, "outputs/"),
+                               script_dir=SUBMISSION_SCRIPT_DIR,
+                               out_dir=SUBMISSION_OUTPUT_DIR,
                                command=task.task_name.command,
                                script_args=formatted_params,
                                working_dir=p_task.uuid,

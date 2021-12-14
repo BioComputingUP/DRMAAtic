@@ -14,6 +14,10 @@ os.environ['DJANGO_CSRF_COOKIE_SECURE'] = 'True'
 os.environ['DJANGO_SESSION_COOKIE_SECURE'] = 'True'
 os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "https://scheduler.biocomputingup.it"
 
+# SUBMISSION FOLDERS
+os.environ['SUBMISSION_SCRIPT_DIR'] = '/home/django/scripts'
+os.environ['SUBMISSION_OUTPUT_DIR'] = '/home/django/outputs'
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
 
 application = get_wsgi_application()

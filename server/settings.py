@@ -30,6 +30,10 @@ CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', [])
 
 ALLOWED_HOSTS = ['*']
 
+# SUBMISSION APP FOLDERS
+SUBMISSION_SCRIPT_DIR = env.str('SUBMISSION_SCRIPT_DIR', os.path.join(BASE_DIR, "scripts/"))
+SUBMISSION_OUTPUT_DIR = env.str('SUBMISSION_OUTPUT_DIR', os.path.join(BASE_DIR, "outputs/"))
+
 # Application definition
 
 INSTALLED_APPS = [
