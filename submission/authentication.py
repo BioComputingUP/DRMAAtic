@@ -145,7 +145,7 @@ class RemoteAuthentication(BearerAuthentication):
         # Case keyword does not match expected one
         if keyword != self.keyword.encode():
             # Just raise authentication error
-            print(header)
+            print(request.META)
             raise AuthenticationFailed(_('Authentication header is not valid'))
         # Define authentication endpoint (user username a s orcid ID)
         url = self.url.format(user.username)
