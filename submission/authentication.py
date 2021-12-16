@@ -113,8 +113,7 @@ class RemoteAuthentication(BearerAuthentication):
             # Return both user and token
             return user, token
         # Catch any exception
-        except Exception as error:
-            print(error)
+        except Exception:
             # Substitute with authentication exception
             raise AuthenticationFailed(_('Could not authenticate user'))
 

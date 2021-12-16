@@ -21,6 +21,7 @@ CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 CORS_ALLOWED_ORIGINS = [
         'http://localhost:4200',
+        'https://ring.biocomputingup.it/',
 ]
 
 # HTTPS flags
