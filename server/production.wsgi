@@ -19,7 +19,7 @@ os.environ['SUBMISSION_SCRIPT_DIR'] = '/home/django/scripts'
 os.environ['SUBMISSION_OUTPUT_DIR'] = '/home/django/outputs'
 
 # ORCID AUTHENTICATION
-os.environ['ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production
+os.environ['SUBMISSION_ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
 
