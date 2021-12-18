@@ -114,8 +114,9 @@ class RemoteAuthentication(BearerAuthentication):
             # Return both user and token
             return user, token
         # Catch any exception
-        except Exception:
+        except Exception as error:
             # Substitute with authentication exception
+            print(error)
             raise AuthenticationFailed(_('Could not authenticate user'))
 
     # Authenticate user
@@ -149,7 +150,7 @@ class RemoteAuthentication(BearerAuthentication):
             print(request.META)
             raise AuthenticationFailed(_('Authentication header is not valid'))
         # Define authentication endpoint (user username a s orcid ID)
-        url = self.url.format(keyword)
+        url = self.url.format(user.username)
         # Make a request against authorization URL
         response = requests.get(url, {**self.header, keyword: secret}, **self.request)
         print("response", response)
