@@ -152,7 +152,7 @@ class RemoteAuthentication(BearerAuthentication):
         url = self.url.format(user.username)
         # Make a request against authorization URL
         response = requests.get(url, {**self.header, keyword: secret}, **self.request)
-	print("response", response)
+        print("response", response)
         # Case response return 200 OK
         if not status.is_success(response.status_code):
             # Just raise authentication error
