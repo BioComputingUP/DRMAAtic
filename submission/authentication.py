@@ -138,6 +138,7 @@ class RemoteAuthentication(BearerAuthentication):
     def authenticate_token(self, request, user=None):
         # Split authentication binary header (token key, value)
         header = get_authorization_header(request).split()
+        print("header", header)
         # Retrieve authentication key
         keyword = header[0] if len(header) > 0 else None
         # Retrieve authentication token
@@ -151,6 +152,7 @@ class RemoteAuthentication(BearerAuthentication):
         url = self.url.format(user.username)
         # Make a request against authorization URL
         response = requests.get(url, {**self.header, keyword: secret}, **self.request)
+	print("response", response)
         # Case response return 200 OK
         if not status.is_success(response.status_code):
             # Just raise authentication error
