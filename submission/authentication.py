@@ -83,7 +83,7 @@ class RemoteAuthentication(BearerAuthentication):
     # Define URL to remote service
     # url = r'https://orcid.org/v3.0/{0:s}/record'  # Production
     # url = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'  # Development
-    ulr = ORCID_AUTH_URL
+    url = ORCID_AUTH_URL
     # Define header
     header = {
             'Content-Type': 'application/json',
@@ -114,9 +114,8 @@ class RemoteAuthentication(BearerAuthentication):
             # Return both user and token
             return user, token
         # Catch any exception
-        except Exception as error:
+        except Exception:
             # Substitute with authentication exception
-            print(error)
             raise AuthenticationFailed(_('Could not authenticate user'))
 
     # Authenticate user
@@ -139,7 +138,6 @@ class RemoteAuthentication(BearerAuthentication):
     def authenticate_token(self, request, user=None):
         # Split authentication binary header (token key, value)
         header = get_authorization_header(request).split()
-        print("header", header)
         # Retrieve authentication key
         keyword = header[0] if len(header) > 0 else None
         # Retrieve authentication token
@@ -147,13 +145,11 @@ class RemoteAuthentication(BearerAuthentication):
         # Case keyword does not match expected one
         if keyword != self.keyword.encode():
             # Just raise authentication error
-            print(request.META)
             raise AuthenticationFailed(_('Authentication header is not valid'))
         # Define authentication endpoint (user username a s orcid ID)
         url = self.url.format(user.username)
         # Make a request against authorization URL
         response = requests.get(url, {**self.header, keyword: secret}, **self.request)
-        print("response", response)
         # Case response return 200 OK
         if not status.is_success(response.status_code):
             # Just raise authentication error
