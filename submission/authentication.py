@@ -149,7 +149,7 @@ class RemoteAuthentication(BearerAuthentication):
             print(request.META)
             raise AuthenticationFailed(_('Authentication header is not valid'))
         # Define authentication endpoint (user username a s orcid ID)
-        url = self.url.format(user.username)
+        url = self.url.format(keyword)
         # Make a request against authorization URL
         response = requests.get(url, {**self.header, keyword: secret}, **self.request)
         print("response", response)
