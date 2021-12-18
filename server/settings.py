@@ -35,6 +35,9 @@ ALLOWED_HOSTS = ['*']
 SUBMISSION_SCRIPT_DIR = env.str('SUBMISSION_SCRIPT_DIR', os.path.join(BASE_DIR, "scripts/"))
 SUBMISSION_OUTPUT_DIR = env.str('SUBMISSION_OUTPUT_DIR', os.path.join(BASE_DIR, "outputs/"))
 
+# ORCID AUTHENTICATION
+ORCID_AUTH_URL = env.str('SUBMISSION_ORCID_AUTH_URL', r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record')  # Development
+
 # Application definition
 
 INSTALLED_APPS = [

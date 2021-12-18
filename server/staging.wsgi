@@ -18,6 +18,9 @@ os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "['https://dev.scheduler.biocomputin
 os.environ['SUBMISSION_SCRIPT_DIR'] = '/home/django/scripts'
 os.environ['SUBMISSION_OUTPUT_DIR'] = '/home/django/outputs'
 
+# ORCID AUTH
+os.environ['ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
 
 application = get_wsgi_application()

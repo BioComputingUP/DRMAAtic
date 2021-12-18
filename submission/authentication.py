@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
-from server.settings import BASE_GROUP, SECRET_KEY
+from server.settings import BASE_GROUP, SECRET_KEY, ORCID_AUTH_URL
 from .models import Group, Token, User
 
 
@@ -82,7 +82,8 @@ class BearerAuthentication(BaseAuthentication):
 class RemoteAuthentication(BearerAuthentication):
     # Define URL to remote service
     # url = r'https://orcid.org/v3.0/{0:s}/record'  # Production
-    url = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'  # Development
+    # url = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'  # Development
+    ulr = ORCID_AUTH_URL
     # Define header
     header = {
             'Content-Type': 'application/json',
