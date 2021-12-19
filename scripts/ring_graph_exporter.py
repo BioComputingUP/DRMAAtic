@@ -1,7 +1,7 @@
 import json
 import os
 from json import JSONEncoder
-from typing import Dict, List, Union
+from typing import List, Union
 
 import networkx as nx
 import pandas as pd
@@ -13,16 +13,6 @@ def _default(self, obj):
 
 _default.default = JSONEncoder().default
 JSONEncoder.default = _default
-
-intTypeMap = {
-        "IONIC"    : (0.0, 0.0, 1.0),
-        "SSBOND"   : (1.0, 1.0, 0.0),
-        "PIPISTACK": (1.0, 0.5, 0.0),
-        "PICATION" : (1.0, 0.0, 0.0),
-        "HBOND"    : (0.0, 1.0, 1.0),
-        "VDW"      : (0.5050504803657532, 0.5050504803657532, 0.5050504803657532),
-        "IAC"      : (1.0, 1.0, 1.0)
-}
 
 
 class Node:
@@ -160,37 +150,16 @@ class Edge:
         return hash((self.node1, self.node2))
 
 
-def get_freq(obj, interchain=False, intrachain=False) -> Dict[str, Dict[Edge, float]]:
-    conn_freq = dict()
-    for inter in intTypeMap.keys():
-        conn_freq.setdefault(inter, dict())
-        with open("md/{}.gfreq_{}".format(obj, inter), 'r') as f:
-            for line in f:
-                node1, _, node2, perc = line.split('\t')
-                node1 = Node(node1)
-                node2 = Node(node2)
-                edge = Edge(node1, node2)
-
-                if intrachain and node1.chain != node2.chain:
-                    continue
-                if interchain and node1.chain == node2.chain:
-                    continue
-
-                conn_freq[inter].setdefault(edge, float(perc))
-    return conn_freq
-
-
-def export_network_graph(model='input_file'):
+def produce_graph(model='input_file'):
     G = nx.MultiGraph()
 
     # Add the nodes to the graph
-    is_md = "md" in os.listdir('.')
-
     if "input_file.cif_ringNodes" in os.listdir("."):
         ext = "cif"
     else:
         ext = "pdb"
 
+    # Add nodes to the graph
     file_pth = model + ".{}_ringNodes".format(ext)
     df = pd.read_csv(file_pth, sep='\t')
     if len(df) == 0:
@@ -201,41 +170,29 @@ def export_network_graph(model='input_file'):
         node = Node(nodeId)
         G.add_node(node, degree=round(degree, 3), chain=node.chain, resi=node.resi, resn=node.resn)
 
-    # Add the edges to the graph
+    # Now edges
     file_pth = model + ".{}_ringEdges".format(ext)
     df = pd.read_csv(file_pth, sep='\t')
 
-    distance_dict = dict()
-    mean_distance = df.groupby(['NodeId1', 'NodeId2', 'Interaction']).mean()
-    for (nodeId, distance, *_) in mean_distance.itertuples(index=True, name='Distance'):
-        nodeId1, nodeId2, interaction = nodeId
-        intType = interaction.split(":")[0]
+    max_model = df["Model"].max()
+    # Remove useless interaction informations
+    df["Interaction"] = df["Interaction"].map(lambda x: x.split(':')[0])
+    # Remove coordinates from atom columns
+    df = df.replace({'Atom1': r'[^A-Z]*', 'Atom2': r'[^A-Z]*'}, {'Atom1': '', 'Atom2': ''}, regex=True)
+    group = df.groupby(['NodeId1', 'NodeId2', 'Interaction', 'Atom1', 'Atom2']).mean()
+    # Get the frequency for that contact
+    group["Model"] = group["Model"] / max_model
+
+    for (ids, distance, _, energy, _, frequency) in group.itertuples(index=True):
+        nodeId1, nodeId2, interaction, atom1, atom2 = ids
         node1 = Node(nodeId1)
         node2 = Node(nodeId2)
-        edge = Edge(node1, node2)
-        distance_dict.setdefault(intType, dict()).setdefault(edge, distance)
-
-    conn_freq = dict()
-    if is_md:
-        conn_freq = get_freq(model)
-
-    sawn = set()
-    df = df.groupby(["NodeId1", "Interaction", "NodeId2"]).sum()
-    for (ids, *_) in df.itertuples(index=True):
-        nodeId1, interaction, nodeId2 = ids
-        intType = interaction.split(":")[0]
-        node1 = Node(nodeId1)
-        node2 = Node(nodeId2)
-        edge = Edge(node1, node2)
-        key = (edge, intType)
-        if key not in sawn:
-            G.add_edge(node1, node2, interaction=intType, frequency=round(conn_freq[intType][edge], 3) if is_md else 1,
-                       distance=round(distance_dict[intType][edge], 3))
-            sawn.add(key)
+        G.add_edge(node1, node2, interaction=interaction, frequency=round(frequency, 3),
+                   distance=round(distance, 3), atom1=atom1, atom2=atom2)
 
     with open("{}.json".format(model), 'w+') as f:
         json.dump(nx.cytoscape_data(G), f)
 
 
 if __name__ == '__main__':
-    export_network_graph()
+    produce_graph(model='input_file')
