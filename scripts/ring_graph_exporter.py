@@ -181,13 +181,13 @@ def produce_graph(model='input_file'):
     df = df.replace({'Atom1': r'[^A-Z]*', 'Atom2': r'[^A-Z]*'}, {'Atom1': '', 'Atom2': ''}, regex=True)
     group = df.groupby(['NodeId1', 'NodeId2', 'Interaction', 'Atom1', 'Atom2']).mean()
     # Get the frequency for that contact
-    group["Model"] = group["Model"] / max_model
+    group['Frequency'] = df.groupby(['NodeId1', 'NodeId2', 'Interaction', 'Atom1', 'Atom2']).count()["Model"] / max_model
 
-    for (ids, distance, _, energy, _, frequency) in group.itertuples(index=True):
+    for (ids, distance, _, energy, _, _, frequency) in group.itertuples(index=True):
         nodeId1, nodeId2, interaction, atom1, atom2 = ids
         node1 = Node(nodeId1)
         node2 = Node(nodeId2)
-        G.add_edge(node1, node2, interaction=interaction, frequency=round(frequency, 3),
+        G.add_edge(node1, node2, interaction=interaction, frequency=round(frequency, 3), energy=round(energy, 3),
                    distance=round(distance, 3), atom1=atom1, atom2=atom2)
 
     with open("{}.json".format(model), 'w+') as f:
