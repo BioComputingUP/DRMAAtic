@@ -2,7 +2,7 @@ import logging
 
 from rest_framework.fields import ReadOnlyField
 
-from server.settings import SUBMISSION_OUTPUT_DIR, SUBMISSION_SCRIPT_DIR
+from server.settings import SUBMISSION_SCRIPT_DIR
 from submission_lib.manage import start_job
 from .models import *
 from .utils import *
@@ -162,6 +162,8 @@ class TaskSerializer(serializers.ModelSerializer):
         # Create the task with the name
         task = Task.objects.create(task_name=validated_data["task_name"], user=validated_data.get("user"),
                                    parent_task=parent_task)
+
+        log_ip(logger, self.context.get('request'))
 
         if task.parent_task is None:
             create_task_folder(str(task.uuid))
