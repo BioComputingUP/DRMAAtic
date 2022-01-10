@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import zipfile
 from pathlib import Path
@@ -10,6 +11,8 @@ from rest_framework.settings import api_settings
 
 from server.settings import SUBMISSION_OUTPUT_DIR
 from .models import Parameter, Task, TaskParameter
+
+logger = logging.getLogger(__name__)
 
 
 def format_task_params(passed_params):
@@ -112,7 +115,7 @@ def get_ancestor(task: Task):
     return task
 
 
-def log_ip(logger, request):
+def log_ip(request):
     def get_ident(req):
         """
         Identify the machine making the request by parsing HTTP_X_FORWARDED_FOR
