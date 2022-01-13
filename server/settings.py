@@ -23,7 +23,7 @@ CORS_ALLOWED_ORIGINS = [
         'http://localhost:4200',
         'http://localhost:4205',
         'https://ring.biocomputingup.it/',
-        'https://dev.proteinensable.org/',
+        'https://dev.proteinensemble.org/',
         'https://assessment.proteinsemble.org/',
 ]
 
