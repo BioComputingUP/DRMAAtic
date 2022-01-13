@@ -138,7 +138,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         p_task = get_ancestor(task)
 
         root = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid))
-        files = [os.path.join(dp.replace(root, ''), f) for dp, dn, fn in os.walk(root) for f in fn]
+        files = [os.path.join(dp.replace(root, ''), f).lstrip('/') for dp, dn, fn in os.walk(root) for f in fn]
 
         logger.info("file path is " + path)
         if path:
