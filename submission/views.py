@@ -136,7 +136,8 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         root = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid))
         files = [os.path.join(dp.replace(root, ''), f) for dp, dn, fn in os.walk(root) for f in fn]
-
+        
+        path = path.lstrip('/')
         if path:
             if path in files:
                 file = os.path.join(root, path)
