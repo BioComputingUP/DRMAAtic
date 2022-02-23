@@ -1,14 +1,13 @@
 import mimetypes
 import os.path
-import logging
 
 from django.http import FileResponse
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 
+from server.settings import SUBMISSION_DOWNLOAD_DIR
 from submission_lib.manage import terminate_job
 from .authentication import *
 from .permissions import *
@@ -119,7 +118,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         if task.has_finished():
             p_task = get_ancestor(task)
 
-            zip_file = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid), "downloads/{}.zip".format(p_task.uuid))
+            zip_file = os.path.join(SUBMISSION_DOWNLOAD_DIR, "{}.zip".format(p_task.uuid))
             file_handle = open(zip_file, "rb")
 
             mimetype, _ = mimetypes.guess_type(zip_file)

@@ -22,9 +22,9 @@ CORS_ORIGIN_ALLOW_ALL = DEBUG
 CORS_ALLOWED_ORIGINS = [
         'http://localhost:4200',
         'http://localhost:4205',
-        'https://ring.biocomputingup.it/',
-        'https://dev.proteinensemble.org/',
-        'https://assessment.proteinsemble.org/',
+        'https://ring.biocomputingup.it',
+        'https://dev.proteinensemble.org',
+        'https://assessment.proteinsemble.org',
 ]
 
 # HTTPS flags
@@ -37,6 +37,9 @@ ALLOWED_HOSTS = ['*']
 # SUBMISSION APP FOLDERS
 SUBMISSION_SCRIPT_DIR = env.str('SUBMISSION_SCRIPT_DIR', os.path.join(BASE_DIR, "scripts/"))
 SUBMISSION_OUTPUT_DIR = env.str('SUBMISSION_OUTPUT_DIR', os.path.join(BASE_DIR, "outputs/"))
+SUBMISSION_DOWNLOAD_DIR = env.str('SUBMISSION_DOWNLOADS_DIR', os.path.join(BASE_DIR, "downloads/"))
+
+SUBMISSION_LOGGER_PTH = env.str('SUBMISSION_LOGGER_PTH', os.path.join(BASE_DIR, "logger.log"))
 
 # ORCID AUTHENTICATION
 ORCID_AUTH_URL = env.str('SUBMISSION_ORCID_AUTH_URL', r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record')  # Development

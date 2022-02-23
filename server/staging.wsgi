@@ -15,8 +15,11 @@ os.environ['DJANGO_SESSION_COOKIE_SECURE'] = 'True'
 os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "['https://dev.scheduler.biocomputingup.it']"
 
 # SUBMISSION FOLDERS
-os.environ['SUBMISSION_SCRIPT_DIR'] = '/home/django/scripts'
-os.environ['SUBMISSION_OUTPUT_DIR'] = '/home/django/outputs'
+os.environ['SUBMISSION_SCRIPT_DIR'] = '/var/django/jobs/scheduler/scripts'
+os.environ['SUBMISSION_OUTPUT_DIR'] = '/var/django/jobs/scheduler/outputs'
+os.environ['SUBMISSION_DOWNLOADS_DIR'] = '/var/django/jobs/scheduler/downloads'
+
+os.environ['SUBMISSION_LOGGER_PTH'] = '/var/django/logs/scheduler/scheduler.log'
 
 # ORCID AUTH
 os.environ['SUBMISSION_ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production
