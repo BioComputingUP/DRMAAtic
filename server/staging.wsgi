@@ -7,19 +7,19 @@ os.environ['DJANGO_SECRET_KEY'] = 'f81998978f1ff1aa6ead635a63b9070df709789476867
 # SECURITY WARNING: don't run with debug turned on in production!
 os.environ['DJANGO_DEBUG'] = 'True'
 
-os.environ['DJANGO_CORS_ORIGIN_ALLOW_ALL'] = 'True'
+os.environ['DJANGO_CORS_ORIGIN_ALLOW_ALL'] = 'False'
 
 # HTTPS flags
 os.environ['DJANGO_CSRF_COOKIE_SECURE'] = 'True'
 os.environ['DJANGO_SESSION_COOKIE_SECURE'] = 'True'
-os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "['https://dev.scheduler.biocomputingup.it']"
+os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = 'https://dev.scheduler.biocomputingup.it'
 
 # SUBMISSION FOLDERS
-os.environ['SUBMISSION_SCRIPT_DIR'] = '/var/django/jobs/scheduler/scripts'
-os.environ['SUBMISSION_OUTPUT_DIR'] = '/var/django/jobs/scheduler/outputs'
-os.environ['SUBMISSION_DOWNLOADS_DIR'] = '/var/django/jobs/scheduler/downloads'
+os.environ['SUBMISSION_SCRIPT_DIR'] = '/var/local/webservers/jobs/scheduler-dev/scripts'
+os.environ['SUBMISSION_OUTPUT_DIR'] = '/var/local/webservers/jobs/scheduler-dev/outputs'
+os.environ['SUBMISSION_DOWNLOADS_DIR'] = '/var/local/webservers/jobs/scheduler-dev/downloads'
 
-os.environ['SUBMISSION_LOGGER_PTH'] = '/var/django/logs/scheduler/scheduler.log'
+os.environ['SUBMISSION_LOGGER_PTH'] = '/var/local/webservers/logs/scheduler-dev/scheduler-dev.log'
 
 # ORCID AUTH
 os.environ['SUBMISSION_ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production
