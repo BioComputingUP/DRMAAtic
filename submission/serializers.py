@@ -1,5 +1,3 @@
-import logging
-
 from rest_framework.fields import ReadOnlyField
 
 from server.settings import SUBMISSION_SCRIPT_DIR
@@ -162,7 +160,7 @@ class TaskSerializer(serializers.ModelSerializer):
         # Create the task with the name
         task = Task.objects.create(task_name=validated_data["task_name"], user=validated_data.get("user"),
                                    parent_task=parent_task)
-        
+
         log_ip(self.context.get('request'))
 
         if task.parent_task is None:
@@ -179,7 +177,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
         j_id, name = start_job(**drm_params,
                                task_name=task.task_name.name,
-                               script_dir=SUBMISSION_SCRIPT_DIR,
+                               # if the command is defined as absolute then do not add the submission script dir first
+                               script_dir='' if task.task_name.command[0] == '/' else SUBMISSION_SCRIPT_DIR,
                                out_dir=SUBMISSION_OUTPUT_DIR,
                                command=task.task_name.command,
                                script_args=formatted_params,

@@ -140,7 +140,7 @@ class Script(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False, unique=True)
     # Name of the command to execute (example.sh)
     # Link to the DRM job template that will run the script
-    command = models.CharField(max_length=100, null=False, blank=False)
+    command = models.CharField(max_length=500, null=False, blank=False)
     job = models.ForeignKey(DRMJobTemplate, on_delete=models.SET_NULL, null=True)
 
     is_array = models.BooleanField(default=False)
