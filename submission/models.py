@@ -211,6 +211,7 @@ class Task(models.Model):
         USER_SUSPENDED = "job is user suspended"
         DONE = "job finished normally"
         FAILED = "job finished, but failed"
+        DELETED = "job has been deleted"
 
     status = models.CharField(max_length=200, choices=Status.choices, blank=False, null=False, default=Status.RECEIVED)
     parent_task = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
@@ -219,12 +220,15 @@ class Task(models.Model):
     # TODO : Add a reference to the user whose submitted the job
 
     def has_finished(self):
-        return self.status in {self.Status.DONE.value, self.Status.FAILED.value}
+        return self.status in {self.Status.DONE.value, self.Status.FAILED.value, self.Status.DELETED.value}
 
     def update_drm_status(self):
         if self.drm_job_id is not None and not self.has_finished():
             self.status = get_job_status(str(self.drm_job_id))
             self.save()
+
+    def delete_from_user(self):
+        self.status = self.Status.DELETED
 
     def __str__(self):
         return "{} : {}".format(self.pk, self.task_name.name)

@@ -103,7 +103,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         """
         instance: Task = self.get_object()
 
-        terminate_job(instance.drm_job_id)
+        if not instance.has_finished():
+            terminate_job(instance.drm_job_id)
+
+        instance.delete_from_user()
 
         # The task is not removed from the ws nor from the database
         # self.perform_destroy(instance)
