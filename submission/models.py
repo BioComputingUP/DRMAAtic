@@ -191,6 +191,9 @@ class Parameter(models.Model):
 class Task(models.Model):
     # The name of the task should be one of the script names
     task_name = models.ForeignKey(Script, to_field="name", on_delete=models.CASCADE, null=False)
+    # Custom name that can be given to the task by the user
+    task_description = models.CharField(default=None, blank=True, max_length=200, null=True)
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 

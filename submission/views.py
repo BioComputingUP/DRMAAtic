@@ -107,6 +107,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             terminate_job(instance.drm_job_id)
 
         instance.delete_from_user()
+        instance.save()
 
         # The task is not removed from the ws nor from the database
         # self.perform_destroy(instance)

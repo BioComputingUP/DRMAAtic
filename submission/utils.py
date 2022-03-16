@@ -82,7 +82,7 @@ def get_params(user_param, task, parameters_of_task):
             task.delete()  # The submitted task was not created with proper params, destroy it
             raise exceptions.NotAcceptable("The parameter {} must be specified for the {} task"
                                            .format(param.name, task.task_name))
-        # Param is private and hase to be set
+        # Param is private and has to be set
         elif param.private:
             new_param = TaskParameter.objects.create(task=task, param=param, value=param.default)
             created_params.add(new_param)

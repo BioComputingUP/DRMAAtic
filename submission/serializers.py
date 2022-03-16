@@ -126,7 +126,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "parent_task", "creation_date", "status", "params"]
+        fields = ["uuid", "task_name", "task_description", "parent_task", "creation_date", "status", "params"]
 
     def to_representation(self, instance):
         """
@@ -160,6 +160,10 @@ class TaskSerializer(serializers.ModelSerializer):
         # Create the task with the name
         task = Task.objects.create(task_name=validated_data["task_name"], user=validated_data.get("user"),
                                    parent_task=parent_task)
+
+        if "task_description" in validated_data.keys():
+            task.task_description = validated_data["task_description"]
+            task.save()
 
         log_ip(self.context.get('request'))
 
@@ -211,7 +215,7 @@ class SuperTaskSerializer(TaskSerializer):
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "parent_task", "status", "drm_job_id", "user", "creation_date", "update_date",
+        fields = ["uuid", "task_name", "task_description", "parent_task", "status", "drm_job_id", "user", "creation_date", "update_date",
                   "params"]
 
 
