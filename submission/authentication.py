@@ -5,13 +5,12 @@ import requests
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jwt import ExpiredSignatureError
-from pytimeparse.timeparse import timeparse
 from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
-from server.settings import BASE_GROUP, SECRET_KEY, ORCID_AUTH_URL
-from .models import Group, Token, User
+from server.settings import ORCID_AUTH_URL, SECRET_KEY
+from .models import Token, User
 
 
 # Extend token authentication in order to create Bearer authentication
@@ -81,8 +80,6 @@ class BearerAuthentication(BaseAuthentication):
 # Extend Bearer token authentication to exchange it with an external service
 class RemoteAuthentication(BearerAuthentication):
     # Define URL to remote service
-    # url = r'https://orcid.org/v3.0/{0:s}/record'  # Production
-    # url = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'  # Development
     url = ORCID_AUTH_URL
     # Define header
     header = {
@@ -115,7 +112,6 @@ class RemoteAuthentication(BearerAuthentication):
             return user, token
         # Catch any exception
         except Exception as error:
-            print(error)
             # Substitute with authentication exception
             raise AuthenticationFailed(_('Could not authenticate user'))
 
@@ -126,8 +122,7 @@ class RemoteAuthentication(BearerAuthentication):
         # Define current user
         # NOTE might raise not-found exception
         user, _ = self.user.objects.get_or_create(username=username,
-                                                  defaults={'source': User.ORCID, 'active': True,
-                                                            'group' : Group.objects.get(name=BASE_GROUP)})
+                                                  defaults={'source': User.ORCID, 'active': True})
         # Check that user is active
         if not user.active:
             # Just raise authentication error
@@ -151,7 +146,7 @@ class RemoteAuthentication(BearerAuthentication):
         url = self.url.format(user.username)
         # Make a request against authorization URL
         response = requests.get(url, {**self.header, keyword: secret}, **self.request)
-        print(url, response)
+
         # Case response return 200 OK
         if not status.is_success(response.status_code):
             # Just raise authentication error
@@ -159,7 +154,7 @@ class RemoteAuthentication(BearerAuthentication):
         # Define creation time
         created = timezone.now()
         # Define expiration time
-        expires = created + timedelta(seconds=timeparse(user.get_token_renewal_time))
+        expires = created + timedelta(seconds=user.get_token_renewal_time_seconds)
         # Create a new hash
         secret = jwt.encode({'nbf': created, 'exp': expires, 'iss': user.id}, self.secret, algorithm='HS256')
         # Create token from user

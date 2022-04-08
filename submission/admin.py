@@ -1,57 +1,14 @@
-from django import forms
-from django.contrib import admin
 from django.contrib.admin import display
 from django.contrib.auth import admin as auth
 
+# noinspection PyUnresolvedReferences
+from .drm_job_template.admin import *
 from .models import *
-
-
-@admin.register(DRMJobTemplate)
-class DRMJobtAdmin(admin.ModelAdmin):
-    list_display = ('name', 'cpus_per_task', 'queue')
-
-
-class ParamForm(forms.ModelForm):
-    def clean(self):
-        if self.cleaned_data["private"] and self.cleaned_data["required"]:
-            raise forms.ValidationError(
-                    {'private': "Cannot be set with required", 'required': "Cannot be set with private"})
-        if self.cleaned_data["name"] == "task_name":
-            raise forms.ValidationError({'name': "name cannot be set to 'task_name'"})
-
-
-class ParamAdminInline(admin.TabularInline):
-    model = Parameter
-    form = ParamForm
-
-
-@admin.register(Script)
-class ScriptAdmin(admin.ModelAdmin):
-    fields = (('name', 'command'), 'job', ('is_array', 'begin_index', 'end_index', 'step_index'))
-    list_display = ('name', 'command')
-
-    inlines = [ParamAdminInline]
-
-
-class TaskParamAdminInline(admin.TabularInline):
-    model = TaskParameter
-
-
-@admin.register(Task)
-class TaskAdmin(admin.ModelAdmin):
-    list_filter = [
-            "task_name",
-            "status",
-            "user"
-    ]
-    search_fields = (
-            "task_name__name",
-            "user__username",
-    )
-
-    list_display = ('uuid', 'task_name', 'status', 'creation_date', 'user')
-    inlines = [TaskParamAdminInline]
-
+# noinspection PyUnresolvedReferences
+from .parameter.admin import *
+from .script.admin import *
+# noinspection PyUnresolvedReferences
+from .task.admin import *
 
 # Register user in the admin web interface, using the default interface
 admin.site.register(Admin, auth.UserAdmin)
@@ -64,10 +21,17 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'source', 'group', 'email', 'phone', 'active')
 
 
+class GroupForm(forms.ModelForm):
+    def clean(self):
+        if timeparse(self.cleaned_data["token_renewal_time"]) is None:
+            raise forms.ValidationError({'token_renewal_time': "Invalid time"})
+
+
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     # Define columns to show
     list_display = ('name', 'has_full_access', 'throttling_rate', 'token_renewal_time')
+    form = GroupForm
 
 
 # Register token in the admin web interface

@@ -10,7 +10,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.settings import api_settings
 
 from server.settings import SUBMISSION_OUTPUT_DIR
-from .models import Parameter, Task, TaskParameter
+from .parameter.models import Parameter, TaskParameter
+from .task.models import Task
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +38,11 @@ def get_extension(param_name, file_name):
     return file_name.split('.')[-1]
 
 
-def get_params(user_param, task, parameters_of_task):
+def get_params(user_param, task: Task, parameters_of_task):
     created_params = set()
     renamed_files = dict()
 
-    p_task = get_ancestor(task)
+    p_task = task.get_first_ancestor()
     for param in parameters_of_task:
         param = Parameter.objects.get(script=task.task_name, name=param.name)
         # Param not private and user has set it
@@ -50,7 +51,11 @@ def get_params(user_param, task, parameters_of_task):
             try:
                 if param.type == Parameter.Type.FILE.value:
                     files = []
-                    num_files = len(user_param.getlist(param.name))
+                    num_files = len(list(filter(None, user_param.getlist(param.name))))
+
+                    if num_files == 0:
+                        raise exceptions.NotAcceptable("The file for the parameter {} was not uploaded".format(param.name))
+
                     for file_idx, file in enumerate(user_param.getlist(param.name)):
                         ext = get_extension(param.name, file.name)
                         # If multiple files are passed on the same input name, then save them with different names
@@ -64,6 +69,7 @@ def get_params(user_param, task, parameters_of_task):
                         # Manage multiple files for a single parameter
                         files.append(file_name)
                         file_pth = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid), file_name)
+                        # Save the file to the output directory
                         with open(file_pth, "wb+") as f:
                             for chunk in file.chunks():
                                 f.write(chunk)
@@ -87,15 +93,16 @@ def get_params(user_param, task, parameters_of_task):
             new_param = TaskParameter.objects.create(task=task, param=param, value=param.default)
             created_params.add(new_param)
 
+    task.files_name = renamed_files
+
     # Write in a file all the association between new file name and original file name, if files are passed
     with open(os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid), "files.json"), 'a') as f:
         json.dump(renamed_files, f)
 
-    return created_params
+    return created_params, renamed_files
 
 
 def create_task_folder(wd):
-    # TODO : Change base path
     os.makedirs(os.path.join(SUBMISSION_OUTPUT_DIR, wd), exist_ok=True)
 
 
@@ -108,14 +115,7 @@ def zip_dir(dir_pth: Union[Path, str], filename: Union[Path, str]):
             zip_file.write(entry, entry.relative_to(dir_pth))
 
 
-def get_ancestor(task: Task):
-    while task.parent_task is not None:
-        task = task.parent_task
-
-    return task
-
-
-def log_ip(request):
+def get_ip(request):
     def get_ident(req):
         """
         Identify the machine making the request by parsing HTTP_X_FORWARDED_FOR
@@ -137,4 +137,8 @@ def log_ip(request):
 
     ident = get_ident(request)
 
-    logger.info("IP {} has sent a new task".format(ident if len(ident) > 0 else '?'))
+    return ident
+
+
+def request_by_admin(request):
+    return request.user and request.user.is_admin()

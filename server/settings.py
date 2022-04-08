@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from environs import Env
 
 env = Env()
@@ -9,9 +10,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # DRMAA library for submission server
 os.environ.setdefault("DRMAA_LIBRARY_PATH", "/usr/lib/slurm-drmaa/libdrmaa.so")
-
-# Group for base users, which are automatically created upon request
-BASE_GROUP = 'base'
 
 SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2')
 
@@ -41,14 +39,21 @@ SUBMISSION_DOWNLOAD_DIR = env.str('SUBMISSION_DOWNLOADS_DIR', os.path.join(BASE_
 
 SUBMISSION_LOGGER_PTH = env.str('SUBMISSION_LOGGER_PTH', os.path.join(BASE_DIR, "logger.log"))
 
+# Set true if you want to remove the task directory when the task is deleted
+REMOVE_TASK_FILES_ON_DELETE = env.bool('REMOVE_TASK_FILES_ON_DELETE', True)
+
 # ORCID AUTHENTICATION
 ORCID_AUTH_URL = env.str('SUBMISSION_ORCID_AUTH_URL', r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record')  # Development
+
+MAX_PAGE_SIZE = env.int('MAX_PAGE_SIZE', 1000)
 
 # Application definition
 
 INSTALLED_APPS = [
         'rest_framework',
         'corsheaders',
+        'rangefilter',  # Range filter for django admin panel
+        'django_filters',  # Django filters for query parameters based filtering
         'django_extensions',
         # 'rest_framework.authtoken',
         'django.contrib.admin',
@@ -70,6 +75,11 @@ MIDDLEWARE = [
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+        'DEFAULT_FILTER_BACKENDS' : ['django_filters.rest_framework.DjangoFilterBackend'],
+        'DEFAULT_PAGINATION_CLASS': 'submission.pagination.StandardResultsSetPagination',
+}
 
 ROOT_URLCONF = 'server.urls'
 
@@ -142,6 +152,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # NOTE https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#auth-custom-user
 AUTH_USER_MODEL = 'submission.Admin'
 
-# Define automaic field
+# Define automatic field
 # NOTE https://stackoverflow.com/questions/67783120/warning-auto-created-primary-key-used-when-not-defining-a-primary-key-type-by
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

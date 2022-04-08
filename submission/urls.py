@@ -1,19 +1,20 @@
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
+import submission.task.views
+import submission.script.views
 from submission import views
 
 # Add default routes
 router = DefaultRouter()
-router.register(r'task', views.TaskViewSet)
-router.register(r'script', views.ScriptViewSet)
-router.register(r'params', views.ParamsViewSet)
+router.register(r'task', submission.task.views.TaskViewSet)
+router.register(r'script', submission.script.views.ScriptViewSet)
 router.register(r'token', views.TokenViewSet, basename='Token')
 
 # Define file view
-TaskFileView = views.TaskViewSet.as_view({'get': 'file'})
+TaskFileView = submission.task.views.TaskViewSet.as_view({'get': 'file'})
 # Define download view
-TaskDownloadView = views.TaskViewSet.as_view({'get': 'download'})
+TaskDownloadView = submission.task.views.TaskViewSet.as_view({'get': 'download'})
 
 # Define URL patterns
 urlpatterns = [
