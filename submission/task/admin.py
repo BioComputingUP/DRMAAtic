@@ -23,7 +23,7 @@ class TaskAdmin(admin.ModelAdmin):
 
     actions = ["delete_and_remove"]
 
-    list_display = ('uuid', 'task_name', '_status', 'deleted', 'creation_date', 'user')
+    list_display = ('uuid', 'task_name', '_status', 'deleted', 'creation_date', 'user', '_sender_ip_addr')
     inlines = [TaskParamAdminInline]
 
     def delete_model(self, request, task):

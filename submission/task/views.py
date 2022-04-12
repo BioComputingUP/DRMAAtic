@@ -133,14 +133,17 @@ class TaskViewSet(viewsets.ModelViewSet):
         if task.has_finished():
             p_task = task.get_first_ancestor()
 
-            zip_file = os.path.join(SUBMISSION_DOWNLOAD_DIR, "{}.zip".format(p_task.uuid))
-            file_handle = open(zip_file, "rb")
+            zip_file = os.path.join(SUBMISSION_OUTPUT_DIR, p_task.uuid, "{}.zip".format(p_task.uuid))
+            try:
+                file_handle = open(zip_file, "rb")
 
-            mimetype, _ = mimetypes.guess_type(zip_file)
-            response = FileResponse(file_handle, content_type=mimetype)
-            response['Content-Length'] = os.path.getsize(zip_file)
-            response['Content-Disposition'] = "attachment; filename={}".format("{}.zip".format(p_task.uuid))
-            return response
+                mimetype, _ = mimetypes.guess_type(zip_file)
+                response = FileResponse(file_handle, content_type=mimetype)
+                response['Content-Length'] = os.path.getsize(zip_file)
+                response['Content-Disposition'] = "attachment; filename={}".format("{}.zip".format(p_task.uuid))
+                return response
+            except FileNotFoundError:
+                return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({'status': 'Output files not available, check task status'},
                             status=status.HTTP_404_NOT_FOUND)
