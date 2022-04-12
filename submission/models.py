@@ -25,8 +25,6 @@ class Group(models.Model):
     throttling_rate = models.CharField(max_length=30, default="10/s", null=False, blank=False)
     token_renewal_time = models.CharField(default="1 day", null=False, blank=False, max_length=40)
 
-    under = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-
     def __str__(self):
         return self.name
 
