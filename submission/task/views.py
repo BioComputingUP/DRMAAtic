@@ -133,7 +133,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         if task.has_finished():
             p_task = task.get_first_ancestor()
 
-            zip_file = os.path.join(SUBMISSION_OUTPUT_DIR, p_task.uuid, "{}.zip".format(p_task.uuid))
+            zip_file = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid), "{}.zip".format(p_task.uuid))
             try:
                 file_handle = open(zip_file, "rb")
 
