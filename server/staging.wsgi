@@ -17,7 +17,6 @@ os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = 'https://dev.scheduler.biocomputingu
 # SUBMISSION FOLDERS
 os.environ['SUBMISSION_SCRIPT_DIR'] = '/var/local/webservers/jobs/scheduler-dev/scripts'
 os.environ['SUBMISSION_OUTPUT_DIR'] = '/var/local/webservers/jobs/scheduler-dev/outputs'
-os.environ['SUBMISSION_DOWNLOADS_DIR'] = '/var/local/webservers/jobs/scheduler-dev/downloads'
 
 os.environ['SUBMISSION_LOGGER_PTH'] = '/var/local/webservers/logs/scheduler-dev/scheduler-dev.log'
 

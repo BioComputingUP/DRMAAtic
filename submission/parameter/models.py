@@ -15,7 +15,7 @@ class Parameter(models.Model):
     # Define parameter name
     name = models.CharField(max_length=100, blank=False, null=False)
     # Define substitution flag
-    flag = models.CharField(max_length=100, blank=False, default='')
+    flag = models.CharField(max_length=100, blank=True, default='', null=True)
     # Define parameter type
     type = models.CharField(max_length=100, choices=Type.choices, blank=True, default=Type.STRING)
     # Define default value
@@ -30,7 +30,10 @@ class Parameter(models.Model):
     script = models.ForeignKey(Script, related_name="param", on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return "{} {} {}".format(self.name, self.flag, self.default).strip()
+        if self.flag:
+            return "{} {} {}".format(self.name, self.flag, self.default).strip()
+        else:
+            return "{} {}".format(self.name, self.default).strip()
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["name", "script"], name="param_name")]

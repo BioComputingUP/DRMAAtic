@@ -9,7 +9,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from server.settings import SUBMISSION_DOWNLOAD_DIR, SUBMISSION_OUTPUT_DIR
+from server.settings import SUBMISSION_OUTPUT_DIR
 from submission.authentication import BearerAuthentication
 from submission.permissions import IsOwner, IsSuper
 from submission.task.models import Task, TaskFilterSet

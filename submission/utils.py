@@ -19,15 +19,23 @@ logger = logging.getLogger(__name__)
 def format_task_params(passed_params):
     formatted_params = []
     for passed_param in passed_params:
-        # If the param is of type Bool and is positive, no value has to be passed, only the flag
-        if passed_param.param.type == Parameter.Type.BOOL.value and passed_param.value:
-            formatted_params.append("{}".format(passed_param.param.flag))
+        if passed_param.param.flag:
+            # If the param is of type Bool and is positive, no value has to be passed, only the flag
+            if passed_param.param.type == Parameter.Type.BOOL.value and passed_param.value:
+                formatted_params.append("{}".format(passed_param.param.flag))
+            else:
+                # If at the end of the flag there is a '=' then no space is required between flag and value
+                format_string = "{} {}"
+                if passed_param.param.flag[-1] == "=":
+                    format_string = "{}{}"
+
+                if passed_param.param.type == Parameter.Type.STRING.value:
+                    formatted_params.append(format_string.format(passed_param.param.flag, "\"{}\"".format(passed_param.value).strip()))
+                else:
+                    formatted_params.append(format_string.format(passed_param.param.flag, passed_param.value).strip())
+
         else:
-            # If at the end of the flag there is a '=' then no space is required between flag and value
-            format_string = "{} {}"
-            if passed_param.param.flag[-1] == "=":
-                format_string = "{}{}"
-            formatted_params.append(format_string.format(passed_param.param.flag, passed_param.value).strip())
+            formatted_params.append(passed_param.param.value)
 
     return formatted_params
 
