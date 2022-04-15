@@ -34,7 +34,7 @@ def format_task_params(passed_params):
                 else:
                     formatted_params.append(format_string.format(passed_param.param.flag, passed_param.value).strip())
         else:
-            formatted_params.append(passed_param.param.value)
+            formatted_params.append(passed_param.value)
 
     return formatted_params
 
