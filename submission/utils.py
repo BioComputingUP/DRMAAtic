@@ -42,7 +42,14 @@ def format_task_params(passed_params):
 def get_extension(param_name, file_name):
     if '.' not in file_name:
         raise exceptions.NotAcceptable("The file parameter {} must have a file extension".format(param_name))
-    return file_name.split('.')[-1]
+
+    # Extension is everything after the fist '.'
+    extension = file_name.split('.')
+    if len(extension) > 2:
+        extension = extension[1:]
+        return '.'.join(extension)
+    else:
+        return extension[-1]
 
 
 def get_params(user_param, task: Task, parameters_of_task):
