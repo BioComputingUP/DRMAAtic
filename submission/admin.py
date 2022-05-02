@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.admin import display
 from django.contrib.auth import admin as auth
 
@@ -47,6 +49,9 @@ class TokenAdmin(admin.ModelAdmin):
     # Define columns to show
     list_display = ('get_short_hash', 'get_user_source', 'get_user_name', 'created', 'expires')
     # Define readonly fields
+
+    def get_changeform_initial_data(self, request):
+        return {'hash': uuid.uuid4()}
 
     # Show short hash
     @display(ordering='hash', description='Hashed token')
