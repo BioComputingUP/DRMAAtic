@@ -36,7 +36,8 @@ class User(models.Model):
 
     # Define source choices
     SOURCES = [
-            (ORCID, 'ORCID')
+            (ORCID, 'ORCID'),
+            ('INTERNAL', 'INTERNAL')
     ]
 
     # Define source
@@ -104,10 +105,10 @@ class User(models.Model):
 # Define internal token (associated to external user)
 class Token(models.Model):
     # Define hash
-    hash = models.CharField(max_length=1000, editable=False)
+    hash = models.CharField(max_length=1000)
     # Defines when the token has been created
-    created = models.DateTimeField(blank=False, null=False, editable=False)
+    created = models.DateTimeField(blank=False, null=False)
     # Defines expiration time
-    expires = models.DateTimeField(blank=False, null=False, editable=False)
+    expires = models.DateTimeField(blank=False, null=False)
     # Define foreign key constraint
-    user = models.ForeignKey(User, to_field='id', related_name='has_user', on_delete=models.CASCADE, editable=False)
+    user = models.ForeignKey(User, to_field='id', related_name='has_user', on_delete=models.CASCADE)

@@ -63,18 +63,26 @@ class BearerAuthentication(BaseAuthentication):
         # Retrieve token out of hash
         token = token_class.objects.get(hash=hash)
         # Decode payload from token
-        try:
-            payload = jwt.decode(hash, self.secret, algorithms=['HS256', ])
-        except ExpiredSignatureError:
-            raise AuthenticationFailed(_('Authentication token expired'))
-        # # Retrieve user out payload
-        # user = User.objects.get(id=payload.get('iss', ''))
-        # Case retrieved user is not allowed
-        if (token.user.id != payload.get('iss', None)) or not token.user.active:
-            # Raise an authentication error
-            raise AuthenticationFailed(_('User is forbidden'))
-        # Define token
-        return token
+        if token.user.source == 'INTERNAL':
+            if token.user.active and token.expires > timezone.now():
+                return token
+            elif token.expires < timezone.now():
+                raise AuthenticationFailed(_('Authentication token expired'))
+            else:
+                raise AuthenticationFailed(_('User is forbidden'))
+        else:
+            try:
+                payload = jwt.decode(hash, self.secret, algorithms=['HS256', ])
+            except ExpiredSignatureError:
+                raise AuthenticationFailed(_('Authentication token expired'))
+            # # Retrieve user out payload
+            # user = User.objects.get(id=payload.get('iss', ''))
+            # Case retrieved user is not allowed
+            if (token.user.id != payload.get('iss', None)) or not token.user.active:
+                # Raise an authentication error
+                raise AuthenticationFailed(_('User is forbidden'))
+            # Define token
+            return token
 
 
 # Extend Bearer token authentication to exchange it with an external service

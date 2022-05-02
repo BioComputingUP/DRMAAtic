@@ -14,8 +14,9 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # Define token view
-class TokenViewSet(viewsets.ViewSet, mixins.RetrieveModelMixin):
+class TokenViewSet(viewsets.ModelViewSet):
     # Define authentication class
+    serializer_class = InternalTokenSerializer
     authentication_classes = [RemoteAuthentication]
 
     # Retrieve internal authorization token

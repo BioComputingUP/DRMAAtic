@@ -37,6 +37,7 @@ class GroupAdmin(admin.ModelAdmin):
 # Register token in the admin web interface
 @admin.register(Token)
 class TokenAdmin(admin.ModelAdmin):
+    model = Token
     list_filter = [
             "user__username",
     ]
@@ -46,7 +47,6 @@ class TokenAdmin(admin.ModelAdmin):
     # Define columns to show
     list_display = ('get_short_hash', 'get_user_source', 'get_user_name', 'created', 'expires')
     # Define readonly fields
-    readonly_fields = ('hash', 'created', 'expires', 'user')
 
     # Show short hash
     @display(ordering='hash', description='Hashed token')
