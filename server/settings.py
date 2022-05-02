@@ -24,7 +24,7 @@ CORS_ALLOWED_ORIGINS = [
         'https://dev.proteinensemble.org',
         'https://assessment.proteinsemble.org',
         'https://biocomputingup.it',
-        'https://protein.bio.unipd.it/'
+        'https://protein.bio.unipd.it'
 ]
 
 # HTTPS flags
