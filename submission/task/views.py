@@ -4,7 +4,7 @@ import os
 from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, filters, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, throttle_classes
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -14,14 +14,13 @@ from submission.authentication import BearerAuthentication
 from submission.permissions import IsOwner, IsSuper
 from submission.task.models import Task, TaskFilterSet
 from submission.task.serializers import SuperTaskSerializer, TaskSerializer
-from submission.throttles import IPRateThrottle, UserBasedThrottle
+from submission.throttles import *
 from submission.utils import request_by_admin
 from submission_lib.manage import terminate_job
 
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
-    throttle_classes = [IPRateThrottle, UserBasedThrottle]
     parser_classes = (FormParser, MultiPartParser)
 
     authentication_classes = [api_settings.DEFAULT_AUTHENTICATION_CLASSES[0], BearerAuthentication]
@@ -41,6 +40,13 @@ class TaskViewSet(viewsets.ModelViewSet):
         else:
             return TaskSerializer
 
+    def get_throttles(self):
+        if self.action == "create":
+            _throttle_classes = [IPRateThrottleBurst, IPRateThrottleSustained, UserBasedThrottleBurst, UserBasedThrottleSustained]
+        else:
+            _throttle_classes = [IPRateThrottleBurst, UserBasedThrottleBurst]
+        return [throttle() for throttle in _throttle_classes]
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -55,6 +61,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
 
+    @throttle_classes([IPRateThrottleBurst, UserBasedThrottleBurst])
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -93,6 +100,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             # If the request is made by an anonymous user, no content is returned
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @throttle_classes([IPRateThrottleBurst, UserBasedThrottleBurst])
     def retrieve(self, request, *args, **kwargs):
         """
         Retrieve the task and update the status of the DRM job

@@ -1,10 +1,12 @@
 from rest_framework import viewsets
+from rest_framework.decorators import throttle_classes
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from submission.authentication import BearerAuthentication
 from submission.script.models import Script
 from submission.script.serializers import ScriptSerializer, SuperScriptSerializer
+from submission.throttles import IPRateThrottleBurst, UserBasedThrottleBurst
 
 
 class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
@@ -30,6 +32,7 @@ class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
 
+    @throttle_classes([IPRateThrottleBurst, UserBasedThrottleBurst])
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -44,6 +47,7 @@ class ScriptViewSet(viewsets.ReadOnlyModelViewSet):
 
         return self.get_response(queryset)
 
+    @throttle_classes([IPRateThrottleBurst, UserBasedThrottleBurst])
     def retrieve(self, request, *args, **kwargs):
         script = self.get_object()
         serializer = self.get_serializer(script)
