@@ -60,10 +60,10 @@ class User(models.Model):
 
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # anon_user = Group.objects.get_or_create(name='anon',
-    #                                         defaults={'throttling_rate_burst'    : '20/s',
-    #                                                   'throttling_rate_sustained': '100/d',
-    #                                                   'token_renewal_time'       : '3 days'})[0]
+    anon_user = Group.objects.get_or_create(name='anon',
+                                            defaults={'throttling_rate_burst'    : '20/s',
+                                                      'throttling_rate_sustained': '100/d',
+                                                      'token_renewal_time'       : '3 days'})[0]
 
     def __str__(self):
         return self.username
@@ -82,19 +82,19 @@ class User(models.Model):
     def is_authenticated(self):
         return True
 
-    # @property
-    # def throttling_rate_burst(self):
-    #     if self.group:
-    #         return self.group.throttling_rate_burst
-    #     else:
-    #         return self.anon_user.throttling_rate_burst
-    #
-    # @property
-    # def throttling_rate_sustained(self):
-    #     if self.group:
-    #         return self.group.throttling_rate_sustained
-    #     else:
-    #         return self.anon_user.throttling_rate_sustained
+    @property
+    def throttling_rate_burst(self):
+        if self.group:
+            return self.group.throttling_rate_burst
+        else:
+            return self.anon_user.throttling_rate_burst
+
+    @property
+    def throttling_rate_sustained(self):
+        if self.group:
+            return self.group.throttling_rate_sustained
+        else:
+            return self.anon_user.throttling_rate_sustained
 
     @property
     def get_token_renewal_time_seconds(self):

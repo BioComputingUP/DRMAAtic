@@ -32,7 +32,7 @@ class GroupForm(forms.ModelForm):
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     # Define columns to show
-    # list_display = ('name', 'has_full_access', 'throttling_rate_burst', 'throttling_rate_sustained', 'token_renewal_time')
+    list_display = ('name', 'has_full_access', 'throttling_rate_burst', 'throttling_rate_sustained', 'token_renewal_time')
     form = GroupForm
 
 
