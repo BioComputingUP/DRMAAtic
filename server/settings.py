@@ -109,6 +109,14 @@ DATABASES = {
         'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME'  : BASE_DIR / 'db.sqlite3',
+        },
+        'new_default': {
+                'ENGINE'  : 'django.db.backends.mysql',
+                'NAME'    : 'submission_ws',
+                'USER'    : 'maria',
+                'PASSWORD': 'password',
+                'HOST'    : '/var/run/mysqld/mysqld.sock',
+                'PORT'    : '3306',
         }
 }
 
