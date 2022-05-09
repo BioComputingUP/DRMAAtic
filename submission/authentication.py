@@ -46,7 +46,7 @@ class BearerAuthentication(BaseAuthentication):
         except AuthenticationFailed as e:
             # Unset both user and token
             user, token = None, None
-            raise e
+
         # Return both user and token
         return user, token
 
@@ -61,6 +61,7 @@ class BearerAuthentication(BaseAuthentication):
         # Case keyword specified is not the expected one
         if keyword != self.keyword.encode():
             raise AuthenticationFailed(_('Authentication header is not correctly formatted'))
+
         # Retrieve authentication value (token)
         hash = header[1].decode() if len(header) > 1 else None
         # Retrieve token out of hash
