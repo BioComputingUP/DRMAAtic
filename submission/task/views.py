@@ -42,7 +42,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "file":
-            return [permission() for permission in [IsOutputAccessible, IsOwner, IsSuper]]
+            return [permission() for permission in [IsOutputAccessible | IsOwner | IsSuper]]
         else:
             return super().get_permissions()
 
