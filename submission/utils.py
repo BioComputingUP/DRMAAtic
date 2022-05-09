@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import zipfile
 from pathlib import Path
 from typing import Union
@@ -31,9 +32,9 @@ def format_task_params(passed_params):
                 if passed_param.param.flag[-1] == "=":
                     format_string = "{}{}"
 
-                value = passed_param.value.replace("'", r" ")
+                value = re.sub('[!,*)#%(&$?^]', ' ', passed_param.value)
 
-                if passed_param.param.type == Parameter.Type.STRING.value and " " in passed_param.value:
+                if passed_param.param.type == Parameter.Type.STRING.value and " " in value:
                     formatted_params.append(format_string.format(passed_param.param.flag, "\"{}\"".format(value).strip()))
                 else:
                     formatted_params.append(format_string.format(passed_param.param.flag, value).strip())
