@@ -40,12 +40,15 @@ class BearerAuthentication(BaseAuthentication):
         try:
             # Authenticate token
             token = self.authenticate_token(request)
+            # In case no header for authentication was provided
+            if token is None:
+                return None, None
             # Define user
             user = token.user
             # Catch authentication exceptions
         except AuthenticationFailed as e:
             # Unset both user and token
-            user, token = None, None
+            raise e
 
         # Return both user and token
         return user, token
@@ -60,7 +63,7 @@ class BearerAuthentication(BaseAuthentication):
         keyword = header[0] if len(header) > 0 else None
         # Case keyword specified is not the expected one
         if keyword != self.keyword.encode():
-            raise AuthenticationFailed(_('Authentication header is not correctly formatted'))
+            return None
 
         # Retrieve authentication value (token)
         hash = header[1].decode() if len(header) > 1 else None
