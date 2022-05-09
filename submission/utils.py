@@ -32,7 +32,7 @@ def format_task_params(passed_params):
                 if passed_param.param.flag[-1] == "=":
                     format_string = "{}{}"
 
-                value = re.sub('[!,*)#%(&$?^]', ' ', passed_param.value)
+                value = re.sub("[!,*)#%(&$?\\\^'/`\"]", ' ', passed_param.value)
 
                 if passed_param.param.type == Parameter.Type.STRING.value and " " in value:
                     formatted_params.append(format_string.format(passed_param.param.flag, "\"{}\"".format(value).strip()))
