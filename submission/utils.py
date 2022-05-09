@@ -13,6 +13,8 @@ from server.settings import SUBMISSION_OUTPUT_DIR
 from .parameter.models import Parameter, TaskParameter
 from .task.models import Task
 
+import shlex
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,10 +31,14 @@ def format_task_params(passed_params):
                 if passed_param.param.flag[-1] == "=":
                     format_string = "{}{}"
 
-                if passed_param.param.type == Parameter.Type.STRING.value and " " in passed_param.value:
-                    formatted_params.append(format_string.format(passed_param.param.flag, "\"{}\"".format(passed_param.value).strip()))
-                else:
-                    formatted_params.append(format_string.format(passed_param.param.flag, passed_param.value).strip())
+                value = passed_param.value.replace("'", r" ")
+
+                formatted_params.append(format_string.format(passed_param.param.flag, shlex.quote(value)).strip())
+                # if passed_param.param.type == Parameter.Type.STRING.value and " " in passed_param.value:
+                #     formatted_params.append(
+                #         format_string.format(passed_param.param.flag, "\"{}\"".format(passed_param.value).strip()))
+                # else:
+                #     formatted_params.append(format_string.format(passed_param.param.flag, passed_param.value).strip())
         else:
             formatted_params.append(passed_param.value)
 
@@ -68,7 +74,8 @@ def get_params(user_param, task: Task, parameters_of_task):
                     num_files = len(list(filter(None, user_param.getlist(param.name))))
 
                     if num_files == 0:
-                        raise exceptions.NotAcceptable("The file for the parameter {} was not uploaded".format(param.name))
+                        raise exceptions.NotAcceptable(
+                            "The file for the parameter {} was not uploaded".format(param.name))
 
                     for file_idx, file in enumerate(user_param.getlist(param.name)):
                         ext = get_extension(param.name, file.name)
