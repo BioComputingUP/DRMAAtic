@@ -33,12 +33,10 @@ def format_task_params(passed_params):
 
                 value = passed_param.value.replace("'", r" ")
 
-                formatted_params.append(format_string.format(passed_param.param.flag, shlex.quote(value)).strip())
-                # if passed_param.param.type == Parameter.Type.STRING.value and " " in passed_param.value:
-                #     formatted_params.append(
-                #         format_string.format(passed_param.param.flag, "\"{}\"".format(passed_param.value).strip()))
-                # else:
-                #     formatted_params.append(format_string.format(passed_param.param.flag, passed_param.value).strip())
+                if passed_param.param.type == Parameter.Type.STRING.value and " " in passed_param.value:
+                    formatted_params.append(format_string.format(passed_param.param.flag, "\"{}\"".format(value).strip()))
+                else:
+                    formatted_params.append(format_string.format(passed_param.param.flag, value).strip())
         else:
             formatted_params.append(passed_param.value)
 
