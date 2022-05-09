@@ -11,7 +11,7 @@ from rest_framework.settings import api_settings
 
 from server.settings import SUBMISSION_OUTPUT_DIR
 from submission.authentication import BearerAuthentication
-from submission.permissions import IsOwner, IsSuper
+from submission.permissions import IsOutputAccessible, IsOwner, IsSuper
 from submission.task.models import Task, TaskFilterSet
 from submission.task.serializers import SuperTaskSerializer, TaskSerializer
 from submission.throttles import *
@@ -39,6 +39,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             return SuperTaskSerializer
         else:
             return TaskSerializer
+
+    def get_permissions(self):
+        if self.action == "file":
+            return [permission() for permission in [IsOutputAccessible]]
+        else:
+            return super().get_permissions()
 
     def get_throttles(self):
         if self.action == "create":

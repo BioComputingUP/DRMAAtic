@@ -18,9 +18,9 @@ class ScriptForm(forms.ModelForm):
 
 @admin.register(Script)
 class ScriptAdmin(admin.ModelAdmin):
-    fields = (('name', 'command'), 'job', "_max_clock_time", "groups",
+    fields = (('name', 'command'), ('job', 'is_output_visible'), "_max_clock_time", "groups",
               ('is_array', 'begin_index', 'end_index', 'step_index'))
-    list_display = ('name', 'command')
+    list_display = ('name', 'command', "is_output_visible")
     form = ScriptForm
 
     inlines = [ParamAdminInline, ]

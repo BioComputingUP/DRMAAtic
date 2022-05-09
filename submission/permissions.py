@@ -48,3 +48,11 @@ class IsSuper(BasePermission):
             return True
         else:
             return False
+
+
+class IsOutputAccessible(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if hasattr(obj, 'task_name') and obj.task_name.is_output_visible:
+            return True
+        return False

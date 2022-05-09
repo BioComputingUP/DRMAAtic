@@ -55,5 +55,5 @@ class SuperScriptSerializer(ScriptSerializer):
 
     class Meta:
         model = Script
-        fields = ["name", "command", "job", "groups", "max_clock_time", "is_array", "begin_index", "end_index", "step_index",
+        fields = ["name", "command", "job", "groups", "is_output_visible", "max_clock_time", "is_array", "begin_index", "end_index", "step_index",
                   "param"]

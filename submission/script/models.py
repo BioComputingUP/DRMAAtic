@@ -25,6 +25,8 @@ class Script(models.Model):
 
     groups = models.ManyToManyField('Group', related_name="scripts", blank=True)
 
+    is_output_visible = models.BooleanField(default=False)
+
     def __str__(self):
         return self.name
 
