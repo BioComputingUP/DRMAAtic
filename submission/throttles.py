@@ -1,7 +1,11 @@
 # Dependencies
+import logging
+
 from rest_framework.throttling import AnonRateThrottle, SimpleRateThrottle
 
 from submission.models import Group
+
+logger = logging.getLogger(__name__)
 
 
 def get_anon_user_throttle():
@@ -13,66 +17,96 @@ def get_anon_user_throttle():
 
 
 class IPRateThrottleBurst(AnonRateThrottle):
-    THROTTLE_RATES = {'anon': '20/s'}
+    scope = 'ipBurst'
+    THROTTLE_RATES = {'ipBurst': '10/s'}
+
+    ident = None
 
     def get_cache_key(self, request, view):
+        if request.user is not None:
+            return None  # Only throttle unauthenticated requests.
+
         anon_throttle = get_anon_user_throttle()
 
         self.num_requests, self.duration = self.parse_rate(anon_throttle.throttling_rate_burst)
 
-        if request.user is not None:
-            return None  # Only throttle unauthenticated requests.
+        self.ident = self.get_ident(request)
 
         return self.cache_format % {
                 'scope': self.scope,
-                'ident': self.get_ident(request)
+                'ident': self.ident
         }
+
+    def throttle_failure(self):
+        logger.warning('Throttling failure for IP: %s', self.ident)
 
 
 class IPRateThrottleSustained(AnonRateThrottle):
-    THROTTLE_RATES = {'anon': '20/s'}
+    scope = 'ipSustained'
+    THROTTLE_RATES = {'ipSustained': '100/d'}
+
+    ident = None
 
     def get_cache_key(self, request, view):
+        if request.user is not None:
+            return None  # Only throttle unauthenticated requests.
+
         anon_throttle = get_anon_user_throttle()
 
         self.num_requests, self.duration = self.parse_rate(anon_throttle.throttling_rate_sustained)
 
-        if request.user is not None:
-            return None  # Only throttle unauthenticated requests.
+        self.ident = self.get_ident(request)
 
         return self.cache_format % {
                 'scope': self.scope,
-                'ident': self.get_ident(request)
+                'ident': self.ident
         }
+
+    def throttle_failure(self):
+        logger.warning('Throttling failure for user: %s', self.ident)
 
 
 class UserBasedThrottleBurst(SimpleRateThrottle):
-    scope = 'user'
+    scope = 'userBurst'
+    THROTTLE_RATES = {'userBurst': '5/s'}
+
+    ident = None
 
     def get_cache_key(self, request, view):
         if request.user is not None and request.user.is_authenticated:
             self.num_requests, self.duration = self.parse_rate(request.user.throttling_rate_burst)
-            ident = request.user.pk
+            pk = request.user.pk
+            self.ident = request.user.username
         else:
             return None
 
         return self.cache_format % {
                 'scope': self.scope,
-                'ident': ident
+                'ident': pk
         }
+
+    def throttle_failure(self):
+        logger.warning('Throttling failure for user: %s', self.ident)
 
 
 class UserBasedThrottleSustained(SimpleRateThrottle):
-    scope = 'user'
+    scope = 'userSustained'
+    THROTTLE_RATES = {'userSustained': '1000/d'}
+
+    ident = None
 
     def get_cache_key(self, request, view):
         if request.user is not None and request.user.is_authenticated:
             self.num_requests, self.duration = self.parse_rate(request.user.throttling_rate_sustained)
-            ident = request.user.pk
+            pk = request.user.pk
+            self.ident = request.user.username
         else:
             return None
 
         return self.cache_format % {
                 'scope': self.scope,
-                'ident': ident
+                'ident': pk
         }
+
+    def throttle_failure(self):
+        logger.warning('Throttling failure for IP: %s', self.ident)

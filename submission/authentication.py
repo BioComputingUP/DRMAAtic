@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 import jwt
@@ -11,6 +12,8 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from server.settings import ORCID_AUTH_URL, SECRET_KEY
 from .models import Token, User
+
+logger = logging.getLogger(__name__)
 
 
 # Extend token authentication in order to create Bearer authentication
@@ -40,10 +43,10 @@ class BearerAuthentication(BaseAuthentication):
             # Define user
             user = token.user
             # Catch authentication exceptions
-        except AuthenticationFailed:
+        except AuthenticationFailed as e:
             # Unset both user and token
             user, token = None, None
-            # raise AuthenticationFailed(_('Issued token is not valid'))
+            raise e
         # Return both user and token
         return user, token
 
@@ -61,13 +64,19 @@ class BearerAuthentication(BaseAuthentication):
         # Retrieve authentication value (token)
         hash = header[1].decode() if len(header) > 1 else None
         # Retrieve token out of hash
-        token = token_class.objects.get(hash=hash)
+        try:
+            token = token_class.objects.get(hash=hash)
+        except token_class.DoesNotExist:
+            raise AuthenticationFailed(_('Token does not exist'))
+
+        if token.expires < timezone.now():
+            logger.warning("User {} is trying to use an expired token".format(token.user.username))
+            raise AuthenticationFailed(_('Authentication token expired'))
+
         # Decode payload from token
         if token.user.source == 'INTERNAL':
-            if token.user.active and token.expires > timezone.now():
+            if token.user.active:
                 return token
-            elif token.expires < timezone.now():
-                raise AuthenticationFailed(_('Authentication token expired'))
             else:
                 raise AuthenticationFailed(_('User is forbidden'))
         else:
