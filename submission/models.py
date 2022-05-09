@@ -18,6 +18,14 @@ class Admin(AbstractUser):
     def is_authenticated(self):
         return True
 
+    @property
+    def throttling_rate_burst(self):
+        return "1000/s"
+
+    @property
+    def throttling_rate_sustained(self):
+        return "1000/s"
+
 
 class Group(models.Model):
     name = models.CharField(max_length=50)
