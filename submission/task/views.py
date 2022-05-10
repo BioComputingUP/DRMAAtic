@@ -171,6 +171,15 @@ class TaskViewSet(viewsets.ModelViewSet):
         root = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid))
         files = [os.path.join(dp.replace(root, ''), f).lstrip('/') for dp, dn, fn in os.walk(root) for f in fn]
 
+        if not request_by_admin(request):
+            to_remove = []
+            for i, file in enumerate(files):
+                if "log.o" in file or "log.e" in file:
+                    to_remove.append(i)
+
+            for i in reversed(to_remove):
+                files.pop(i)
+
         if path:
             if path in files:
                 file = os.path.join(root, path)
