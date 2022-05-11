@@ -11,7 +11,7 @@ class ScriptSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Script
-        fields = ["name", "command", "param"]
+        fields = ["name", "param"]
 
     def validate(self, attrs):
         if timeparse(attrs["_max_clock_time"]) is None:

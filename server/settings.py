@@ -50,8 +50,8 @@ ORCID_AUTH_URL = env.str('SUBMISSION_ORCID_AUTH_URL', r'https://pub.sandbox.orci
 MAX_PAGE_SIZE = env.int('MAX_PAGE_SIZE', 1000)
 
 DEFAULT_RENDERER_CLASSES = (
-        'submission.renderers.CustomBrowsableAPIRenderer',
         'rest_framework.renderers.JSONRenderer',
+        'submission.renderers.CustomBrowsableAPIRenderer',
 )
 
 # Application definition
