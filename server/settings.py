@@ -49,6 +49,11 @@ ORCID_AUTH_URL = env.str('SUBMISSION_ORCID_AUTH_URL', r'https://pub.sandbox.orci
 
 MAX_PAGE_SIZE = env.int('MAX_PAGE_SIZE', 1000)
 
+DEFAULT_RENDERER_CLASSES = (
+        'submission.renderers.CustomBrowsableAPIRenderer',
+        'rest_framework.renderers.JSONRenderer',
+)
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -81,6 +86,7 @@ MIDDLEWARE = [
 REST_FRAMEWORK = {
         'DEFAULT_FILTER_BACKENDS' : ['django_filters.rest_framework.DjangoFilterBackend'],
         'DEFAULT_PAGINATION_CLASS': 'submission.pagination.StandardResultsSetPagination',
+        'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
 }
 
 ROOT_URLCONF = 'server.urls'
@@ -107,7 +113,7 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-        'old': {
+        'old'    : {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME'  : BASE_DIR / 'db.sqlite3',
         },
