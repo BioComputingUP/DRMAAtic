@@ -16,7 +16,7 @@ class ParameterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Parameter
-        fields = ["name", "flag", "type", "default", "description", "required"]
+        fields = ["name", "type", "default", "description", "required"]
 
     def to_representation(self, parameter):
         # If the parameter is not private, return its representation
