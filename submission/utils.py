@@ -14,8 +14,6 @@ from server.settings import SUBMISSION_OUTPUT_DIR
 from .parameter.models import Parameter, TaskParameter
 from .task.models import Task
 
-import shlex
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +33,8 @@ def format_task_params(passed_params):
                 value = re.sub("[!,*)#%(&$?\\\^'/`\"]", ' ', passed_param.value)
 
                 if passed_param.param.type == Parameter.Type.STRING.value and " " in value:
-                    formatted_params.append(format_string.format(passed_param.param.flag, "\"{}\"".format(value).strip()))
+                    formatted_params.append(
+                        format_string.format(passed_param.param.flag, "\"{}\"".format(value).strip()))
                 else:
                     formatted_params.append(format_string.format(passed_param.param.flag, value).strip())
         else:
@@ -74,7 +73,7 @@ def get_params(user_param, task: Task, parameters_of_task):
 
                     if num_files == 0:
                         raise exceptions.NotAcceptable(
-                            "The file for the parameter {} was not uploaded".format(param.name))
+                                "The file for the parameter {} was not uploaded".format(param.name))
 
                     for file_idx, file in enumerate(user_param.getlist(param.name)):
                         ext = get_extension(param.name, file.name)
@@ -161,4 +160,15 @@ def get_ip(request):
 
 
 def request_by_admin(request):
+    """
+    Check if the request is made by an admin from the request
+    """
     return request.user and request.user.is_admin()
+
+
+def is_user_admin(context):
+    """
+    Check if the user is an admin from the context
+    """
+    user = getattr(context.get('request'), 'user', None)
+    return user is not None and user.is_admin()

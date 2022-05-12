@@ -1,9 +1,10 @@
 from pytimeparse.timeparse import timeparse
 from rest_framework import serializers
 
-from submission.parameter.serializers import ParameterSerializer
+from submission.parameter.serializers import ParameterSerializer, SuperParameterSerializer
 from submission.script.models import Script
 from submission.serializers import GroupSerializer
+from submission.utils import is_user_admin
 
 
 class ScriptSerializer(serializers.ModelSerializer):
@@ -28,6 +29,11 @@ class ScriptSerializer(serializers.ModelSerializer):
         """
         Modify the task representation removing k:v pairs with v=None and null items in the param list
         """
+        if is_user_admin(self.context):
+            self.fields['param'] = SuperParameterSerializer(many=True, read_only=True)
+        else:
+            self.fields['param'] = ParameterSerializer(many=True, read_only=True)
+
         data = super().to_representation(instance)
 
         data["param"] = [p for p in data["param"] if p is not None]

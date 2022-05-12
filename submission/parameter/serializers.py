@@ -2,11 +2,7 @@ from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
 
 from submission.parameter.models import Parameter, TaskParameter
-
-
-def is_user_admin(context):
-    user = getattr(context.get('request'), 'user', None)
-    return user is not None and user.is_admin()
+from submission.utils import is_user_admin
 
 
 class ParameterSerializer(serializers.ModelSerializer):
@@ -24,13 +20,7 @@ class ParameterSerializer(serializers.ModelSerializer):
             return super().to_representation(parameter)
         # Private parameters are only returned if the user is an admin
         else:
-            try:
-                if is_user_admin(self.context):
-                    return super().to_representation(parameter)
-                else:
-                    return None
-            except AttributeError:
-                return None
+            return None
 
     def validate(self, attrs):
         # Private and required cannot be set together
@@ -43,6 +33,19 @@ class ParameterSerializer(serializers.ModelSerializer):
         if attrs["name"] == "parent_task":
             raise serializers.ValidationError("parent_task cannot be set as name of a parameter")
         return attrs
+
+
+class SuperParameterSerializer(ParameterSerializer):
+    """
+    Serializes the parameters of a script for a superuser.
+    """
+
+    class Meta:
+        model = Parameter
+        fields = ["name", "flag", "type", "default", "description", "required"]
+
+    def to_representation(self, parameter):
+        return serializers.ModelSerializer.to_representation(self, parameter)
 
 
 class TaskParameterSerializer(serializers.ModelSerializer):
