@@ -110,21 +110,27 @@ class TaskSerializer(serializers.ModelSerializer):
 
         p_task = task.get_first_ancestor()
 
-        j_id, name = start_job(**drm_params,
-                               task_name=task.task_name.name,
-                               # if the command is defined as absolute then do not add the submission script dir first
-                               script_dir='' if task.task_name.command[0] == '/' else SUBMISSION_SCRIPT_DIR,
-                               out_dir=SUBMISSION_OUTPUT_DIR,
-                               command=task.task_name.command,
-                               script_args=formatted_params,
-                               working_dir=p_task.uuid,
-                               dependency=parent_task.drm_job_id if parent_task is not None else None,
-                               clock_time_limit=bytes(task.task_name.max_clock_time, encoding='utf8'),
-                               is_array=task.task_name.is_array,
-                               begin_index=task.task_name.begin_index,
-                               end_index=task.task_name.end_index,
-                               step_index=task.task_name.step_index,
-                               account=task.user.group_name())
+        j_id = None
+        try:
+            j_id, name = start_job(**drm_params,
+                                   task_name=task.task_name.name,
+                                   # if the command is defined as absolute then do not add the submission script dir first
+                                   script_dir='' if task.task_name.command[0] == '/' else SUBMISSION_SCRIPT_DIR,
+                                   out_dir=SUBMISSION_OUTPUT_DIR,
+                                   command=task.task_name.command,
+                                   script_args=formatted_params,
+                                   working_dir=p_task.uuid,
+                                   dependency=parent_task.drm_job_id if parent_task is not None else None,
+                                   clock_time_limit=bytes(task.task_name.max_clock_time, encoding='utf8'),
+                                   is_array=task.task_name.is_array,
+                                   begin_index=task.task_name.begin_index,
+                                   end_index=task.task_name.end_index,
+                                   step_index=task.task_name.step_index,
+                                   account=task.user.group_name())
+        except Exception:
+            task.delete_from_file_system()
+            raise exceptions.APIException(detail='An error occurred while starting the task')
+
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the task as rejected
             task.status = Task.Status.REJECTED.value
