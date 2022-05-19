@@ -126,7 +126,7 @@ class TaskSerializer(serializers.ModelSerializer):
                                    begin_index=task.task_name.begin_index,
                                    end_index=task.task_name.end_index,
                                    step_index=task.task_name.step_index,
-                                   account=task.user.group_name())
+                                   account=None)
         except Exception:
             task.delete_from_file_system()
             raise exceptions.APIException(detail='An error occurred while starting the task')
