@@ -84,7 +84,7 @@ class User(models.Model):
     def group_name(self):
         if self.group:
             return self.group.name
-        return None
+        return 'anon'
 
     @property
     def is_authenticated(self):
