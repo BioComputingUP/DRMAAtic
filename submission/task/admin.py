@@ -34,7 +34,7 @@ class TaskAdmin(admin.ModelAdmin):
 
     def outputs(self, obj):
         return mark_safe(
-                '<a href=http://0.0.0.0:8300/task/{}/file/log.o>out</a> / <a href=http://0.0.0.0:8300/task/{}/file/log.e>err</a>  / <a href=http://0.0.0.0:8300/task/{}/file>files</a>'.format(
+                '<a href=https://scheduler.biocomputingup.it/task/{}/file/log.o>out</a> / <a href=https://scheduler.biocomputingup.it/task/{}/file/log.e>err</a>  / <a href=https://scheduler.biocomputingup.it/task/{}/file>files</a>'.format(
                         obj.uuid, obj.uuid, obj.uuid)
         )
 
