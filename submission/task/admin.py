@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 from rangefilter.filters import DateRangeFilter
 
 from submission.parameter.admin import TaskParamAdminInline
@@ -8,6 +9,9 @@ from submission_lib.manage import terminate_job
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
+    class Media:
+        css = {'all': ('css/mymodel_list.css',)}
+
     list_filter = [
             "task_name",
             "_status",
@@ -16,6 +20,7 @@ class TaskAdmin(admin.ModelAdmin):
             "user",
     ]
     search_fields = (
+            "uuid",
             "task_name__name",
             "user__username",
             "creation_date",
@@ -23,8 +28,17 @@ class TaskAdmin(admin.ModelAdmin):
 
     actions = ["delete_and_remove"]
 
-    list_display = ('uuid', 'task_name', '_status', 'deleted', 'creation_date', 'user', '_sender_ip_addr')
+    list_display = ('uuid', 'task_name', '_status', 'outputs', 'deleted', 'creation_date', 'user', '_sender_ip_addr')
+    readonly_fields = ()
     inlines = [TaskParamAdminInline]
+
+    def outputs(self, obj):
+        return mark_safe(
+                '<a href=http://0.0.0.0:8300/task/{}/file/log.o>out</a> / <a href=http://0.0.0.0:8300/task/{}/file/log.e>err</a>  / <a href=http://0.0.0.0:8300/task/{}/file>files</a>'.format(
+                        obj.uuid, obj.uuid, obj.uuid)
+        )
+
+    outputs.short_description = 'outputs'
 
     def delete_model(self, request, task):
         # Stop the job if it is running
@@ -52,3 +66,11 @@ class TaskAdmin(admin.ModelAdmin):
     def delete_and_remove(self, request, queryset):
         self.delete_queryset(request, queryset)
         queryset.delete()
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        # Update the drm status of the task
+        for task in queryset:
+            task.update_drm_status()
+
+        return queryset

@@ -113,7 +113,7 @@ class Task(models.Model):
         self.save(update_fields=['_files_name'])
 
     def __str__(self):
-        return "{} : {}".format(self.pk, self.task_name.name)
+        return "{} - {}".format(self.uuid, self.task_name.name)
 
     def get_task_path(self):
         return join(SUBMISSION_OUTPUT_DIR, str(self.uuid))
