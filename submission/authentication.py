@@ -74,7 +74,7 @@ class BearerAuthentication(BaseAuthentication):
             raise AuthenticationFailed(_('Token does not exist'))
 
         if token.expires < timezone.now():
-            logger.warning("User {} is trying to use an expired token".format(token.user.username))
+            logger.warning("Is trying to use an expired token", extra={'ip': token.user.username})
             raise AuthenticationFailed(_('Authentication token expired'))
 
         # Decode payload from token

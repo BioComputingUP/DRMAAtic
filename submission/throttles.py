@@ -38,7 +38,7 @@ class IPRateThrottleBurst(AnonRateThrottle):
         }
 
     def throttle_failure(self):
-        logger.warning('Throttling failure for IP: %s', self.ident)
+        logger.warning('Request was throttled', extra={'ip': self.ident})
 
 
 class IPRateThrottleSustained(AnonRateThrottle):
@@ -63,7 +63,7 @@ class IPRateThrottleSustained(AnonRateThrottle):
         }
 
     def throttle_failure(self):
-        logger.warning('Throttling failure for user: %s', self.ident)
+        logger.warning('Request was throttled', extra={'ip': self.ident})
 
 
 class UserBasedThrottleBurst(SimpleRateThrottle):
@@ -86,7 +86,7 @@ class UserBasedThrottleBurst(SimpleRateThrottle):
         }
 
     def throttle_failure(self):
-        logger.warning('Throttling failure for user: %s', self.ident)
+        logger.warning('Request was throttled', extra={'ip': self.ident})
 
 
 class UserBasedThrottleSustained(SimpleRateThrottle):
@@ -109,4 +109,4 @@ class UserBasedThrottleSustained(SimpleRateThrottle):
         }
 
     def throttle_failure(self):
-        logger.warning('Throttling failure for IP: %s', self.ident)
+        logger.warning('Request was throttled', extra={'ip': self.ident})

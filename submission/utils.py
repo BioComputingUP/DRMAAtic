@@ -24,6 +24,8 @@ def format_task_params(passed_params):
             # If the param is of type Bool and is positive, no value has to be passed, only the flag
             if passed_param.param.type == Parameter.Type.BOOL.value and passed_param.value:
                 formatted_params.append("{}".format(passed_param.param.flag))
+            elif passed_param.param.type == Parameter.Type.FILE.value:
+                formatted_params.append("{} {}".format(passed_param.param.flag, passed_param.value))
             else:
                 # If at the end of the flag there is a '=' then no space is required between flag and value
                 format_string = "{} {}"

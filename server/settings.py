@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-
 from environs import Env
 
 env = Env()
@@ -40,6 +39,68 @@ SUBMISSION_SCRIPT_DIR = env.str('SUBMISSION_SCRIPT_DIR', os.path.join(BASE_DIR, 
 SUBMISSION_OUTPUT_DIR = env.str('SUBMISSION_OUTPUT_DIR', os.path.join(BASE_DIR, "outputs/"))
 
 SUBMISSION_LOGGER_PTH = env.str('SUBMISSION_LOGGER_PTH', os.path.join(BASE_DIR, "logger.log"))
+
+LOGGING = {
+        "version"                 : 1,
+        "disable_existing_loggers": False,
+        "formatters"              : {
+                "request_formatter": {
+                        "format" : "%(asctime)s - %(name)-20s - %(levelname)-7s - %(ip)-15s - %(message)s",
+                        "datefmt": "%Y-%m-%d %H:%M:%S"
+                },
+                "drm_formatter"    : {
+                        "format" : "%(asctime)s - %(name)-20s - %(levelname)-7s - %(message)s",
+                        "datefmt": "%Y-%m-%d %H:%M:%S"
+                },
+        },
+        "handlers"                : {
+                "ip_request": {
+                        "level"    : "INFO",
+                        "class"    : "logging.FileHandler",
+                        "formatter": "request_formatter",
+                        'filters'  : ['append_ip', 'shorten_name'],
+                        "filename" : SUBMISSION_LOGGER_PTH,
+                },
+                "drm"       : {
+                        "level"    : "INFO",
+                        "class"    : "logging.FileHandler",
+                        "filters"  : ['shorten_name'],
+                        "formatter": "drm_formatter",
+                        "filename" : SUBMISSION_LOGGER_PTH,
+                },
+                "base"      : {
+                        "level"    : "INFO",
+                        "class"    : "logging.FileHandler",
+                        "formatter": "drm_formatter",
+                        "filename" : SUBMISSION_LOGGER_PTH,
+                },
+        },
+        'filters'                 : {
+                'append_ip'   : {
+                        '()': 'submission.log.IPAddressFilter'
+                },
+                'shorten_name': {
+                        '()': 'submission.log.NameFilter'
+                }
+        },
+        'loggers'                 : {
+                'submission_lib': {
+                        'handlers' : ['drm'],
+                        'level'    : 'INFO',
+                        'propagate': True,
+                },
+                'submission'    : {
+                        'level'    : 'INFO',
+                        'handlers' : ['ip_request'],
+                        'propagate': True,
+                },
+                'django'        : {
+                        'level'    : 'WARNING',
+                        'handlers' : ['base'],
+                        'propagate': True,
+                },
+        },
+}
 
 # Set true if you want to remove the task directory when the task is deleted
 REMOVE_TASK_FILES_ON_DELETE = env.bool('REMOVE_TASK_FILES_ON_DELETE', True)

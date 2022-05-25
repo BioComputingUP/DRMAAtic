@@ -8,6 +8,9 @@ from submission.script.models import Script
 from submission.task.models import Task
 from submission.utils import create_task_folder, format_task_params, get_ip, get_params
 from submission_lib.manage import start_job
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TaskParentField(serializers.RelatedField):
@@ -61,7 +64,7 @@ class TaskSerializer(serializers.ModelSerializer):
         Once task and parameters are created, the task is sent to the DRM in order to be executed. The DRM returns an ID that is
         then associated to the task in order to check the status on the DRM.
 
-        The task can be associated to an user if a user is passed.
+        The task can be associated to a user if a user is passed.
 
         A task can have a parent if necessary, in this case the working directory of the new task is the same as the parent task.
         """
@@ -110,7 +113,6 @@ class TaskSerializer(serializers.ModelSerializer):
 
         p_task = task.get_first_ancestor()
 
-        j_id = None
         try:
             j_id, name = start_job(**drm_params,
                                    task_name=task.task_name.name,
@@ -129,15 +131,20 @@ class TaskSerializer(serializers.ModelSerializer):
                                    account=task.user.group_name() if task.user else None)
         except Exception:
             task.delete_from_file_system()
+            logger.warning("Task {}, {}, something went wrong starting this job".format(task.uuid, task.task_name.name),
+                           extra={'request': self.context.get('request')})
             raise exceptions.APIException(detail='An error occurred while starting the task')
 
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the task as rejected
             task.status = Task.Status.REJECTED.value
+            logger.warning("Task {}, {}, was rejected".format(task.uuid, task.task_name.name), extra={'request': self.context.get('request')})
+
         else:
-            # Otherwise we associate the job id of the DRM and set the status to CREATED
+            # Otherwise, we associate the job id of the DRM and set the status to CREATED
             task.drm_job_id = j_id
             task.status = Task.Status.CREATED.value
+            logger.info("Task {} ({}) was created, DRM {}".format(task.uuid, task.task_name.name, j_id), extra={'request': self.context.get('request')})
 
         return task
 
