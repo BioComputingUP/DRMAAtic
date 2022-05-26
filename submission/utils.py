@@ -26,7 +26,7 @@ def format_task_params(passed_params):
                 formatted_params.append("{}".format(passed_param.param.flag))
             elif passed_param.param.type == Parameter.Type.FILE.value:
                 filename = re.escape(passed_param.value)
-                formatted_params.append("{} '{}'".format(passed_param.param.flag, filename))
+                formatted_params.append("{} {}".format(passed_param.param.flag, filename))
             else:
                 # If at the end of the flag there is a '=' then no space is required between flag and value
                 format_string = "{} {}"
