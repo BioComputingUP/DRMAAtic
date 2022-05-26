@@ -26,6 +26,7 @@ def format_value(value, param_type):
 
 def format_task_params(passed_params):
     formatted_params = []
+    passed_params = list(sorted(passed_params, key=lambda param: param.param.flag, reverse=False))
     for passed_param in passed_params:
         if passed_param.param.flag:
             # If the param is of type Bool and is positive, no value has to be passed, only the flag
