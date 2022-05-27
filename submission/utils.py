@@ -17,29 +17,29 @@ from .task.models import Task
 logger = logging.getLogger(__name__)
 
 
+def format_value(value, param_type):
+    if param_type == Parameter.Type.STRING.value:
+        value = value.replace("'", "\''")
+    value = value.strip()
+    return value
+
+
 def format_task_params(passed_params):
     formatted_params = []
     for passed_param in passed_params:
         if passed_param.param.flag:
             # If the param is of type Bool and is positive, no value has to be passed, only the flag
-            if passed_param.param.type == Parameter.Type.BOOL.value and passed_param.value:
-                formatted_params.append("{}".format(passed_param.param.flag))
-            elif passed_param.param.type == Parameter.Type.FILE.value:
-                filename = re.escape(passed_param.value)
-                formatted_params.append("{} {}".format(passed_param.param.flag, filename))
+            if passed_param.param.type == Parameter.Type.BOOL.value:
+                formatted_params.append(passed_param.param.flag)
+                continue
+
+            value = format_value(passed_param.value, passed_param.param.type)
+            if passed_param.param.flag[-1] == '=':
+                formatted_params.append("{}{}".format(passed_param.param.flag, value))
             else:
-                # If at the end of the flag there is a '=' then no space is required between flag and value
-                format_string = "{} {}"
-                if passed_param.param.flag[-1] == "=":
-                    format_string = "{}{}"
+                formatted_params.append(passed_param.param.flag)
+                formatted_params.append(value)
 
-                value = re.sub("[!,*)#%(&$?\\\^'/`\"]", ' ', passed_param.value)
-
-                if passed_param.param.type == Parameter.Type.STRING.value and " " in value:
-                    formatted_params.append(
-                        format_string.format(passed_param.param.flag, "\"{}\"".format(value).strip()))
-                else:
-                    formatted_params.append(format_string.format(passed_param.param.flag, value).strip())
         else:
             formatted_params.append(passed_param.value)
 
