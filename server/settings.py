@@ -8,7 +8,7 @@ env = Env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # DRMAA library for submission server
-os.environ.setdefault("DRMAA_LIBRARY_PATH", "/usr/lib/slurm-drmaa/libdrmaa.so")
+os.environ.setdefault("DRMAA_LIBRARY_PATH", "/usr/lib/slurm-drmaa/lib/libdrmaa.so")
 
 SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2')
 
@@ -62,7 +62,7 @@ LOGGING = {
                         "filename" : SUBMISSION_LOGGER_PTH,
                 },
                 "drm"       : {
-                        "level"    : "INFO",
+                        "level"    : "DEBUG",
                         "class"    : "logging.FileHandler",
                         "filters"  : ['shorten_name'],
                         "formatter": "drm_formatter",
@@ -86,7 +86,7 @@ LOGGING = {
         'loggers'                 : {
                 'submission_lib': {
                         'handlers' : ['drm'],
-                        'level'    : 'INFO',
+                        'level'    : 'DEBUG',
                         'propagate': True,
                 },
                 'submission'    : {
