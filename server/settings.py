@@ -9,6 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # DRMAA library for submission server
 os.environ.setdefault("DRMAA_LIBRARY_PATH", "/usr/lib/slurm-drmaa/lib/libdrmaa.so")
+os.environ.setdefault("SLURM_DRMAA_USE_SLURMDBD", "1")
 
 SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2')
 
