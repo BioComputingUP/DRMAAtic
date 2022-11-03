@@ -29,7 +29,9 @@ class TaskAdmin(admin.ModelAdmin):
     actions = ["delete_and_remove"]
 
     list_display = ('uuid', 'task_name', '_status', 'outputs', 'deleted', 'creation_date', 'user', '_sender_ip_addr')
+
     readonly_fields = ()
+
     inlines = [TaskParamAdminInline]
 
     def outputs(self, obj):
