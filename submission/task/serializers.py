@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import exceptions, serializers
 
 from server.settings import SUBMISSION_OUTPUT_DIR, SUBMISSION_SCRIPT_DIR
@@ -8,7 +10,6 @@ from submission.script.models import Script
 from submission.task.models import Task
 from submission.utils import create_task_folder, format_task_params, get_ip, get_params
 from submission_lib.manage import start_job
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +39,20 @@ class TaskSerializer(serializers.ModelSerializer):
     params = TaskParameterSerializer(many=True, read_only=True, required=False)
     status = serializers.CharField(read_only=True)
     parent_task = TaskParentField(queryset=Task.objects.all(), required=False)
-
+    child_tasks = serializers.SerializerMethodField(read_only=True, method_name='get_children')
     files_name = serializers.JSONField(required=False, read_only=True)
 
     task_description = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "task_description", "parent_task", "creation_date", "status", "files_name",
+        fields = ["uuid", "task_name", "task_description", "parent_task", "child_tasks", "creation_date", "status",
+                  "files_name",
                   "params"]
+
+    def get_children(self, obj):
+        tasks_with_parent = Task.objects.filter(parent_task=obj)
+        return [task.uuid for task in tasks_with_parent] if tasks_with_parent else None
 
     def to_representation(self, instance):
         """
@@ -138,13 +144,15 @@ class TaskSerializer(serializers.ModelSerializer):
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the task as rejected
             task.status = Task.Status.REJECTED.value
-            logger.warning("Task {}, {}, was rejected".format(task.uuid, task.task_name.name), extra={'request': self.context.get('request')})
+            logger.warning("Task {}, {}, was rejected".format(task.uuid, task.task_name.name),
+                           extra={'request': self.context.get('request')})
 
         else:
             # Otherwise, we associate the job id of the DRM and set the status to CREATED
             task.drm_job_id = j_id
             task.status = Task.Status.CREATED.value
-            logger.info("Task {} ({}) was created, DRM {}".format(task.uuid, task.task_name.name, j_id), extra={'request': self.context.get('request')})
+            logger.info("Task {} ({}) was created, DRM {}".format(task.uuid, task.task_name.name, j_id),
+                        extra={'request': self.context.get('request')})
 
         return task
 
@@ -158,5 +166,6 @@ class SuperTaskSerializer(TaskSerializer):
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "task_description", "parent_task", "sender_ip_addr", "status", "deleted",
+        fields = ["uuid", "task_name", "task_description", "parent_task", "child_tasks", "sender_ip_addr", "status",
+                  "deleted",
                   "drm_job_id", "files_name", "user", "creation_date", "update_date", "params"]
