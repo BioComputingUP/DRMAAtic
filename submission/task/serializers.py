@@ -119,6 +119,10 @@ class TaskSerializer(serializers.ModelSerializer):
 
         p_task = task.get_first_ancestor()
 
+        # Take the first 8 characters of the task uuid to use as outfile names
+        out_file = "{}_out.txt".format(str(task.uuid)[:8])
+        err_file = "{}_err.txt".format(str(task.uuid)[:8])
+
         try:
             j_id, name = start_job(**drm_params,
                                    task_name=task.task_name.name,
@@ -134,7 +138,9 @@ class TaskSerializer(serializers.ModelSerializer):
                                    begin_index=task.task_name.begin_index,
                                    end_index=task.task_name.end_index,
                                    step_index=task.task_name.step_index,
-                                   account=task.user.group_name() if task.user else None)
+                                   account=task.user.group_name() if task.user else None,
+                                   stdout_file=out_file,
+                                   stderr_file=err_file)
         except Exception:
             task.delete_from_file_system()
             logger.warning("Task {}, {}, something went wrong starting this job".format(task.uuid, task.task_name.name),
