@@ -24,8 +24,8 @@ class DRMJobTemplate(models.Model):
     # Number of cpus for the task
     cpus_per_task = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(64)])
     n_tasks = models.PositiveIntegerField(default=1)
-    mem_per_node = models.CharField(max_length=20, null=True, blank=True)
-    mem_per_cpu = models.CharField(max_length=20, null=True, blank=True)
+    mem_per_node = models.CharField(max_length=20, null=True, blank=True, verbose_name="Memory per node (MB)")
+    mem_per_cpu = models.CharField(max_length=20, null=True, blank=True, verbose_name="Memory per cpu (MB)")
 
     def __str__(self):
         return self.name
