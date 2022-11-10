@@ -141,9 +141,9 @@ class TaskSerializer(serializers.ModelSerializer):
                                    account=task.user.group_name() if task.user else None,
                                    stdout_file=out_file,
                                    stderr_file=err_file)
-        except Exception:
+        except Exception as e:
             task.delete_from_file_system()
-            logger.warning("Task {}, {}, something went wrong starting this job".format(task.uuid, task.task_name.name),
+            logger.warning("Task {}, {}, something went wrong starting this job: {}".format(task.uuid, task.task_name.name, e),
                            extra={'request': self.context.get('request')})
             raise exceptions.APIException(detail='An error occurred while starting the task')
 
