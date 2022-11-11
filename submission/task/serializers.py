@@ -46,7 +46,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "task_description", "parent_task", "creation_date", "status",
+        fields = ["uuid", "task_name", "descendants", "task_description", "parent_task", "creation_date", "status",
                   "files_name", "params"]
 
     def get_descendants(self, task):
