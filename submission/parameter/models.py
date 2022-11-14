@@ -26,7 +26,6 @@ class Parameter(models.Model):
     private = models.BooleanField(default=False, null=False, blank=False)
     # Define if parameter can be changed by users or only admin
     required = models.BooleanField(default=True, null=False, blank=False)
-    to_script = models.BooleanField(default=True, null=False, blank=False)
 
     script = models.ForeignKey(Script, related_name="param", on_delete=models.CASCADE, null=True)
 
