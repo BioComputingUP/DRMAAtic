@@ -42,7 +42,7 @@ class SuperParameterSerializer(ParameterSerializer):
 
     class Meta:
         model = Parameter
-        fields = ["name", "flag", "type", "default", "description", "required"]
+        fields = ["name", "flag", "type", "default", "description", "required", "to_script"]
 
     def to_representation(self, parameter):
         return serializers.ModelSerializer.to_representation(self, parameter)

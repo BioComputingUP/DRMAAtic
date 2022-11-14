@@ -4,7 +4,7 @@ import os
 import re
 import zipfile
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
 from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
@@ -24,9 +24,12 @@ def format_value(value, param_type):
     return value
 
 
-def format_task_params(passed_params):
+def format_task_params(passed_params: List[TaskParameter]):
     formatted_params = []
-    passed_params = list(sorted(passed_params, key=lambda param: param.param.flag, reverse=False))
+    # Filter the parameters that are not supposed to go to the script, flag to_script = False
+    filtered_params = list(filter(lambda x: x.to_script, passed_params))
+
+    passed_params = list(sorted(filtered_params, key=lambda param: param.param.flag if param.param.flag else 0, reverse=False))
     for passed_param in passed_params:
         if passed_param.param.flag:
             # If the param is of type Bool and is positive, no value has to be passed, only the flag
