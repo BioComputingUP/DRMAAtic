@@ -42,7 +42,7 @@ class Parameter(models.Model):
 class TaskParameter(models.Model):
     task = models.ForeignKey("Task", related_name="params", on_delete=models.CASCADE, null=True)
     param = models.ForeignKey(Parameter, on_delete=models.CASCADE)
-    value = models.CharField(max_length=1000)
+    value = models.TextField(max_length=5000)
 
     def __str__(self):
         return "{} : {} ".format(self.param, self.value)
