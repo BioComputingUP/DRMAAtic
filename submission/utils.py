@@ -27,7 +27,7 @@ def format_value(value, param_type):
 def format_task_params(passed_params: List[TaskParameter]):
     formatted_params = []
     # Filter the parameters that are not supposed to go to the script, flag to_script = False
-    filtered_params = list(filter(lambda x: x.to_script, passed_params))
+    filtered_params = list(filter(lambda x: x.param.to_script, passed_params))
 
     passed_params = list(sorted(filtered_params, key=lambda param: param.param.flag if param.param.flag else 0, reverse=False))
     for passed_param in passed_params:
