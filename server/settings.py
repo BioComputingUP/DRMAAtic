@@ -25,7 +25,9 @@ CORS_ALLOWED_ORIGINS = [
         'https://assessment.proteinsemble.org',
         'https://biocomputingup.it',
         'https://www.biocomputingup.it',
-        'https://protein.bio.unipd.it'
+        'https://protein.bio.unipd.it',
+        'https://dev.caid.idpcentral.org',
+        'https://caid.idpcentral.org',
 ]
 
 # HTTPS flags
