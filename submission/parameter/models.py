@@ -50,8 +50,6 @@ class TaskParameter(models.Model):
     # Override necessary to run validation when a model is created via create() method
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.validate_value(self.value)
-        # Remove the \r\n from the value
-        self.value = self.value.replace("\r\n", "\n")
         super(TaskParameter, self).save()
 
     # Validate the value passed in input, that has to be of the type specified in the Param
