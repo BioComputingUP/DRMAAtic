@@ -29,12 +29,18 @@ class TaskAdmin(admin.ModelAdmin):
     actions = ["delete_and_remove"]
 
     list_display = ('uuid', 'task_name', '_status', 'outputs', 'deleted', 'creation_date', 'user', '_sender_ip_addr')
+
     readonly_fields = ()
+
     inlines = [TaskParamAdminInline]
 
     def outputs(self, obj):
+        out_file = "{}_out.txt".format(str(obj.uuid)[:8])
+        err_file = "{}_err.txt".format(str(obj.uuid)[:8])
+
+        url = "https://scheduler.biocomputingup.it/task/"
         return mark_safe(
-                f'<a href=https://scheduler.biocomputingup.it/task/{obj.uuid}/file/log.o>out</a> / <a href="https://scheduler.biocomputingup.it/task/{obj.uuid}/file/log.e" target="_blank">err</a>  / <a href=https://scheduler.biocomputingup.it/task/{obj.uuid}/file>files</a>'
+                f'<a href={url}{obj.uuid}/file/{out_file}>out</a> / <a href="{url}{obj.uuid}/file/{err_file}" target="_blank">err</a>  / <a href={url}{obj.uuid}/file>files</a>'
         )
 
     outputs.short_description = 'outputs'

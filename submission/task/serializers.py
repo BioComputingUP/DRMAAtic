@@ -39,20 +39,28 @@ class TaskSerializer(serializers.ModelSerializer):
     params = TaskParameterSerializer(many=True, read_only=True, required=False)
     status = serializers.CharField(read_only=True)
     parent_task = TaskParentField(queryset=Task.objects.all(), required=False)
-    child_tasks = serializers.SerializerMethodField(read_only=True, method_name='get_children')
+    descendants = serializers.SerializerMethodField(read_only=True, method_name='get_descendants')
     files_name = serializers.JSONField(required=False, read_only=True)
 
     task_description = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "task_description", "parent_task", "child_tasks", "creation_date", "status",
-                  "files_name",
-                  "params"]
+        fields = ["uuid", "task_name", "descendants", "task_description", "parent_task", "creation_date", "status",
+                  "files_name", "params"]
 
-    def get_children(self, obj):
-        tasks_with_parent = Task.objects.filter(parent_task=obj)
-        return [task.uuid for task in tasks_with_parent] if tasks_with_parent else None
+    def get_descendants(self, task):
+        """
+        Get all the descendants of a task
+        """
+        descendants = []
+        for child in Task.objects.filter(parent_task=task):
+            descendants.append(child.uuid)
+            next_descendants = self.get_descendants(child)
+            if next_descendants:
+                descendants.extend(next_descendants)
+
+        return descendants if descendants else None
 
     def to_representation(self, instance):
         """
@@ -119,6 +127,10 @@ class TaskSerializer(serializers.ModelSerializer):
 
         p_task = task.get_first_ancestor()
 
+        # Take the first 8 characters of the task uuid to use as outfile names
+        out_file = "{}_out.txt".format(str(task.uuid)[:8])
+        err_file = "{}_err.txt".format(str(task.uuid)[:8])
+
         try:
             j_id, name = start_job(**drm_params,
                                    task_name=task.task_name.name,
@@ -134,11 +146,14 @@ class TaskSerializer(serializers.ModelSerializer):
                                    begin_index=task.task_name.begin_index,
                                    end_index=task.task_name.end_index,
                                    step_index=task.task_name.step_index,
-                                   account=task.user.group_name() if task.user else None)
-        except Exception:
+                                   account=task.user.group_name() if task.user else None,
+                                   stdout_file=out_file,
+                                   stderr_file=err_file)
+        except Exception as e:
             task.delete_from_file_system()
-            logger.warning("Task {}, {}, something went wrong starting this job".format(task.uuid, task.task_name.name),
-                           extra={'request': self.context.get('request')})
+            logger.warning(
+                "Task {}, {}, something went wrong starting this job: {}".format(task.uuid, task.task_name.name, e),
+                extra={'request': self.context.get('request')})
             raise exceptions.APIException(detail='An error occurred while starting the task')
 
         if j_id is None:
@@ -166,6 +181,6 @@ class SuperTaskSerializer(TaskSerializer):
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "task_description", "parent_task", "child_tasks", "sender_ip_addr", "status",
+        fields = ["uuid", "task_name", "task_description", "parent_task", "descendants", "sender_ip_addr", "status",
                   "deleted",
                   "drm_job_id", "files_name", "user", "creation_date", "update_date", "params"]
