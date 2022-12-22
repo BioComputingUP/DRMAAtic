@@ -107,7 +107,6 @@ def get_params(user_param, task: Task, parameters_of_task):
                                 "The value for the parameter {} is too long, the maximum permitted length is 5000"
                                 .format(param.name)
                         )
-                    user_param[param.name] = user_param[param.name].replace("\r\n", "\n")
                     new_param = TaskParameter.objects.create(task=task, param=param,
                                                              value=user_param[param.name])
                 created_params.add(new_param)
