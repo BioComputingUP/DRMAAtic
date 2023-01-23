@@ -18,7 +18,7 @@ os.environ['DJANGO_CSRF_TRUSTED_ORIGINS'] = "https://scheduler.biocomputingup.it
 os.environ['SUBMISSION_SCRIPT_DIR'] = '/home/django/scripts'
 os.environ['SUBMISSION_OUTPUT_DIR'] = '/home/django/outputs'
 
-os.environ['SUBMISSION_LOGGER_PTH'] = '/home/django/logger.log'
+os.environ['SUBMISSION_LOGGER_PTH'] = '/home/django/logs/submission_ws.log'
 
 # ORCID AUTHENTICATION
 os.environ['SUBMISSION_ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production

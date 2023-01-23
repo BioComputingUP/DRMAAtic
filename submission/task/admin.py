@@ -72,10 +72,16 @@ class TaskAdmin(admin.ModelAdmin):
         self.delete_queryset(request, queryset)
         queryset.delete()
 
+    @admin.action(description="Update DRM status")
+    def update_drm_status(self, request, queryset):
+        for task in queryset:
+            task.update_drm_status()
+
+
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         # Update the drm status of the task
-        for task in queryset:
-            task.update_drm_status()
+        # for task in queryset:
+        #     task.update_drm_status()
 
         return queryset
