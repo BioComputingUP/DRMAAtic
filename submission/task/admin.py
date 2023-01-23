@@ -26,7 +26,7 @@ class TaskAdmin(admin.ModelAdmin):
             "creation_date",
     )
 
-    actions = ["delete_and_remove"]
+    actions = ["delete_and_remove", "update_drm_status"]
 
     list_display = ('uuid', 'task_name', '_status', 'outputs', 'deleted', 'creation_date', 'user', '_sender_ip_addr')
 
