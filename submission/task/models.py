@@ -42,12 +42,21 @@ class Task(models.Model):
         DONE = "job finished normally"
         FAILED = "job finished, but failed"
 
+    class DependencyTypes(models.TextChoices):
+        AFTER_ANY = "afterany"
+        AFTER_OK = "afterok"
+        AFTER_NOT_OK = "afternotok"
+
     _status = models.CharField(max_length=200, choices=Status.choices, blank=False, null=False, default=Status.RECEIVED)
 
     deleted = models.BooleanField(default=False, null=False, blank=False)
 
     parent_task = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     _drm_job_id = models.PositiveIntegerField(null=True, blank=True)
+
+    dependencies = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='dependents')
+    dependency_type = models.CharField(max_length=20, choices=DependencyTypes.choices, blank=True, null=True,
+                                       default=None)
 
     def has_finished(self):
         return self.status in {self.Status.DONE.value, self.Status.FAILED.value} or self.deleted

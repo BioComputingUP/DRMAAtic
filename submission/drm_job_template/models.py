@@ -1,14 +1,19 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from server import settings
+
 
 class DRMJobTemplate(models.Model):
     class DRMQueue(models.Choices):
-        SUPER = "super"
-        ULTRA = "ultra"
-        MEGA = "mega"
-        LONG = "long"
-        LONG_ALL = "long-all"
+        if settings.DEBUG:
+            LOCAL = "local"
+        else:
+            SUPER = "super"
+            ULTRA = "ultra"
+            MEGA = "mega"
+            LONG = "long"
+            LONG_ALL = "long-all"
 
     class DRMEmailType(models.Choices):
         ALL = "ALL"
@@ -20,7 +25,7 @@ class DRMJobTemplate(models.Model):
     # Name of the stderr file
     # stderr_file = models.CharField(max_length=50, default="log.e", null=False, blank=False)
     # Name of the queue where the scripts has to run
-    queue = models.CharField(max_length=20, choices=DRMQueue.choices, default=DRMQueue.SUPER, null=False, blank=False)
+    queue = models.CharField(max_length=20, choices=DRMQueue.choices, default=DRMQueue.choices[0], null=False, blank=False)
     # Number of cpus for the task
     cpus_per_task = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(64)])
     n_tasks = models.PositiveIntegerField(default=1)

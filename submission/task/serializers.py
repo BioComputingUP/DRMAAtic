@@ -30,7 +30,7 @@ class TaskParentField(serializers.RelatedField):
                 return task
             except Task.DoesNotExist:
                 raise serializers.ValidationError({
-                        'parent_task': 'Specified task does not exists.'
+                    'parent_task': 'Specified task does not exists.'
                 })
         return None
 
@@ -40,13 +40,19 @@ class TaskSerializer(serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     parent_task = TaskParentField(queryset=Task.objects.all(), required=False)
     descendants = serializers.SerializerMethodField(read_only=True, method_name='get_descendants')
+    # The dependencies are passed as a list of UUIDs separated by commas
+    dependencies = serializers.CharField(required=False, write_only=True)
+    depends_on = serializers.SlugRelatedField(many=True, read_only=True, required=False, slug_field='uuid',
+                                              source='dependencies')
     files_name = serializers.JSONField(required=False, read_only=True)
 
     task_description = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "descendants", "task_description", "parent_task", "creation_date", "status",
+        fields = ["uuid", "task_name", "descendants", "dependencies", "depends_on", "dependency_type",
+                  "task_description",
+                  "parent_task", "creation_date", "status",
                   "files_name", "params"]
 
     def get_descendants(self, task):
@@ -131,6 +137,22 @@ class TaskSerializer(serializers.ModelSerializer):
         out_file = "{}_out.txt".format(str(task.uuid)[:8])
         err_file = "{}_err.txt".format(str(task.uuid)[:8])
 
+        # Get all the dependencies of the task and the type of dependency
+        if "dependencies" in validated_data.keys():
+            task.dependencies.set([Task.objects.get(uuid=dep) for dep in validated_data["dependencies"].split(",")])
+
+            if "dependency_type" in validated_data.keys():
+                dependency_type = validated_data["dependency_type"]
+                if dependency_type in Task.DependencyTypes.values:
+                    task.dependency_type = dependency_type
+                else:
+                    raise exceptions.NotAcceptable("The dependency_type parameter is not valid")
+            else:
+                task.dependency_type = Task.DependencyTypes.AFTER_ANY
+
+        dependencies = [t.drm_job_id for t in task.dependencies.all()] if task.dependencies.exists() else None
+        dependency_type = task.dependency_type if dependencies else None
+
         try:
             j_id, name = start_job(**drm_params,
                                    task_name=task.task_name.name,
@@ -140,7 +162,8 @@ class TaskSerializer(serializers.ModelSerializer):
                                    command=task.task_name.command,
                                    script_args=formatted_params,
                                    working_dir=p_task.uuid,
-                                   dependency=parent_task.drm_job_id if parent_task is not None else None,
+                                   dependencies=dependencies,
+                                   dependency_type=dependency_type,
                                    clock_time_limit=bytes(task.task_name.max_clock_time, encoding='utf8'),
                                    is_array=task.task_name.is_array,
                                    begin_index=task.task_name.begin_index,
@@ -169,6 +192,8 @@ class TaskSerializer(serializers.ModelSerializer):
             logger.info("Task {} ({}) was created, DRM {}".format(task.uuid, task.task_name.name, j_id),
                         extra={'request': self.context.get('request')})
 
+        task.save()
+
         return task
 
 
@@ -181,6 +206,8 @@ class SuperTaskSerializer(TaskSerializer):
 
     class Meta:
         model = Task
-        fields = ["uuid", "task_name", "task_description", "parent_task", "descendants", "sender_ip_addr", "status",
-                  "deleted",
+        fields = ["uuid", "task_name", "task_description", "parent_task", "descendants", "dependencies",
+                  "depends_on",
+                  "dependency_type",
+                  "sender_ip_addr", "status", "deleted",
                   "drm_job_id", "files_name", "user", "creation_date", "update_date", "params"]
