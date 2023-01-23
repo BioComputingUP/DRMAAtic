@@ -60,29 +60,29 @@ LOGGING = {
     "handlers": {
         "ip_request": {
             "level": "INFO",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "formatter": "request_formatter",
             'filters': ['append_ip', 'shorten_name'],
             "filename": SUBMISSION_LOGGER_PTH,
             "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 5,
+            "backupCount": 5
         },
         "drm": {
             "level": "DEBUG",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "filters": ['shorten_name'],
             "formatter": "drm_formatter",
             "filename": SUBMISSION_LOGGER_PTH,
             "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 5,
+            "backupCount": 5
         },
         "base": {
             "level": "INFO",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "formatter": "drm_formatter",
             "filename": SUBMISSION_LOGGER_PTH,
             "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 5,
+            "backupCount": 5
         },
     },
     'filters': {
