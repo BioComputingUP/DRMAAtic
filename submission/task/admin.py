@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
 from rangefilter.filters import DateRangeFilter
 
@@ -13,17 +14,17 @@ class TaskAdmin(admin.ModelAdmin):
         css = {'all': ('css/mymodel_list.css',)}
 
     list_filter = [
-            "task_name",
-            "_status",
-            "deleted",
-            ("creation_date", DateRangeFilter),
-            "user",
+        "task_name",
+        "_status",
+        "deleted",
+        ("creation_date", DateRangeFilter),
+        "user",
     ]
     search_fields = (
-            "uuid",
-            "task_name__name",
-            "user__username",
-            "creation_date",
+        "uuid",
+        "task_name__name",
+        "user__username",
+        "creation_date",
     )
 
     actions = ["delete_and_remove", "update_drm_status"]
@@ -34,13 +35,19 @@ class TaskAdmin(admin.ModelAdmin):
 
     inlines = [TaskParamAdminInline]
 
+    def get_action_choices(self, request, default_choices=BLANK_CHOICE_DASH):
+        choices = super(TaskAdmin, self).get_action_choices(request, default_choices)
+        choices.pop(0)
+        choices.reverse()
+        return choices
+
     def outputs(self, obj):
         out_file = "{}_out.txt".format(str(obj.uuid)[:8])
         err_file = "{}_err.txt".format(str(obj.uuid)[:8])
 
         url = "https://scheduler.biocomputingup.it/task/"
         return mark_safe(
-                f'<a href={url}{obj.uuid}/file/{out_file}>out</a> / <a href="{url}{obj.uuid}/file/{err_file}" target="_blank">err</a>  / <a href={url}{obj.uuid}/file>files</a>'
+            f'<a href={url}{obj.uuid}/file/{out_file}>out</a> / <a href="{url}{obj.uuid}/file/{err_file}" target="_blank">err</a>  / <a href={url}{obj.uuid}/file>files</a>'
         )
 
     outputs.short_description = 'outputs'
@@ -76,7 +83,6 @@ class TaskAdmin(admin.ModelAdmin):
     def update_drm_status(self, request, queryset):
         for task in queryset:
             task.update_drm_status()
-
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
