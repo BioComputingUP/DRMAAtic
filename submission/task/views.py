@@ -139,7 +139,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         # self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['POST'], detail=True, description="Stop a task from running")
+    @action(methods=['PUT'], detail=True, description="Stop a task from running")
     def stop(self, request, *args, **kwargs):
         """
         Stop the task, stopping it in DRM, but preserving it in the database

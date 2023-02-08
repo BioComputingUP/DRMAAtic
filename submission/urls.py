@@ -16,7 +16,7 @@ TaskFileView = submission.task.views.TaskViewSet.as_view({'get': 'file'})
 # Define download view
 TaskDownloadView = submission.task.views.TaskViewSet.as_view({'get': 'download'})
 # Define stop view
-TaskStopView = submission.task.views.TaskViewSet.as_view({'post': 'stop'})
+TaskStopView = submission.task.views.TaskViewSet.as_view({'put': 'stop'})
 
 # Define URL patterns
 urlpatterns = [
