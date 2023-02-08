@@ -15,6 +15,8 @@ router.register(r'token', views.TokenViewSet, basename='Token')
 TaskFileView = submission.task.views.TaskViewSet.as_view({'get': 'file'})
 # Define download view
 TaskDownloadView = submission.task.views.TaskViewSet.as_view({'get': 'download'})
+# Define stop view
+TaskStopView = submission.task.views.TaskViewSet.as_view({'post': 'stop'})
 
 # Define URL patterns
 urlpatterns = [
@@ -22,6 +24,8 @@ urlpatterns = [
         re_path(r'^task/(?P<uuid>[^/.]+)/download/$', TaskDownloadView),
         # Register custom route for files
         re_path(r'^task/(?P<uuid>[^/.]+)/file/(?P<path>.*)$', TaskFileView),
+        # Register custom route for stop
+        re_path(r'^task/(?P<uuid>[^/.]+)/stop/$', TaskStopView),
         # Register default router
         path(r'', include(router.urls))
 ]
