@@ -23,6 +23,19 @@ os.environ['SUBMISSION_LOGGER_PTH'] = '/home/django/logs/submission_ws.log'
 # ORCID AUTHENTICATION
 os.environ['SUBMISSION_ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production
 
+os.environ["SUBMISSION_WS_URL"] = 'https://dev.scheduler.biocomputingup.it'
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'submission_ws',
+        'USER': 'maria',
+        'PASSWORD': 'password',
+        'HOST': '/var/run/mysqld/mysqld.sock',
+        'PORT': '3306',
+    }
+}
 
 application = get_wsgi_application()

@@ -18,10 +18,7 @@ SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv
 DEBUG = env.bool('DJANGO_DEBUG', True)
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
-if DEBUG:
-    WS_URL = 'http://0.0.0.0:8300'
-else:
-    WS_URL = 'https://scheduler.biocomputingup.it'
+SUBMISSION_WS_URL = env.str('SUBMISSION_WS_URL', '0.0.0.0:8300')
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
@@ -188,20 +185,33 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'old': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'submission_ws',
-        'USER': 'maria',
-        'PASSWORD': 'password',
-        'HOST': '/var/run/mysqld/mysqld.sock',
-        'PORT': '3306',
+# Check if the database is already defined
+if 'DATABASES' not in locals():
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'submission_ws',
+            'USER': 'maria',
+            'PASSWORD': 'password',
+            'HOST': '/var/run/mysqld/mysqld.sock',
+            'PORT': '3306',
+        }
     }
-}
+
+# DATABASES = {
+#     'old': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     },
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'submission_ws',
+#         'USER': 'maria',
+#         'PASSWORD': 'password',
+#         'HOST': '/var/run/mysqld/mysqld.sock',
+#         'PORT': '3306',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

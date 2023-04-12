@@ -2,7 +2,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ['DJANGO_SECRET_KEY'] = 'f81998978f1ff1aa6ead635a63b9070df70978947686751d9b53eeff43ee7e47f9e592e65239a09142946dc281c6e90550d04d54512043f4c4860a04ba1360e74830f8b67a362eb6b20babf3ef5c15913729d6d9a635864e1b76954504bb9ad92e733e15'
+os.environ['DJANGO_SECRET_KEY'] = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 os.environ['DJANGO_DEBUG'] = 'True'
@@ -23,6 +23,19 @@ os.environ['SUBMISSION_LOGGER_PTH'] = '/var/local/webservers/logs/scheduler-dev/
 # ORCID AUTH
 os.environ['SUBMISSION_ORCID_AUTH_URL'] = r'https://orcid.org/v3.0/{0:s}/record'  # Production
 
+os.environ["SUBMISSION_WS_URL"] = 'https://dev.scheduler.biocomputingup.it'
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'submission_ws_dev',
+        'USER': 'maria',
+        'PASSWORD': 'password',
+        'HOST': '/var/run/mysqld/mysqld.sock',
+        'PORT': '3306',
+    }
+}
 
 application = get_wsgi_application()

@@ -1,22 +1,12 @@
-from django import forms
 from django.contrib import admin
 from django.db.models import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
 from rangefilter.filters import DateRangeFilter
 
-from server.settings import WS_URL
+from server.settings import SUBMISSION_WS_URL
 from submission.job.models import Job
 from submission.parameter.admin import JobParamAdminInline
 from submission_lib.manage import terminate_job
-
-
-# class JobAdminForm(forms.ModelForm):
-#     class Meta:
-#         model = Job
-#         fields = '__all__'
-#
-#     # Change the parent job combo box to show only the job that is the parent of the current job, if any
-#     parent_job = forms.
 
 
 @admin.register(Job)
@@ -24,7 +14,8 @@ class JobAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/mymodel_list.css',)}
 
-    readonly_fields = ('uuid', 'task', 'creation_date', '_sender_ip_addr', '_drm_job_id', 'parent_job', 'dependencies', 'dependency_type', '_files_name')
+    readonly_fields = ('uuid', 'task', 'creation_date', '_sender_ip_addr',
+                       '_drm_job_id', 'parent_job', 'dependencies', 'dependency_type', '_files_name')
 
     list_filter = [
         "task",
@@ -56,7 +47,7 @@ class JobAdmin(admin.ModelAdmin):
         out_file = "{}_out.txt".format(str(obj.uuid)[:8])
         err_file = "{}_err.txt".format(str(obj.uuid)[:8])
 
-        url = "{}/job/".format(WS_URL)
+        url = "{}/job/".format(SUBMISSION_WS_URL)
         return mark_safe(
             f'<a href="{url}{obj.uuid}/file/{out_file}" target="_blank">out</a> / <a href="{url}{obj.uuid}/file/{err_file}" target="_blank">err</a>  / <a href="{url}{obj.uuid}/file" target="_blank">files</a>'
         )
