@@ -1,93 +1,47 @@
+from django import forms
 from django.contrib import admin
-from django.db.models import BLANK_CHOICE_DASH
-from django.utils.safestring import mark_safe
-from rangefilter.filters import DateRangeFilter
+from pytimeparse.timeparse import timeparse
 
-from submission.parameter.admin import TaskParamAdminInline
+from submission.parameter.admin import ParamAdminInline
 from submission.task.models import Task
-from submission_lib.manage import terminate_job
+
+
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = '__all__'
+
+    def clean_cpus(self):
+        # Get the queue and check that for that queue the number of cpus is not exceeded
+        queue = self.cleaned_data["queue"] if "queue" in self.cleaned_data else None
+        if queue is not None and self.cleaned_data["cpus"] > queue.max_cpu:
+            raise forms.ValidationError(f"Number of CPUs exceeds the maximum for the queue {queue.max_cpu}")
+        return self.cleaned_data["cpus"]
+
+    def clean_mem(self):
+        # Get the queue and check that for that queue the amount of memory is not exceeded
+        queue = self.cleaned_data["queue"] if "queue" in self.cleaned_data else None
+        if queue is not None and self.cleaned_data["mem"] > queue.max_mem:
+            raise forms.ValidationError(f"Amount of memory exceeds the maximum for the queue {queue.max_mem}MB")
+        return self.cleaned_data["mem"]
+
+    def clean__max_clock_time(self):
+        time = timeparse(self.cleaned_data["_max_clock_time"])
+        if time is None:
+            raise forms.ValidationError({'_max_clock_time': "Invalid time"})
+        if time < 60:
+            raise forms.ValidationError({'_max_clock_time': "Minimum time is 1 minute"})
+        return self.cleaned_data["_max_clock_time"]
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    class Media:
-        css = {'all': ('css/mymodel_list.css',)}
+    fields = (('name', 'command'), ('queue', 'cpus', 'mem'), 'is_output_visible', "_max_clock_time", "groups",
+              ('is_array', 'begin_index', 'end_index', 'step_index'))
+    list_display = ('name', 'command', "is_output_visible")
+    search_fields = ('name', 'command')
+    ordering = ('command', 'name')
 
-    list_filter = [
-        "task_name",
-        "_status",
-        "deleted",
-        ("creation_date", DateRangeFilter),
-        "user",
-    ]
-    search_fields = (
-        "uuid",
-        "task_name__name",
-        "user__username",
-        "creation_date",
-    )
+    form = TaskForm
 
-    actions = ["delete_and_remove", "update_drm_status"]
-
-    list_display = ('uuid', 'task_name', '_status', 'outputs', 'deleted', 'creation_date', 'user', '_sender_ip_addr')
-
-    readonly_fields = ()
-
-    inlines = [TaskParamAdminInline]
-
-    def get_action_choices(self, request, default_choices=BLANK_CHOICE_DASH):
-        choices = super(TaskAdmin, self).get_action_choices(request, default_choices)
-        choices.pop(0)
-        choices.reverse()
-        return choices
-
-    def outputs(self, obj):
-        out_file = "{}_out.txt".format(str(obj.uuid)[:8])
-        err_file = "{}_err.txt".format(str(obj.uuid)[:8])
-
-        url = "https://scheduler.biocomputingup.it/task/"
-        return mark_safe(
-            f'<a href={url}{obj.uuid}/file/{out_file}>out</a> / <a href="{url}{obj.uuid}/file/{err_file}" target="_blank">err</a>  / <a href={url}{obj.uuid}/file>files</a>'
-        )
-
-    outputs.short_description = 'outputs'
-
-    def delete_model(self, request, task):
-        # Stop the job if it is running
-        task.update_drm_status()
-        if not task.has_finished() and task.drm_job_id:
-            terminate_job(task.drm_job_id)
-        # Delete task folder and all files
-        task.delete_from_file_system()
-        task.delete()
-
-    # Overrides the default delete of bulk tasks from the admin interface with the setting of the deleted flag and removal of files from the file system
-    def delete_queryset(self, request, queryset):
-        for task in queryset:
-            task.update_drm_status()
-            # Stop the job if it is running
-            if not task.has_finished() and task.drm_job_id:
-                terminate_job(task.drm_job_id)
-            # Delete task folder and all files
-            task.delete_from_file_system()
-
-        # Set the tasks to deleted
-        queryset.update(deleted=True)
-
-    @admin.action(description="Delete and remove from database")
-    def delete_and_remove(self, request, queryset):
-        self.delete_queryset(request, queryset)
-        queryset.delete()
-
-    @admin.action(description="Update DRM status")
-    def update_drm_status(self, request, queryset):
-        for task in queryset:
-            task.update_drm_status()
-
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        # Update the drm status of the task
-        # for task in queryset:
-        #     task.update_drm_status()
-
-        return queryset
+    inlines = [ParamAdminInline, ]

@@ -45,8 +45,8 @@ class User(models.Model):
 
     # Define source choices
     SOURCES = [
-            (ORCID, 'ORCID'),
-            ('INTERNAL', 'INTERNAL')
+        (ORCID, 'ORCID'),
+        ('INTERNAL', 'INTERNAL')
     ]
 
     # Define source
@@ -66,12 +66,14 @@ class User(models.Model):
 
     token_renewal_time = models.CharField(max_length=40, blank=True, null=True)
 
-    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True)
+    group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True, blank=True)
 
-    anon_user = Group.objects.get_or_create(name='anon',
-                                            defaults={'throttling_rate_burst'    : '20/s',
-                                                      'throttling_rate_sustained': '100/d',
-                                                      'token_renewal_time'       : '3 days'})[0]
+    @property
+    def anon_user(self):
+        return Group.objects.get_or_create(name='anon',
+                                           defaults={'throttling_rate_burst': '20/s',
+                                                     'throttling_rate_sustained': '100/d',
+                                                     'token_renewal_time': '3 days'})[0]
 
     def __str__(self):
         return self.username

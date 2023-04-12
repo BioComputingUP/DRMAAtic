@@ -10,8 +10,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.settings import api_settings
 
 from server.settings import SUBMISSION_OUTPUT_DIR
-from .parameter.models import Parameter, TaskParameter
-from .task.models import Task
+from .job.models import Job
+from .parameter.models import Parameter, JobParameter
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def format_value(value, param_type):
     return value
 
 
-def format_task_params(passed_params: List[TaskParameter]):
+def format_job_params(passed_params: List[JobParameter]):
     formatted_params = []
     # Filter the parameters that are not supposed to go to the script, flag to_script = False
     passed_params = list(
@@ -61,16 +61,16 @@ def get_extension(param_name, file_name):
         return extension[-1]
 
 
-def get_params(user_param, task: Task, parameters_of_task):
+def get_params(user_param, job: Job, parameters_of_job):
     created_params = set()
     renamed_files = dict()
 
-    p_task = task.get_first_ancestor()
-    for param in parameters_of_task:
-        param = Parameter.objects.get(script=task.task_name, name=param.name)
+    p_job = job.get_first_ancestor()
+    for param in parameters_of_job:
+        param = Parameter.objects.get(job=job.task, name=param.name)
         # Param not private and user has set it
         if not param.private and param.name in user_param.keys():
-            # If the validation on the creation fails then the task (and all related param) will be deleted
+            # If the validation on the creation fails then the job (and all related param) will be deleted
             try:
                 if param.type == Parameter.Type.FILE.value:
                     files = []
@@ -92,14 +92,14 @@ def get_params(user_param, task: Task, parameters_of_task):
                         renamed_files.setdefault(file_name, file.name)
                         # Manage multiple files for a single parameter
                         files.append(file_name)
-                        file_pth = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid), file_name)
+                        file_pth = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_job.uuid), file_name)
                         # Save the file to the output directory
                         with open(file_pth, "wb+") as f:
                             for chunk in file.chunks():
                                 f.write(chunk)
 
                     files = ','.join(files)
-                    new_param = TaskParameter.objects.create(task=task, param=param, value=files)
+                    new_param = JobParameter.objects.create(job=job, param=param, value=files)
                 else:
                     # Check that the length of the value is not greater than the max length of the field (5000)
                     if len(user_param[param.name]) > 5000:
@@ -107,32 +107,32 @@ def get_params(user_param, task: Task, parameters_of_task):
                                 "The value for the parameter {} is too long, the maximum permitted length is 5000"
                                 .format(param.name)
                         )
-                    new_param = TaskParameter.objects.create(task=task, param=param,
-                                                             value=user_param[param.name])
+                    new_param = JobParameter.objects.create(job=job, param=param,
+                                                            value=user_param[param.name])
                 created_params.add(new_param)
             except ValidationError as e:
-                task.delete()
+                job.delete()
                 raise e
         # Param is required and user did not set it
         elif param.required and param.name not in user_param.keys():
-            task.delete()  # The submitted task was not created with proper params, destroy it
+            job.delete()  # The submitted job was not created with proper params, destroy it
             raise exceptions.NotAcceptable("The parameter {} must be specified for the {} task"
-                                           .format(param.name, task.task_name))
+                                           .format(param.name, job.task))
         # Param is private and has to be set
         elif param.private:
-            new_param = TaskParameter.objects.create(task=task, param=param, value=param.default)
+            new_param = JobParameter.objects.create(job=job, param=param, value=param.default)
             created_params.add(new_param)
 
-    task.files_name = renamed_files
+    job.files_name = renamed_files
 
     # Write in a file all the association between new file name and original file name, if files are passed
-    with open(os.path.join(SUBMISSION_OUTPUT_DIR, str(p_task.uuid), "files.json"), 'a') as f:
+    with open(os.path.join(SUBMISSION_OUTPUT_DIR, str(p_job.uuid), "files.json"), 'a') as f:
         json.dump(renamed_files, f)
 
     return created_params, renamed_files
 
 
-def create_task_folder(wd):
+def create_job_folder(wd):
     os.makedirs(os.path.join(SUBMISSION_OUTPUT_DIR, wd), exist_ok=True)
 
 

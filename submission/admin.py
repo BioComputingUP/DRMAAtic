@@ -3,14 +3,15 @@ import uuid
 from django.contrib.admin import display
 from django.contrib.auth import admin as auth
 
+from submission.models import *
 # noinspection PyUnresolvedReferences
-from .drm_job_template.admin import *
-from .models import *
+from submission.job.admin import *
 # noinspection PyUnresolvedReferences
-from .parameter.admin import *
-from .script.admin import *
+from submission.parameter.admin import *
 # noinspection PyUnresolvedReferences
-from .task.admin import *
+from submission.queue.admin import *
+# noinspection PyUnresolvedReferences
+from submission.task.admin import *
 
 # Register user in the admin web interface, using the default interface
 admin.site.register(Admin, auth.UserAdmin)
@@ -32,7 +33,8 @@ class GroupForm(forms.ModelForm):
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     # Define columns to show
-    list_display = ('name', 'has_full_access', 'throttling_rate_burst', 'throttling_rate_sustained', 'token_renewal_time')
+    list_display = (
+    'name', 'has_full_access', 'throttling_rate_burst', 'throttling_rate_sustained', 'token_renewal_time')
     form = GroupForm
 
 
@@ -41,13 +43,14 @@ class GroupAdmin(admin.ModelAdmin):
 class TokenAdmin(admin.ModelAdmin):
     model = Token
     list_filter = [
-            "user__username",
+        "user__username",
     ]
     search_fields = [
-            "user__username",
+        "user__username",
     ]
     # Define columns to show
     list_display = ('get_short_hash', 'get_user_source', 'get_user_name', 'created', 'expires')
+
     # Define readonly fields
 
     def get_changeform_initial_data(self, request):

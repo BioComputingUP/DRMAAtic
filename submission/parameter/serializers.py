@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
 
-from submission.parameter.models import Parameter, TaskParameter
+from submission.parameter.models import Parameter, JobParameter
 from submission.utils import is_user_admin
 
 
@@ -27,11 +27,11 @@ class ParameterSerializer(serializers.ModelSerializer):
         if attrs["private"] and attrs["required"]:
             raise serializers.ValidationError("Private and Required fields can't be set together")
         # Special flag for the task that needs to be executed
-        if attrs["name"] == "task_name":
-            raise serializers.ValidationError("task_name cannot be set as name of a parameter")
+        if attrs["name"] == "task":
+            raise serializers.ValidationError("'task' cannot be set as name of a parameter")
         # Special flag to refer to another task already submitted (via uuid)
-        if attrs["name"] == "parent_task":
-            raise serializers.ValidationError("parent_task cannot be set as name of a parameter")
+        if attrs["name"] == "parent_job":
+            raise serializers.ValidationError("parent_job cannot be set as name of a parameter")
         return attrs
 
 
@@ -61,5 +61,5 @@ class TaskParameterSerializer(serializers.ModelSerializer):
             return None
 
     class Meta:
-        model = TaskParameter
+        model = JobParameter
         fields = ["name", "value"]

@@ -1,7 +1,7 @@
 from django.db import models
 from rest_framework import serializers
 
-from submission.script.models import Script
+from submission.task.models import Task
 
 
 class Parameter(models.Model):
@@ -27,7 +27,7 @@ class Parameter(models.Model):
     # Define if parameter can be changed by users or only admin
     required = models.BooleanField(default=True, null=False, blank=False)
 
-    script = models.ForeignKey(Script, related_name="param", on_delete=models.CASCADE, null=True)
+    task = models.ForeignKey(Task, related_name="param", on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         if self.flag:
@@ -36,11 +36,11 @@ class Parameter(models.Model):
             return "{} {}".format(self.name, self.default).strip()
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["name", "script"], name="param_name")]
+        constraints = [models.UniqueConstraint(fields=["name", "task"], name="param_name")]
 
 
-class TaskParameter(models.Model):
-    task = models.ForeignKey("Task", related_name="params", on_delete=models.CASCADE, null=True)
+class JobParameter(models.Model):
+    job = models.ForeignKey("Job", related_name="params", on_delete=models.CASCADE, null=True)
     param = models.ForeignKey(Parameter, on_delete=models.CASCADE)
     value = models.TextField(max_length=5000)
 
@@ -50,7 +50,7 @@ class TaskParameter(models.Model):
     # Override necessary to run validation when a model is created via create() method
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.validate_value(self.value)
-        super(TaskParameter, self).save()
+        super(JobParameter, self).save()
 
     # Validate the value passed in input, that has to be of the type specified in the Param
     def validate_value(self, value: str):
@@ -66,5 +66,5 @@ class TaskParameter(models.Model):
 
         except ValueError:
             raise serializers.ValidationError(
-                    "The value for the {} parameter has to be of type {}".format(self.param.name, self.param.type))
+                "The value for the {} parameter has to be of type {}".format(self.param.name, self.param.type))
         return value

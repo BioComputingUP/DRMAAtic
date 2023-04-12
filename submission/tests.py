@@ -6,9 +6,8 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from .models import Token, User
 from .drm_job_template.models import DRMJobTemplate
-from .script.models import Script
+from .models import Token, User
 from .parameter.models import Parameter
 from .task.models import Task
 

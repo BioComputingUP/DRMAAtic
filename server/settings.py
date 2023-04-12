@@ -18,6 +18,11 @@ SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv
 DEBUG = env.bool('DJANGO_DEBUG', True)
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
+if DEBUG:
+    WS_URL = 'http://0.0.0.0:8300'
+else:
+    WS_URL = 'https://scheduler.biocomputingup.it'
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
     'http://localhost:4205',
@@ -39,8 +44,8 @@ CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', [])
 ALLOWED_HOSTS = ['*']
 
 # SUBMISSION APP FOLDERS
-SUBMISSION_SCRIPT_DIR = env.str('SUBMISSION_SCRIPT_DIR', os.path.join(BASE_DIR, "scripts/"))
-SUBMISSION_OUTPUT_DIR = env.str('SUBMISSION_OUTPUT_DIR', os.path.join(BASE_DIR, "outputs/"))
+SUBMISSION_SCRIPT_DIR = env.str('SUBMISSION_SCRIPT_DIR', os.path.join(BASE_DIR, "submission_tests/scripts/"))
+SUBMISSION_OUTPUT_DIR = env.str('SUBMISSION_OUTPUT_DIR', os.path.join(BASE_DIR, "submission_tests/outputs/"))
 
 SUBMISSION_LOGGER_PTH = env.str('SUBMISSION_LOGGER_PTH', os.path.join(BASE_DIR, "logger.log"))
 

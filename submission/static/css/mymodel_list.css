@@ -2,13 +2,13 @@
     width: 50px;
 }
 
-.field-uuid {
+th.field-uuid {
     max-width: 100px;
     width: 100px;
     overflow: clip;
     text-overflow: ellipsis;
 }
 
-.field-uuid>a {
+th.field-uuid>a {
     white-space: nowrap;
 }

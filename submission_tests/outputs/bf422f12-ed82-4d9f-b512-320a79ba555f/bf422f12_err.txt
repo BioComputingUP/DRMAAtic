@@ -1,0 +1,1 @@
+/var/lib/slurm-llnl/slurmd/job01047/slurm_script: line 2: /home/alessio/projects/submission_ws/submission_tests/scripts/test.sh: Permission denied
