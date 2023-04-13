@@ -3,7 +3,9 @@ import requests
 FASTA_QUERY = ">DP0001\n" \
               "KADELERIRLRPGGKKKYRL"
 
-base_endpoint = 'http://otrera:8300/'
+# base_endpoint = 'http://otrera:8300/'
+base_endpoint = 'https://dev.scheduler.biocomputingup.it/'
+
 endpoint = {
     'job': base_endpoint + 'job/',
     'job_info': base_endpoint + 'job/{job_id}/',

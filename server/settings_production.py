@@ -1,11 +1,14 @@
-# noinspection PyUnresolvedReferences
-from settings import *
+from django.core.wsgi import get_wsgi_application
+
+from server.settings import *
 
 DEBUG = False
 
 SECRET_KEY = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
 
 CORS_ORIGIN_ALLOW_ALL = False
+
+ALLOWED_HOSTS = ['*']
 
 # HTTPS flags
 CSRF_COOKIE_SECURE = True
@@ -100,3 +103,7 @@ LOGGING = {
         },
     },
 }
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings_production')
+
+application = get_wsgi_application()
