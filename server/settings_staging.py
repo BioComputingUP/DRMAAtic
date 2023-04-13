@@ -105,4 +105,6 @@ LOGGING = {
     },
 }
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings_staging')
+
 application = get_wsgi_application()
