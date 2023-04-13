@@ -18,7 +18,6 @@ CSRF_TRUSTED_ORIGINS = [
 # SUBMISSION FOLDERS
 SUBMISSION_SCRIPT_DIR = '/home/django/scripts'
 SUBMISSION_OUTPUT_DIR = '/var/local/webservers/jobs/scheduler-dev/outputs'
-
 SUBMISSION_LOGGER_PTH = '/var/local/webservers/logs/scheduler-dev/scheduler-dev.log'
 
 # ORCID AUTH
