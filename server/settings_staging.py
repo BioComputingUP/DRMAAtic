@@ -1,4 +1,4 @@
-from django.core.wsgi import get_wsgi_application
+# from django.core.wsgi import get_wsgi_application
 
 from server.settings import *
 
@@ -107,6 +107,6 @@ LOGGING = {
     },
 }
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings_staging')
-
-application = get_wsgi_application()
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings_staging')
+#
+# application = get_wsgi_application()
