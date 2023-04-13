@@ -1,6 +1,8 @@
 # noinspection PyUnresolvedReferences
 from settings import *
 
+from django.core.wsgi import get_wsgi_application
+
 DEBUG = True
 
 DJANGO_SECRET_KEY = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
@@ -103,3 +105,5 @@ LOGGING = {
         },
     },
 }
+
+application = get_wsgi_application()
