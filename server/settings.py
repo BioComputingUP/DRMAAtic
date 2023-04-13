@@ -1,10 +1,6 @@
 import os
 from pathlib import Path
 
-from environs import Env
-
-env = Env()
-
 # The most important thing is to be build relative path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,12 +24,9 @@ CORS_ALLOWED_ORIGINS = [
 ALLOWED_HOSTS = ['*']
 
 # Set true if you want to remove the task directory when the task is deleted
-REMOVE_TASK_FILES_ON_DELETE = env.bool('REMOVE_TASK_FILES_ON_DELETE', True)
+REMOVE_TASK_FILES_ON_DELETE = True
 
-# ORCID AUTHENTICATION
-ORCID_AUTH_URL = env.str('SUBMISSION_ORCID_AUTH_URL', r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record')  # Development
-
-MAX_PAGE_SIZE = env.int('MAX_PAGE_SIZE', 1000)
+MAX_PAGE_SIZE = 1000
 
 DEFAULT_RENDERER_CLASSES = (
     'rest_framework.renderers.JSONRenderer',
@@ -94,7 +87,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'server.wsgi.application'
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

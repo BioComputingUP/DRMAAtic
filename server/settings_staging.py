@@ -7,6 +7,8 @@ DJANGO_SECRET_KEY = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
 
 DJANGO_CORS_ORIGIN_ALLOW_ALL = True
 
+ALLOWED_HOSTS = ['*']
+
 # HTTPS flags
 DJANGO_CSRF_COOKIE_SECURE = 'True'
 DJANGO_SESSION_COOKIE_SECURE = 'True'
