@@ -67,7 +67,7 @@ def get_params(user_param, job: Job, parameters_of_job):
 
     p_job = job.get_first_ancestor()
     for param in parameters_of_job:
-        param = Parameter.objects.get(job=job.task, name=param.name)
+        param = Parameter.objects.get(task=job.task, name=param.name)
         # Param not private and user has set it
         if not param.private and param.name in user_param.keys():
             # If the validation on the creation fails then the job (and all related param) will be deleted
