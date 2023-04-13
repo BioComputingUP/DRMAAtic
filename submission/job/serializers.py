@@ -22,14 +22,14 @@ class JobParentField(serializers.RelatedField):
         return instance.uuid
 
     def to_internal_value(self, value):
-        p_task_uuid = value
-        if p_task_uuid:
+        p_job_uuid = value
+        if p_job_uuid:
             try:
-                task = self.queryset.get(uuid=p_task_uuid)
-                return task
+                job = self.queryset.get(uuid=p_job_uuid)
+                return job
             except Job.DoesNotExist:
                 raise serializers.ValidationError({
-                    'parent_task': 'Specified task does not exists.'
+                    'parent_job': 'Specified job does not exists.'
                 })
         return None
 
@@ -37,7 +37,7 @@ class JobParentField(serializers.RelatedField):
 class JobSerializer(serializers.ModelSerializer):
     params = TaskParameterSerializer(many=True, read_only=True, required=False)
     status = serializers.CharField(read_only=True)
-    parent_task = JobParentField(queryset=Job.objects.all(), required=False)
+    parent_job = JobParentField(queryset=Job.objects.all(), required=False)
     descendants = serializers.SerializerMethodField(read_only=True, method_name='get_descendants')
     # The dependencies are passed as a list of UUIDs separated by commas
     dependencies = serializers.CharField(required=False, write_only=True)
@@ -45,12 +45,12 @@ class JobSerializer(serializers.ModelSerializer):
                                               source='dependencies')
     files_name = serializers.JSONField(required=False, read_only=True)
 
-    task_description = serializers.CharField(required=False, allow_blank=True)
+    job_description = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Job
         fields = ["uuid", "task", "descendants", "dependencies", "depends_on", "dependency_type",
-                  "task_description", "parent_task", "creation_date", "status", "files_name", "params"]
+                  "job_description", "parent_job", "creation_date", "status", "files_name", "params"]
 
     def get_descendants(self, job):
         """
@@ -104,7 +104,7 @@ class JobSerializer(serializers.ModelSerializer):
 
         # Create the job with the name
         job: Job = Job.objects.create(task=validated_data["task"], user=validated_data.get("user"),
-                                 parent_job=parent_job)
+                                      parent_job=parent_job)
 
         task: Task = job.task
 
@@ -131,10 +131,10 @@ class JobSerializer(serializers.ModelSerializer):
         drm_params = {
             'queue': task.queue.name,
             'cpus_per_task': str(task.cpus),
-            # 'mem_per_node': task.mem,
         }
 
-        print("drm_params", drm_params)
+        if task.queue.name != 'local':
+            drm_params['mem_per_node']: task.mem
 
         p_job = job.get_first_ancestor()
 
