@@ -1,7 +1,6 @@
-# noinspection PyUnresolvedReferences
-from .settings import *
-
 from django.core.wsgi import get_wsgi_application
+
+from server.settings import *
 
 DEBUG = True
 
