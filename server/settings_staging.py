@@ -13,7 +13,9 @@ ALLOWED_HOSTS = ['*']
 # HTTPS flags
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = 'https://dev.scheduler.biocomputingup.it'
+CSRF_TRUSTED_ORIGINS = [
+    'https://dev.scheduler.biocomputingup.it'
+]
 
 # SUBMISSION FOLDERS
 SUBMISSION_SCRIPT_DIR = '/var/local/webservers/jobs/scheduler-dev/scripts'
