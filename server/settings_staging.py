@@ -4,16 +4,16 @@ from server.settings import *
 
 DEBUG = True
 
-DJANGO_SECRET_KEY = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
+SECRET_KEY = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
 
-DJANGO_CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS = ['*']
 
 # HTTPS flags
-DJANGO_CSRF_COOKIE_SECURE = 'True'
-DJANGO_SESSION_COOKIE_SECURE = 'True'
-DJANGO_CSRF_TRUSTED_ORIGINS = 'https://dev.scheduler.biocomputingup.it'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = 'https://dev.scheduler.biocomputingup.it'
 
 # SUBMISSION FOLDERS
 SUBMISSION_SCRIPT_DIR = '/var/local/webservers/jobs/scheduler-dev/scripts'

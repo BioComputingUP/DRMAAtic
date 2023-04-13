@@ -12,10 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 os.environ.setdefault("DRMAA_LIBRARY_PATH", "/usr/lib/slurm-drmaa/lib/libdrmaa.so")
 os.environ.setdefault("SLURM_DRMAA_USE_SLURMDBD", "1")
 
-SECRET_KEY = env.str('DJANGO_SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2')
+SECRET_KEY = env.str('SECRET_KEY', 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DJANGO_DEBUG', True)
+DEBUG = env.bool('DEBUG', True)
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 SUBMISSION_WS_URL = env.str('SUBMISSION_WS_URL', '0.0.0.0:8300')
@@ -34,9 +34,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # HTTPS flags
-CSRF_COOKIE_SECURE = env.bool('DJANGO_CSRF_COOKIE_SECURE', False)
-SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', False)
-CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', [])
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', False)
+SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', False)
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', [])
 
 ALLOWED_HOSTS = ['*']
 
