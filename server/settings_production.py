@@ -18,7 +18,7 @@ SUBMISSION_OUTPUT_DIR = '/home/django/outputs'
 SUBMISSION_LOGGER_PTH = '/home/django/logs/submission_ws.log'
 
 # ORCID AUTHENTICATION
-SUBMISSION_ORCID_AUTH_URL = r'https://orcid.org/v3.0/{0:s}/record'
+ORCID_AUTH_URL = r'https://orcid.org/v3.0/{0:s}/record'
 
 SUBMISSION_WS_URL = 'https://dev.scheduler.biocomputingup.it'
 

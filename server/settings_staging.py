@@ -22,7 +22,7 @@ SUBMISSION_OUTPUT_DIR = '/var/local/webservers/jobs/scheduler-dev/outputs'
 SUBMISSION_LOGGER_PTH = '/var/local/webservers/logs/scheduler-dev/scheduler-dev.log'
 
 # ORCID AUTH
-SUBMISSION_ORCID_AUTH_URL = r'https://orcid.org/v3.0/{0:s}/record'  # Production
+ORCID_AUTH_URL = r'https://orcid.org/v3.0/{0:s}/record'  # Production
 
 SUBMISSION_WS_URL = 'https://dev.scheduler.biocomputingup.it'
 
