@@ -9,7 +9,7 @@ from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
 from rest_framework.settings import api_settings
 
-from server.settings import SUBMISSION_OUTPUT_DIR
+from django.conf import settings
 from .job.models import Job
 from .parameter.models import Parameter, JobParameter
 
@@ -92,7 +92,7 @@ def get_params(user_param, job: Job, parameters_of_job):
                         renamed_files.setdefault(file_name, file.name)
                         # Manage multiple files for a single parameter
                         files.append(file_name)
-                        file_pth = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_job.uuid), file_name)
+                        file_pth = os.path.join(settings.SUBMISSION_OUTPUT_DIR, str(p_job.uuid), file_name)
                         # Save the file to the output directory
                         with open(file_pth, "wb+") as f:
                             for chunk in file.chunks():
@@ -126,14 +126,14 @@ def get_params(user_param, job: Job, parameters_of_job):
     job.files_name = renamed_files
 
     # Write in a file all the association between new file name and original file name, if files are passed
-    with open(os.path.join(SUBMISSION_OUTPUT_DIR, str(p_job.uuid), "files.json"), 'a') as f:
+    with open(os.path.join(settings.SUBMISSION_OUTPUT_DIR, str(p_job.uuid), "files.json"), 'a') as f:
         json.dump(renamed_files, f)
 
     return created_params, renamed_files
 
 
 def create_job_folder(wd):
-    os.makedirs(os.path.join(SUBMISSION_OUTPUT_DIR, wd), exist_ok=True)
+    os.makedirs(os.path.join(settings.SUBMISSION_OUTPUT_DIR, wd), exist_ok=True)
 
 
 def zip_dir(dir_pth: Union[Path, str], filename: Union[Path, str]):

@@ -3,7 +3,7 @@ from django.db.models import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
 from rangefilter.filters import DateRangeFilter
 
-from server.settings import SUBMISSION_WS_URL
+from django.conf import settings
 from submission.job.models import Job
 from submission.parameter.admin import JobParamAdminInline
 from submission_lib.manage import terminate_job
@@ -47,7 +47,7 @@ class JobAdmin(admin.ModelAdmin):
         out_file = "{}_out.txt".format(str(obj.uuid)[:8])
         err_file = "{}_err.txt".format(str(obj.uuid)[:8])
 
-        url = "{}/job/".format(SUBMISSION_WS_URL)
+        url = "{}/job/".format(settings.SUBMISSION_WS_URL)
         return mark_safe(
             f'<a href="{url}{obj.uuid}/file/{out_file}" target="_blank">out</a> / <a href="{url}{obj.uuid}/file/{err_file}" target="_blank">err</a>  / <a href="{url}{obj.uuid}/file" target="_blank">files</a>'
         )

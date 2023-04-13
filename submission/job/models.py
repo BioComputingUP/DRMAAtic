@@ -6,7 +6,7 @@ from django.db import models
 from django_filters import CharFilter, ChoiceFilter
 from django_filters.rest_framework import FilterSet
 
-from server.settings import REMOVE_TASK_FILES_ON_DELETE, SUBMISSION_OUTPUT_DIR
+from django.conf import settings
 from submission.models import User
 from submission_lib.manage import get_job_status
 
@@ -125,10 +125,10 @@ class Job(models.Model):
         return "{} - {}".format(self.uuid, self.task.name)
 
     def get_job_path(self):
-        return join(SUBMISSION_OUTPUT_DIR, str(self.uuid))
+        return join(settings.SUBMISSION_OUTPUT_DIR, str(self.uuid))
 
     def delete_from_file_system(self):
-        if REMOVE_TASK_FILES_ON_DELETE:
+        if settings.REMOVE_TASK_FILES_ON_DELETE:
             shutil.rmtree(self.get_job_path(), ignore_errors=True)
 
     class Meta:

@@ -2,7 +2,7 @@ import logging
 
 from rest_framework import exceptions, serializers
 
-from server.settings import SUBMISSION_OUTPUT_DIR, SUBMISSION_SCRIPT_DIR
+from django.conf import settings
 from submission.job.models import Job
 from submission.parameter.models import Parameter
 from submission.parameter.serializers import TaskParameterSerializer
@@ -162,8 +162,8 @@ class JobSerializer(serializers.ModelSerializer):
             j_id, name = start_job(**drm_params,
                                    task_name=task.name,
                                    # if the command is defined as absolute then do not add the submission script dir first
-                                   script_dir='' if task.command[0] == '/' else SUBMISSION_SCRIPT_DIR,
-                                   out_dir=SUBMISSION_OUTPUT_DIR,
+                                   script_dir='' if task.command[0] == '/' else settings.SUBMISSION_SCRIPT_DIR,
+                                   out_dir=settings.SUBMISSION_OUTPUT_DIR,
                                    command=task.command,
                                    script_args=formatted_params,
                                    working_dir=p_job.uuid,

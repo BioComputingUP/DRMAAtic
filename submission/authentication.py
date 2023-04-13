@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
-from server.settings import ORCID_AUTH_URL, SECRET_KEY
+from django.conf import settings
 from .models import Token, User
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class BearerAuthentication(BaseAuthentication):
     keyword = 'Bearer'
     # Define secret
     # NOTE by default it is set as server's secret
-    secret = SECRET_KEY
+    secret = settings.SECRET_KEY
 
     def get_user_class(self):
         return self.user
@@ -101,7 +101,7 @@ class BearerAuthentication(BaseAuthentication):
 # Extend Bearer token authentication to exchange it with an external service
 class RemoteAuthentication(BearerAuthentication):
     # Define URL to remote service
-    url = ORCID_AUTH_URL
+    url = settings.ORCID_AUTH_URL
     # Define header
     header = {
             'Content-Type': 'application/json',
