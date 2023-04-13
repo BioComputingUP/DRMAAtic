@@ -9,7 +9,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from server.settings import SUBMISSION_OUTPUT_DIR
+from django.conf import settings
 from submission.authentication import BearerAuthentication
 from submission.job.models import Job, JobFilterSet
 from submission.job.serializers import SuperJobSerializer, JobSerializer
@@ -160,7 +160,7 @@ class JobViewSet(viewsets.ModelViewSet):
         if job.has_finished():
             p_job = job.get_first_ancestor()
 
-            zip_file = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_job.uuid), "{}.zip".format(p_job.uuid))
+            zip_file = os.path.join(settings.SUBMISSION_OUTPUT_DIR, str(p_job.uuid), "{}.zip".format(p_job.uuid))
             try:
                 file_handle = open(zip_file, "rb")
 
@@ -181,7 +181,7 @@ class JobViewSet(viewsets.ModelViewSet):
 
         p_job = job.get_first_ancestor()
 
-        root = os.path.join(SUBMISSION_OUTPUT_DIR, str(p_job.uuid))
+        root = os.path.join(settings.SUBMISSION_OUTPUT_DIR, str(p_job.uuid))
         files = [os.path.join(dp.replace(root, ''), f).lstrip('/') for dp, dn, fn in os.walk(root) for f in fn]
 
         if not request_by_admin(request):
