@@ -1,5 +1,3 @@
-# from django.core.wsgi import get_wsgi_application
-
 from server.settings import *
 
 DEBUG = True
@@ -39,74 +37,8 @@ DATABASES = {
     }
 }
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "request_formatter": {
-            "format": "%(asctime)s - %(name)-20s - %(levelname)-7s - %(ip)-15s - %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S"
-        },
-        "drm_formatter": {
-            "format": "%(asctime)s - %(name)-20s - %(levelname)-7s - %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S"
-        },
-    },
-    "handlers": {
-        "ip_request": {
-            "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "request_formatter",
-            'filters': ['append_ip', 'shorten_name'],
-            "filename": SUBMISSION_LOGGER_PTH,
-            "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 5
-        },
-        "drm": {
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filters": ['shorten_name'],
-            "formatter": "drm_formatter",
-            "filename": SUBMISSION_LOGGER_PTH,
-            "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 5
-        },
-        "base": {
-            "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "drm_formatter",
-            "filename": SUBMISSION_LOGGER_PTH,
-            "maxBytes": 1024 * 1024 * 5,  # 5 MB
-            "backupCount": 5
-        },
-    },
-    'filters': {
-        'append_ip': {
-            '()': 'submission.log.IPAddressFilter'
-        },
-        'shorten_name': {
-            '()': 'submission.log.NameFilter'
-        }
-    },
-    'loggers': {
-        'submission_lib': {
-            'handlers': ['drm'],
-            'level': 'INFO' if DEBUG else 'WARNING',
-            'propagate': True,
-        },
-        'submission': {
-            'handlers': ['ip_request'],
-            'level': 'INFO' if DEBUG else 'WARNING',
-            'propagate': True,
-        },
-        'django': {
-            'handlers': ['base'],
-            'level': 'WARNING',
-            'propagate': True,
-        },
-    },
-}
-
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings_staging')
-#
-# application = get_wsgi_application()
+LOGGING["handlers"]["ip_request"]["filename"] = SUBMISSION_LOGGER_PTH
+LOGGING["handlers"]["drm"]["filename"] = SUBMISSION_LOGGER_PTH
+LOGGING["handlers"]["base"]["filename"] = SUBMISSION_LOGGER_PTH
+LOGGING["loggers"]["submission_lib"]['level'] = 'DEBUG' if DEBUG else 'INFO'
+LOGGING["loggers"]["submission"]['level'] = 'DEBUG' if DEBUG else 'INFO'

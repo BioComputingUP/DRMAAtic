@@ -132,3 +132,72 @@ AUTH_USER_MODEL = 'submission.Admin'
 # Define automatic field
 # NOTE https://stackoverflow.com/questions/67783120/warning-auto-created-primary-key-used-when-not-defining-a-primary-key-type-by
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "request_formatter": {
+            "format": "%(asctime)s - %(name)-20s - %(levelname)-7s - %(ip)-15s - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+        "drm_formatter": {
+            "format": "%(asctime)s - %(name)-20s - %(levelname)-7s - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+    },
+    "handlers": {
+        "ip_request": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "request_formatter",
+            'filters': ['append_ip', 'shorten_name'],
+            "filename": 'logger.log',
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 5
+        },
+        "drm": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filters": ['shorten_name'],
+            "formatter": "drm_formatter",
+            "filename": 'logger.log',
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 5
+        },
+        "base": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "drm_formatter",
+            "filename": 'logger.log',
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 5
+        },
+    },
+    'filters': {
+        'append_ip': {
+            '()': 'submission.log.IPAddressFilter'
+        },
+        'shorten_name': {
+            '()': 'submission.log.NameFilter'
+        }
+    },
+    'loggers': {
+        'submission_lib': {
+            'handlers': ['drm'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'submission': {
+            'handlers': ['ip_request'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['base'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}

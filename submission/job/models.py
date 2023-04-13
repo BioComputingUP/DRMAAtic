@@ -27,7 +27,7 @@ class Job(models.Model):
 
     _files_name = models.JSONField(default=dict, null=False, blank=True)
 
-    class Status(models.Choices):
+    class Status(models.TextChoices):
         REJECTED = "job has been rejected from the ws"
         RECEIVED = "job has been received from the ws"
         CREATED = "job has been created and sent to the DRM"

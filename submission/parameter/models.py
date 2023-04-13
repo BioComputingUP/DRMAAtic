@@ -5,7 +5,7 @@ from submission.task.models import Task
 
 
 class Parameter(models.Model):
-    class Type(models.Choices):
+    class Type(models.TextChoices):
         INTEGER = 'int'
         FLOAT = 'float'
         STRING = 'string'
