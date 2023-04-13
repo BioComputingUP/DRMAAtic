@@ -129,7 +129,6 @@ AUTH_USER_MODEL = 'submission.Admin'
 # NOTE https://stackoverflow.com/questions/67783120/warning-auto-created-primary-key-used-when-not-defining-a-primary-key-type-by
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
