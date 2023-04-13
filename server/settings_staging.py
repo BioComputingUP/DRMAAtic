@@ -1,5 +1,5 @@
 # noinspection PyUnresolvedReferences
-from settings import *
+from .settings import *
 
 from django.core.wsgi import get_wsgi_application
 
