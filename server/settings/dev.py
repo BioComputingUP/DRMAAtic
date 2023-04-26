@@ -1,8 +1,8 @@
-from server.settings import *
+from server.settings.base import *
 
 DEBUG = True
 
-SECRET_KEY = 'd5rgdp(px3o9$lpk^#pr&y1s%5(w#1otyzlrv1#r+q=2@+uf&2'
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -23,6 +23,10 @@ ORCID_AUTH_URL = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'
 SUBMISSION_WS_URL = '0.0.0.0:8300'
 
 DATABASES = {
+    'old': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'submission_ws',

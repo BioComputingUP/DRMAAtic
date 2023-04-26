@@ -1,12 +1,17 @@
 import os
 from pathlib import Path
 
+from environs import Env
+
+env = Env()
+
+
 # The most important thing is to be build relative path
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # DRMAA library for submission server
-DRMAA_LIBRARY_PATH = "/usr/lib/slurm-drmaa/lib/libdrmaa.so"
-SLURM_DRMAA_USE_SLURMDBD = "1"
+os.environ["DRMAA_LIBRARY_PATH"] = "/usr/lib/slurm-drmaa/lib/libdrmaa.so"
+os.environ["SLURM_DRMAA_USE_SLURMDBD"] = "1"
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
