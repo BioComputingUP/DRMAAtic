@@ -8,7 +8,7 @@ from django.core.wsgi import get_wsgi_application
 # We need to look at the environ because WSGI does not allow to pass arguments to the application.
 # See https://stackoverflow.com/questions/48340719/passing-environment-variables-from-apache-via-mod-wsgi-to-use-in-django-1-11-set
 def application(environ, start_response):
-    if 'DJANGO_SECRET_KEY' not in environ or 'DJANGO_SECRET_KEY' not in os.environ.keys():
+    if 'DJANGO_SECRET_KEY' not in environ and 'DJANGO_SECRET_KEY' not in os.environ.keys():
         raise Exception('DJANGO_SECRET_KEY environment variable not set')
     if 'DJANGO_SECRET_KEY' in environ:
         os.environ['DJANGO_SECRET_KEY'] = environ['DJANGO_SECRET_KEY']
