@@ -187,7 +187,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         if not request_by_admin(request):
             to_remove = []
             for i, file in enumerate(files):
-                if "log.o" in file or "log.e" in file:
+                if "{}_err.txt".format(str(obj.uuid)[:8]) in file or "{}_out.txt".format(str(obj.uuid)[:8]) in file:
                     to_remove.append(i)
 
             for i in reversed(to_remove):
