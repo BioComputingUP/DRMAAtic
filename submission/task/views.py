@@ -203,6 +203,6 @@ class TaskViewSet(viewsets.ModelViewSet):
                 response['Content-Disposition'] = "inline"  # ; filename={}".format(os.path.basename(file))
                 return response
             else:
-                raise HttpResponseNotFound("File not found")
+                return HttpResponseNotFound("File not found")
 
         return Response(files)
