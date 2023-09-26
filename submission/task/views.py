@@ -1,7 +1,7 @@
 import mimetypes
 import os
 
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseNotFound
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, filters, status, viewsets
 from rest_framework.decorators import action, throttle_classes
@@ -187,7 +187,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         if not request_by_admin(request):
             to_remove = []
             for i, file in enumerate(files):
-                if "{}_err.txt".format(str(obj.uuid)[:8]) in file or "{}_out.txt".format(str(obj.uuid)[:8]) in file:
+                if "{}_err.txt".format(str(task.uuid)[:8]) in file or "{}_out.txt".format(str(task.uuid)[:8]) in file:
                     to_remove.append(i)
 
             for i in reversed(to_remove):
@@ -203,6 +203,6 @@ class TaskViewSet(viewsets.ModelViewSet):
                 response['Content-Disposition'] = "inline"  # ; filename={}".format(os.path.basename(file))
                 return response
             else:
-                raise exceptions.NotFound()
+                raise HttpResponseNotFound("File not found")
 
         return Response(files)
