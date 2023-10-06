@@ -1,6 +1,6 @@
-# Submission scheduler WS Admin guide
+# DRMAAtic Admin guide
 
-This is a reference guide for the admin to configure and deploy the submission scheduler WS.
+This is a reference guide for the admin to configure and deploy DRMAAtic.
 
 ## Environments
 
@@ -23,7 +23,7 @@ When developing the application, the developer should use the following commands
 correct settings (and environment):
 
         $ python manage.py makemigrations --settings=server.settings_dev
-        $ python manage.py makemigrations submission --settings=server.settings_dev
+        $ python manage.py makemigrations drmaatic --settings=server.settings_dev
         $ python manage.py migrate --settings=server.settings_dev
         $ python manage.py runserver 0.0.0.0:8300 --settings=server.settings_dev
 
@@ -58,25 +58,25 @@ Here is reported the database schema as of 2023-04-14:
 
 ## Deploy
 
-To deploy on Staging or Production, two bare repositories are being used. These are located in:
- - Staging: `/var/django/apps/scheduler_dev`
+### We moved from conda to venv for managing the environment
+#### How to create the venv
+ - **Python 3.8** is a requirement since it needs to be compatible with the version of WSGI that is installed on the server.
+ - `sudo apt install python3.8-venv` to install venv
+ - `sudo apt install sudo apt-get install python3-dev default-libmysqlclient-dev build-essential` is needed to install mysqlclient
+ - Enter the directory of the project (`cd /var/django/apps/drmaatic_dev`)
+ - Then you can create the venv with `python3.8 -m venv venv`
+ - Activate the venv with `source venv/bin/activate`
+ - Install the requirements with `pip install -r requirements.txt`
+
+To deploy on Staging or Production, locations are used. These are:
+ - Staging: `/var/django/apps/drmaatic_dev`
  - Production: `/var/django/submission` (for now, this will be changed in the future)
 
-The deployment from the dev machine needs to be configured adding these two git remotes:
+You can use the two scripts in the deploy folder to deploy the application on the server. The scripts are:
+ - `deploy_staging.sh` - Deploy the application on the staging environment.
+ - `deploy_prod.sh` - Deploy the application on the production environment.
 
-        $ git remote add staging django@perse:/var/django/apps/scheduler_dev.git
-        $ git remote add production django@perse:/var/django/submission.git
-
-When you have something new to deploy, you can do it so with (on e.g. staging):
-
-        $ git push staging main
-
-This will trigger a post-receive hook that will pull the changes from the bare repository, save the database on a temporary
-directory and then restart the WSGI application.
-
-**Note**: The post-receive hook do not perform any makemigrations or migrate commands. This is because the migrations
-can require user interaction (e.g. when a new field is added to a model). This is why the migrations should be done
-manually on the server.
+These scripts will also trigger the post-deploy script that will perform the **migrations** and the **collectstatic**.
 
 ### Apache WSGI
 
@@ -84,20 +84,23 @@ On our configuration, we use Apache as web server and mod_wsgi as WSGI module. T
 is located in `/etc/apache2/sites-available/scheduler-dev.conf` (for the dev version).
 This file contains the configuration for the WSGI application, the virtual host, and the SSL configuration.
 Here is reported the configuration for the WSGI application for the staging environment:
-
+        
+    Define server_name drmaatic-dev
+    Define app_home /var/django/apps/${server_name}
+    Define env_root ${app_home}/venv
+    
+    WSGIPythonHome ${env_root}
+    WSGIPythonPath ${app_home}
+    ....
     SetEnv DJANGO_ENV staging
+    SetEnv DJANGO_SECRET_KEY super-secret-key
+    SetEnv DJANGO_WS_URL ${server_url}
     # wsgi app
     WSGIPassAuthorization On
-    WSGIScriptAlias / /var/django/apps/${server_name}/server/wsgi.py
-    WSGIDaemonProcess ${server_name} python-home=/home/django/miniconda3/envs/submission python-path=/var/django/apps/${server_name} user=django group=users
+    WSGIScriptAlias / ${app_home}/server/wsgi.py
+    WSGIDaemonProcess ${server_name} python-home=${env_root} python-path=${app_home} user=django group=users
     WSGIProcessGroup ${server_name}
 
-    # Set the environment to be staging (dev on perse)
-    <Directory /var/django/apps/${server_name}/server>
-            <Files wsgi.py>
-                    Require all granted
-            </Files>
-    </Directory>
 
 Note as the SetEnv directive is used to set the environment to staging. This is used by the wsgi.py file to load the
 correct settings file and then start the application. For the production environment, the directive should be:
@@ -108,7 +111,7 @@ correct settings file and then start the application. For the production environ
 
 The migrations are handled by the `manage.py` script. This script is located in the main directory of the application
 and it's used to perform all the database operations for the application.
-The migrations are python files that are located in the `submission/migrations` directory. These files are created
+The migrations are python files that are located in the `drmaatic/migrations` directory. These files are created
 automatically by the `manage.py` script when some changes in the models are detected. In some cases the user is asked
 to create a migration file manually (for complex migrations). The migrations are used to keep the database schema in
 sync with the models.

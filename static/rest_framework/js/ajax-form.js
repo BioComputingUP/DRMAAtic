@@ -29,7 +29,7 @@ function doAjaxSubmit(e) {
     return;
   }
 
-  // At this point we need to make an AJAX form submission.
+  // At this point we need to make an AJAX form drmaatic.
   e.preventDefault();
 
   var url = form.attr('action');

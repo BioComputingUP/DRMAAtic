@@ -1,8 +1,16 @@
+import logging
+
 from server.settings.base import *
 
 DEBUG = False
 
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+logger = logging.getLogger(__name__)
+
+if 'DJANGO_SECRET_KEY' in os.environ:
+    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+else:
+    logger.warning('DJANGO_SECRET_KEY not found in environment variables. Using mockup value.')
+    SECRET_KEY = 'not-a-secret-key'
 
 CORS_ORIGIN_ALLOW_ALL = False
 
@@ -21,12 +29,12 @@ SUBMISSION_LOGGER_PTH = '/home/django/logs/submission_ws.log'
 # ORCID AUTHENTICATION
 ORCID_AUTH_URL = r'https://orcid.org/v3.0/{0:s}/record'
 
-SUBMISSION_WS_URL = 'https://dev.scheduler.biocomputingup.it'
+DRMAATIC_WS_URL = 'https://dev.scheduler.biocomputingup.it'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'submission_ws',
+        'NAME': 'drmaatic',
         'USER': 'maria',
         'PASSWORD': 'password',
         'HOST': '/var/run/mysqld/mysqld.sock',
@@ -38,4 +46,4 @@ LOGGING["handlers"]["ip_request"]["filename"] = SUBMISSION_LOGGER_PTH
 LOGGING["handlers"]["drm"]["filename"] = SUBMISSION_LOGGER_PTH
 LOGGING["handlers"]["base"]["filename"] = SUBMISSION_LOGGER_PTH
 LOGGING["loggers"]["submission_lib"]['level'] = 'DEBUG' if DEBUG else 'INFO'
-LOGGING["loggers"]["submission"]['level'] = 'DEBUG' if DEBUG else 'INFO'
+LOGGING["loggers"]["drmaatic"]['level'] = 'DEBUG' if DEBUG else 'INFO'

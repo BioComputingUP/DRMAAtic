@@ -9,7 +9,9 @@ env = Env()
 # The most important thing is to be build relative path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# DRMAA library for submission server
+PARAMS_VALUES_MAX_LENGTH = 5000
+
+# DRMAA library for drmaatic
 os.environ["DRMAA_LIBRARY_PATH"] = "/usr/lib/slurm-drmaa/lib/libdrmaa.so"
 os.environ["SLURM_DRMAA_USE_SLURMDBD"] = "1"
 
@@ -35,7 +37,7 @@ MAX_PAGE_SIZE = 1000
 
 DEFAULT_RENDERER_CLASSES = (
     'rest_framework.renderers.JSONRenderer',
-    'submission.renderers.CustomBrowsableAPIRenderer',
+    'drmaatic.renderers.CustomBrowsableAPIRenderer',
 )
 
 # Application definition
@@ -53,7 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'submission.apps.SubmissionConfig',
+    'drmaatic.apps.SubmissionConfig',
 ]
 
 MIDDLEWARE = [
@@ -69,9 +71,13 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PAGINATION_CLASS': 'submission.pagination.StandardResultsSetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'drmaatic.pagination.StandardResultsSetPagination',
     'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
 }
+
+dependencies = [
+    ('contenttypes', '__first__'),
+]
 
 ROOT_URLCONF = 'server.urls'
 
@@ -128,7 +134,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Define user model
 # NOTE https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#auth-custom-user
-AUTH_USER_MODEL = 'submission.Admin'
+AUTH_USER_MODEL = 'drmaatic.Admin'
 
 # Define automatic field
 # NOTE https://stackoverflow.com/questions/67783120/warning-auto-created-primary-key-used-when-not-defining-a-primary-key-type-by
@@ -177,10 +183,10 @@ LOGGING = {
     },
     'filters': {
         'append_ip': {
-            '()': 'submission.log.IPAddressFilter'
+            '()': 'drmaatic.log.IPAddressFilter'
         },
         'shorten_name': {
-            '()': 'submission.log.NameFilter'
+            '()': 'drmaatic.log.NameFilter'
         }
     },
     'loggers': {
@@ -189,7 +195,7 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'submission': {
+        'drmaatic': {
             'handlers': ['ip_request'],
             'level': 'INFO',
             'propagate': True,

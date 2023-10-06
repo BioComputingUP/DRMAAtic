@@ -2,7 +2,7 @@ from server.settings.base import *
 
 DEBUG = True
 
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+SECRET_KEY = 'y7&4Fz#&ltEL,p.%IgMU^e9pan0!;:>p@A9),qCEV<NoNw^)l0G`f&hgO"2UK)>'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -14,13 +14,13 @@ CSRF_TRUSTED_ORIGINS = []
 ALLOWED_HOSTS = ['*']
 
 # SUBMISSION APP FOLDERS
-SUBMISSION_SCRIPT_DIR = "submission_tests/scripts/"
-SUBMISSION_OUTPUT_DIR = "submission_tests/outputs/"
-SUBMISSION_LOGGER_PTH = os.path.join(BASE_DIR, "logger.log")
+SUBMISSION_SCRIPT_DIR = BASE_DIR / "tests/scripts/"
+SUBMISSION_OUTPUT_DIR = BASE_DIR / "tests/outputs/"
+SUBMISSION_LOGGER_PTH = BASE_DIR / "logger.log"
 
-ORCID_AUTH_URL = r'https://pub.sandbox.orcid.org/v3.0/{0:s}/record'
+ORCID_AUTH_URL = r'https://sandbox.orcid.org/oauth/userinfo'
 
-SUBMISSION_WS_URL = '0.0.0.0:8300'
+DRMAATIC_WS_URL = 'http://0.0.0.0:8300'
 
 DATABASES = {
     'old': {
@@ -29,7 +29,7 @@ DATABASES = {
     },
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'submission_ws',
+        'NAME': 'drmaatic',
         'USER': 'maria',
         'PASSWORD': 'password',
         'HOST': '/var/run/mysqld/mysqld.sock',
@@ -41,4 +41,4 @@ LOGGING["handlers"]["ip_request"]["filename"] = SUBMISSION_LOGGER_PTH
 LOGGING["handlers"]["drm"]["filename"] = SUBMISSION_LOGGER_PTH
 LOGGING["handlers"]["base"]["filename"] = SUBMISSION_LOGGER_PTH
 LOGGING["loggers"]["submission_lib"]['level'] = 'DEBUG' if DEBUG else 'INFO'
-LOGGING["loggers"]["submission"]['level'] = 'DEBUG' if DEBUG else 'INFO'
+LOGGING["loggers"]["drmaatic"]['level'] = 'DEBUG' if DEBUG else 'INFO'

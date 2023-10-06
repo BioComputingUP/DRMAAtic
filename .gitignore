@@ -4,13 +4,13 @@ __pycache__/
 *$py.class
 
 .idea/
-submission/migrations/*
-!submission/migrations/__init__.py
 
-submission_tests/outputs/*
-submission_tests/!outputs/.gitkeep
-submission_tests/downloads/*
-submission_tests/!downloads/.gitkeep
+static/
+
+tests/outputs/*
+tests/!outputs/.gitkeep
+tests/downloads/*
+tests/!downloads/.gitkeep
 
 # C extensions
 *.so

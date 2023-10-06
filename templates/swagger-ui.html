@@ -1,0 +1,39 @@
+{% load static %}
+{% block style %}
+    <link rel="icon" type="image/ico" href="{% static 'favicon/favicon.ico' %}" />
+{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DRMAAtic</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/swagger-ui.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/swagger-ui-dark.css' %}"/>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="//unpkg.com/swagger-ui-dist@5.9/swagger-ui-bundle.js"></script>
+<script>
+    const ui = SwaggerUIBundle({
+        oauth2RedirectUrl: window.location.origin + "/",
+        url: "{% static 'swagger.yml' %}",
+        dom_id: '#swagger-ui',
+        presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIBundle.SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout",
+        requestInterceptor: (request) => {
+            request.headers['X-CSRFToken'] = "{{ csrf_token }}"
+            return request;
+        },
+    })
+    ui.initOAuth({
+        clientId: "APP-H456ILXFAV2PFA0X",
+        scopes: "openid",
+    })
+    ui.InjectStyleSheet("{% static 'css/swagger-ui-dark.css' %}")
+</script>
+</body>
+</html>

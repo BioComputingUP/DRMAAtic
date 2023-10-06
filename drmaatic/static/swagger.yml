@@ -1,0 +1,977 @@
+openapi: 3.1.0
+info:
+  title: |
+    DRMAAtic
+  version: 1.0.0
+  description: |
+    <img src="/static/img/logo.png" alt="drmaatic logo" height="70">&nbsp;&nbsp;&nbsp;&nbsp;
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Slurm_logo.svg/839px-Slurm_logo.svg.png" alt="slurm logo" height="70">
+    
+    ### Introduction to DRMAAtic API
+    
+    The DRMAAtic API offers a comprehensive set of endpoints to facilitate authentication, job management, and task
+    retrieval within the DRMAAtic system. DRMAAtic is a powerful platform designed to streamline and manage various tasks
+    that should run on a DRM. The current implementation of DRMAAtic supports the SLURM DRM, but it can be easily
+    extended to support other DRMs, given that they support the DRMAA specifications.
+    
+    #### DRMAAtic Overview
+
+    DRMAAtic serves as a versatile platform with a range of capabilities, including:
+    
+    1. **User Authentication**: The API provides endpoints for authenticating users with DRMAAtic using JWT (JSON Web Tokens).
+        Users can obtain JWT tokens by providing access tokens from external social authentication providers through OAuth2.
+    
+    2. **Job Management**: DRMAAtic enables users to create, manage, and monitor jobs seamlessly. Users can define jobs
+        with varying parameters and types, submit them to the DRM (Digital Rights Management), and access job-related information.
+    
+    3. **Execution Tokens**: The system tracks and manages execution tokens, which are essential for job execution.
+        Users can check the number of available execution tokens, ensuring efficient resource utilization.
+    
+    4. **Task Catalog**: DRMAAtic offers a catalog of available tasks, providing users with detailed information about
+        each task's parameters, requirements, and descriptions.
+    
+    5. **Admin Panel**: The API also provides an admin panel for system administrators to manage jobs, tasks, and users.
+        Moreover administrators can create new tasks, with custom parameters and manage DRM specific configurations.
+    
+    #### Key API Endpoints
+    
+    - **Retrieve Internal JWT**: Allows users to obtain JWT tokens for authenticating with DRMAAtic, using access tokens 
+        from external providers.
+    
+    - **Number of Execution Tokens**: Provides the count of available execution tokens for the user.
+    
+    - **Create a New Job**: Enables users to create new jobs, defining job parameters based on specific tasks.
+    
+    - **List All Jobs**: Allows users to list and query jobs, including filtering by status, job name, and other criteria.
+    
+    - **Retrieve a Specific Job**: Retrieves a specific job by its UUID, updating its status if it's not in a final state.
+    
+    - **Delete a Specific Job**: Permits superusers to delete specific jobs, stopping them in DRM while preserving them in the database.
+    
+    - **Download Outputs**: Allows users to download a zip file containing all the output files of a specific job.
+    
+    - **List Output Files**: Lists all the output files of a specific job, including their paths.
+    
+    - **Download a Specific File**: Enables users to download a specific output file of a job, given its path in the output directory.
+    - **Retrieve the Status of a Specific Job**: Provides the status of a specific job, updating it if necessary.
+    - **List All Tasks**: Lists all available tasks in the DRMAAtic system, including their parameters and descriptions.
+    
+      These endpoints collectively offer a comprehensive toolkit for users and administrators to manage tasks, execute jobs, 
+      and track their progress efficiently within the DRMAAtic ecosystem.
+  contact:
+    name: "BioComputing UP"
+    url: "https://biocomputingup.it/"
+
+servers:
+  - url: http://10.69.69.152:8300/
+    description: Local development server
+  - url: https://{environment}drmaatic.biocomputingup.it/
+    description: Remote server
+    variables:
+      environment:
+        default: dev.
+        enum:
+          - dev. # Staging environment
+          - ""   # Production environment
+
+security:
+  - DRMAAticJWTAuth: [ ]
+
+paths:
+  /{provider}/token/:
+    get:
+      operationId: retrieve_internal_tokens
+      summary: 'Retrieve internal JWT'
+      description: |
+        Retrieve the JWT token that can be used to authenticate with DRMAAtic, given the access token from the social provider.
+        
+        The access token from the social provider can be gained with the OAuth2 implicit flow. 
+        The social provider access token is passed in the Authorization header, while the JWT token is returned in the response.
+      security:
+        - OAuth2: [ ]
+        - AccessTokenFromSocial: [ ]
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          description: 'Name of the external authentication provider'
+          schema:
+            type: string
+            enum:
+              - orcid
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jwt:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          description: 'JWT token for the authorization of the user on DRMAAtic'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: 'The token is not valid'
+        '403':
+          description: 'Authentication header is not valid'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: 'Authentication header is not valid'
+      tags:
+        - 'Authentication'
+  /execution-tokens/:
+    get:
+      operationId: get_execution_tokens_number
+      summary: 'Number of execution tokens'
+      description: |
+        Get the number of execution tokens that the user has at the moment.
+        
+        If the user is not logged, the user is identified with the IP address.
+        Pass the JWT token in the Authorization header to identify the user.
+      responses:
+        '200':
+          description: 'Number of execution tokens'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available_execution_tokens:
+                    type: integer
+                    example: 10
+      tags:
+        - 'Execution tokens'
+  /job/:
+    post:
+      operationId: createJob
+      summary: 'Create a new job'
+      description: |
+        Create a new job and send it to the DRM.
+        
+        **The parameters of the job depend form the task that the user wants to execute.**
+        Parameters can be of different type (string, integer, float, file). 
+        To find out which type of parameters are needed for a specific task look at `/task/{name}`
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Job'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Job'
+      responses:
+        '201':
+          description: 'Job successfully created'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Job'
+                  - $ref: '#/components/schemas/SuperuserRequestedJob'
+              examples:
+                Job:
+                  $ref: '#/components/examples/Job'
+                SuperJob:
+                  $ref: '#/components/examples/SuperuserRequestedJob'
+        '404':
+          description: 'Task not found'
+          $ref: '#/components/responses/TaskNotFound'
+        '400':
+          description: 'The job could not be created'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: 'The job could not be created'
+      tags:
+        - 'Job'
+    get:
+      operationId: listJobs
+      summary: 'List all the jobs'
+      description: 'List all the jobs that are owned by the user. If the user is a superuser, all the jobs are returned. This will also update the satus of the jobs in the database with the current status in the DRM'
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - name: page_size
+          required: false
+          in: query
+          description: Number of results to return per page.
+          schema:
+            type: integer
+        - name: status
+          required: false
+          in: query
+          description: 'Filter by job status'
+          schema:
+            $ref: '#/components/schemas/JobStatus'
+        - name: job_name
+          required: false
+          in: query
+          description: 'Filter by the name of the task that was executed by the job'
+          schema:
+            type: string
+        - name: search
+          required: false
+          in: query
+          description: A search term.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'List of jobs matching the query. Only jobs that are owned by the user are returned, unless the user is a superuser'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuperuserRequestedJob'
+        '204':
+          description: 'No jobs found. This is returned when the user is not a superuser or the user is not authenticated'
+      tags:
+        - 'Job'
+  /job/{uuid}/:
+    get:
+      summary: 'Retrieve a specific job'
+      operationId: retrieveJob
+      description: Retrieve the job and if the current status in the database is not final, update it with the current status in the DRM
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: 'UUID of the job'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Job successfully retrieved'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Job'
+                  - $ref: '#/components/schemas/SuperuserRequestedJob'
+              examples:
+                Job:
+                  $ref: '#/components/examples/Job'
+                SuperJob:
+                  $ref: '#/components/examples/SuperuserRequestedJob'
+        '404':
+          description: 'Job not found'
+          $ref: '#/components/responses/JobNotFound'
+      tags:
+        - 'Job'
+    delete:
+      summary: 'Delete a specific job'
+      operationId: destroyJob
+      description: Delete the job, stopping it in DRM, but preserving it in the database. Only superusers will be able to see the job after it has been deleted
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: 'UUID of the job to be deleted'
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'Job deleted'
+        '403':
+          description: 'You do not have permission to delete this job'
+        '404':
+          description: 'Job not found'
+          $ref: '#/components/responses/JobNotFound'
+      tags:
+        - 'Job'
+  /job/{uuid}/download/:
+    get:
+      operationId: downloadJob
+      summary: 'Download outputs'
+      description: 'Download a zip file containing all the output files of the job'
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: 'UUID of the job'
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+              example:
+          description: 'A zip file containing all the output files of the job'
+        '404':
+          description: 'Job not found or it has not finished yet and the output files are not available'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/JobNotFound'
+      tags:
+        - 'Job'
+  /job/{uuid}/file/:
+    get:
+      operationId: fileJob
+      summary: 'List output files'
+      description: 'List all the files in the output directory completed with their path'
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: 'UUID of the job'
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                example:
+                  - 'file_0.fasta'
+                  - 'file_1.fasta'
+                  - 'sub_dir/file_2.fasta'
+          description: 'Path of the files in the output directory'
+      tags:
+        - 'Job'
+  /job/{uuid}/file/{path}:
+    get:
+      summary: 'Download a specific file'
+      operationId: downloadFileJob
+      description: 'Download a specific file of the job, given its path in the output directory'
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: 'UUID of the job'
+          schema:
+            type: string
+        - name: path
+          in: path
+          required: true
+          description: 'Path of the file to be downloaded, name of the file included'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'File successfully downloaded'
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: 'Job not found or it has not finished yet and the output files are not available'
+          $ref: '#/components/responses/JobNotFound'
+      tags:
+        - 'Job'
+  /job/{uuid}/status/:
+    get:
+      operationId: statusJob
+      summary: 'Retrieve the status of a specific job'
+      description: 'Return the status of the job. If the job is not in a final state, the status is updated with the current status in the DRM'
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: 'UUID of the job'
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            plain/text:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+                example: 'job finished normally'
+          description: ''
+      tags:
+        - 'Job'
+  /job/{uuid}/stop/:
+    put:
+      operationId: stopJob
+      summary: 'Stop a specific job'
+      description: Stop the job, stopping it in DRM, but preserving it in the database. The user will be able to see the job after it has been stopped
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: 'UUID of the job'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Job successfully stopped'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: 'Job successfully stopped'
+        '409':
+          description: 'Job is not running'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: 'Job is not running'
+      tags:
+        - 'Job'
+  /task/:
+    get:
+      operationId: listTasks
+      summary: 'List all tasks'
+      description: |
+        List all the available tasks with their parameters. Tasks can be associated with
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - name: page_size
+          required: false
+          in: query
+          description: Number of results to return per page.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'List of available tasks'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    oneOf:
+                      - $ref: '#/components/schemas/Task'
+                      - $ref: '#/components/schemas/SuperuserRequestedTask'
+                    example: [
+                      {
+                        "name": "test",
+                        "required_tokens": 1,
+                        "param": [
+                          {
+                            "name": "input_file",
+                            "type": "file",
+                            "default": "",
+                            "description": "",
+                            "required": false
+                          },
+                          {
+                            "name": "string_text",
+                            "type": "string",
+                            "default": "",
+                            "description": "",
+                            "required": false
+                          }
+                        ]
+                      },
+                    ]
+
+      tags:
+        - 'Task'
+  /task/{name}/:
+    get:
+      operationId: retrieveTask
+      summary: 'Retrieve a specific task'
+      description: 'Retrieve a specific task given its name'
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: 'Name of the task'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Task successfully retrieved'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Task'
+                  - $ref: '#/components/schemas/SuperuserRequestedTask'
+              examples:
+                Task:
+                  $ref: '#/components/examples/Task'
+                SuperTask:
+                  $ref: '#/components/examples/SuperuserRequestedTask'
+      tags:
+        - 'Task'
+
+components:
+  securitySchemes:
+    DRMAAticJWTAuth:
+      scheme: bearer
+      bearerFormat: JWT
+      in: header
+      type: http
+      description: 'The JWT authorization token that is given by DRMAAtic for the social provider access token'
+    AccessTokenFromSocial:
+      scheme: bearer
+      bearerFormat: UUID
+      in: header
+      type: http
+      description: 'The access token provided upon authentication with the social provider'
+    OAuth2:
+      type: oauth2
+      description: 'OAuth2 authentication for the social provider. This will retrieve the access token from the social provider and this can be used to authenticate with DRMAAtic'
+      flows:
+        implicit:
+          authorizationUrl: https://sandbox.orcid.org/oauth/authorize
+          scopes:
+            openid: Grants access to openid
+  responses:
+    Unauthorized:
+      description: 'Unauthorized'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: 'Authentication credentials were not provided.'
+    TaskNotFound:
+      description: 'Not found'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Task 'test' not found"
+    JobNotFound:
+      description: 'Not found'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Not found."
+  schemas:
+    JobStatus:
+      type: string
+      enum:
+        - job has been rejected from the ws
+        - job has been received from the ws
+        - job has been created and sent to the DRM
+        - process status cannot be determined
+        - job is queued and active
+        - job is queued and in system hold
+        - job is queued and in user hold
+        - job is queued and in user and system hold
+        - job is running
+        - job is system suspended
+        - job is user suspended
+        - job was stopped by the user
+        - job finished normally
+        - job finished, but failed
+    Job:
+      type: object
+      properties:
+        uuid:
+          description: 'UUID of the job'
+          type: string
+          format: uuid
+          readOnly: true
+        task:
+          description: 'Name of the task that the job has to execute'
+          type: field
+        job_description:
+          description: 'Description of the job given by the user'
+          type: string
+        parent_job:
+          description: >
+            UUID of the job where this job should be attached to. 
+            If this job is attached to another job, it will be executed in the same directory of the parent job.
+            Note that this does not imply any dependency between the two jobs, for that use the `dependencies` field.
+          type: string
+        descendants:
+          description: 'List of jobs UUID that depend on this job, directly or indirectly'
+          type: string
+          readOnly: true
+        dependencies:
+          description: 'List of jobs UUID that this job depends on'
+          type: array
+          items:
+            type: string
+          writeOnly: true
+        depends_on:
+          description: 'List of jobs UUID that this job depends on'
+          type: array
+          items:
+            type: string
+          readOnly: true
+        dependency_type:
+          description: |
+            Type of dependency between this job and the one the job depends on.
+            - afterany: the job will be executed after all the jobs it depends on have finished, no matter if it failed or not
+            - afterok: the job will be executed after all the jobs it depends on have finished successfully
+            - afternotok: the job will be executed after all the jobs it depends on have finished, but at least one of them failed
+          enum:
+            - afterany
+            - afterok
+            - afternotok
+          type: string
+          nullable: true
+        status:
+          description: 'Status of the job'
+          enum:
+            - job has been rejected from the ws
+            - job has been received from the ws
+            - job has been created and sent to the DRM
+            - process status cannot be determined
+            - job is queued and active
+            - job is queued and in system hold
+            - job is queued and in user hold
+            - job is queued and in user and system hold
+            - job is running
+            - job is system suspended
+            - job is user suspended
+            - job was stopped by the user
+            - job finished normally
+            - job finished, but failed
+          readOnly: true
+        files_name:
+          description:
+            Dictionary of the files that the job got as input, with the name of the file created inn the output
+            directory as key and the name of the file that was passed as input as value
+          type: object
+          readOnly: true
+        creation_date:
+          description: 'Date of creation of the job'
+          type: string
+          format: date-time
+          readOnly: true
+        params:
+          description: 'List of parameters passed to the job, with their name and value.'
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                readOnly: true
+              value:
+                type: string
+                maxLength: 5000
+            required:
+              - value
+          readOnly: true
+        param1:
+          type: string
+          writeOnly: true
+          description: Parameter specific to Task 'test'
+        param2:
+          type: integer
+          writeOnly: true
+          description: Another parameter specific to Task 'test'
+        param3:
+          type: boolean
+          writeOnly: true
+          description: Parameter specific to Task 'test2'
+        param4:
+          type: file
+          writeOnly: true
+          description: Another parameter specific to Task 'test2'
+      required:
+        - task
+    SuperuserRequestedJob:
+      allOf:
+        - $ref: '#/components/schemas/Job'
+      type: object
+      properties:
+        update_date:
+          description: 'Date of the last update of the job. This is updated every time the status of the job is updated'
+          type: string
+          format: date-time
+          readOnly: true
+        deleted:
+          description: 'If the job has been deleted, this will be true'
+          type: boolean
+          readOnly: true
+        sender_ip_addr:
+          description: 'IP address of the user that created the job'
+          type: string
+          readOnly: true
+        drm_job_id:
+          description: 'ID of the job in the DRM'
+          type: string
+          readOnly: true
+        user:
+          description: 'Username of the user that created the job'
+          type: string
+          readOnly: true
+    Task:
+      type: object
+      properties:
+        name:
+          description: 'Name of the task'
+          type: string
+          maxLength: 100
+        required_tokens:
+          description: 'Number of execution tokens that the job will need to be executed'
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        param:
+          description: 'List of parameters that the task needs to be executed'
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                description: 'Name of the parameter'
+                type: string
+                maxLength: 100
+              type:
+                description: 'Type of the parameter'
+                enum:
+                  - int
+                  - float
+                  - string
+                  - bool
+                  - file
+                type: string
+              default:
+                description: 'Default value of the parameter'
+                type: string
+                maxLength: 1000
+              description:
+                description: 'Description of the parameter'
+                type: string
+                maxLength: 300
+              required:
+                description: 'If the parameter is required'
+                type: boolean
+            required:
+              - name
+          readOnly: true
+      required:
+        - name
+    SuperuserRequestedTask:
+      allOf:
+        - $ref: '#/components/schemas/Task'
+      type: object
+      properties:
+        groups:
+          description: 'List of groups that are allowed to execute the task'
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                description: 'Name of the group'
+                type: string
+                maxLength: 50
+            required:
+              - name
+          readOnly: true
+        queue:
+          description: 'Name of the queue where the job will be executed'
+          type: string
+        memory_mb:
+          description: 'Estimated amount of memory that the job will use'
+          type: integer
+          readOnly: true
+          maximum: 4294967295
+          minimum: 256
+          format: int64
+        is_array:
+          description: 'If the job is an array job'
+          type: string
+          readOnly: true
+        begin_index:
+          description: 'Index of the first job of the array'
+          type: string
+          readOnly: true
+        end_index:
+          description: 'Index of the last job of the array'
+          type: string
+          readOnly: true
+        step_index:
+          description: 'Step index of the array'
+          type: string
+          readOnly: true
+        max_clock_time:
+          description: 'Maximum time that the job can run. If the job is not finished in this time, it will be stopped'
+          type: string
+        command:
+          description: 'Command that the job will execute. This is the path of the executable'
+          type: string
+          maxLength: 500
+        cpus:
+          description: 'Number of CPUs that the job will use'
+          type: integer
+          maximum: 4294967295
+          minimum: 1
+          format: int64
+        is_output_public:
+          description: 'If the output of the job will be visible to everyone that has the job UUID'
+          type: boolean
+      required:
+        - queue
+        - max_clock_time
+        - name
+        - command
+  examples:
+    Job:
+      summary: 'Example of a job'
+      value: {
+        "uuid": "d8f3e7ea-91b5-4848-af91-fd4378bfe6f2",
+        "task": "test",
+        "depends_on": [ ],
+        "status": "job finished normally",
+        "files_name": {
+          "file_0.fasta": "test.fasta",
+          "file_1.fasta": "test.fasta"
+        },
+        "creation_date": "2023-10-02T14:39:09.785085+02:00",
+        "params": [
+          {
+            "name": "file",
+            "value": "file_0.fasta"
+          },
+          {
+            "name": "file",
+            "value": "file_1.fasta"
+          }
+        ]
+      }
+    SuperuserRequestedJob:
+      summary: 'Example of a job requested by a superuser'
+      value: {
+        "uuid": "d8f3e7ea-91b5-4848-af91-fd4378bfe6f2",
+        "task": "test",
+        "depends_on": [ ],
+        "sender_ip_addr": "127.0.0.1",
+        "status": "job finished normally",
+        "deleted": false,
+        "drm_job_id": "586",
+        "files_name": {
+          "file_0.fasta": "test.fasta",
+          "file_1.fasta": "test.fasta"
+        },
+        "creation_date": "2023-10-02T14:39:09.785085+02:00",
+        "update_date": "2023-10-02T14:39:09.801388+02:00",
+        "params": [
+          {
+            "name": "file",
+            "value": "file_0.fasta"
+          },
+          {
+            "name": "file",
+            "value": "file_1.fasta"
+          }
+        ]
+      }
+    Task:
+      summary: 'Example of a task'
+      value: {
+        "name": "test",
+        "required_tokens": 1,
+        "param": [
+          {
+            "name": "input_file",
+            "type": "file",
+            "default": "",
+            "description": "",
+            "required": false
+          },
+          {
+            "name": "string_text",
+            "type": "string",
+            "default": "",
+            "description": "",
+            "required": false
+          }
+        ]
+      }
+    SuperuserRequestedTask:
+      summary: 'Example of a task requested by a superuser'
+      value: {
+        "command": "test.py",
+        "name": "test",
+        "required_tokens": 1,
+        "groups": [ ],
+        "queue": "local",
+        "cpus": 1,
+        "memory_mb": 256,
+        "is_array": false,
+        "max_clock_time": "3 hours",
+        "is_output_public": false,
+        "param": [
+          {
+            "name": "file",
+            "flag": "--file",
+            "type": "file",
+            "default": "",
+            "description": "",
+            "required": false
+          },
+          {
+            "name": "stringa",
+            "flag": "--stringa",
+            "type": "string",
+            "default": "",
+            "description": "",
+            "required": false
+          }
+        ]
+      }
