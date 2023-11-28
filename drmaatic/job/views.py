@@ -180,9 +180,9 @@ class JobViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=True)
     def file(self, request, path, **kwargs):
-        job = self.get_object()
+        job: Job = self.get_object()
 
-        p_job = job.get_first_ancestor()
+        p_job: Job = job.get_first_ancestor()
 
         root = os.path.join(settings.SUBMISSION_OUTPUT_DIR, str(p_job.uuid))
         files = [os.path.join(dp.replace(root, ''), f).lstrip('/') for dp, dn, fn in os.walk(root) for f in fn]
@@ -190,8 +190,8 @@ class JobViewSet(viewsets.ModelViewSet):
         if not request_by_admin(request):
             to_remove = []
             for i, file in enumerate(files):
-                out_file = f"{job.uuid[:8]}_out.txt"
-                err_file = f"{job.uuid[:8]}_err.txt"
+                out_file = f"{str(job.uuid)[:8]}_out.txt"
+                err_file = f"{str(job.uuid)[:8]}_err.txt"
                 if file == out_file or file == err_file:
                     to_remove.append(i)
 
@@ -218,3 +218,20 @@ class JobViewSet(viewsets.ModelViewSet):
         job.update_drm_status()
 
         return Response(job.status)
+
+    @action(methods=['PUT'], detail=True, description="Associate a job to a user if the job has no user")
+    def assign_ownership(self, request, **kwargs):
+        job = self.get_object()
+        user = request.user
+
+        job_already_owned = job.user is not None
+        user_is_valid = user is not None and user.is_authenticated
+
+        if job_already_owned:
+            return Response("Job already owned", status=status.HTTP_409_CONFLICT)
+        elif not user_is_valid:
+            return Response("User not valid", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            job.user = user
+            job.save()
+            return Response("Job ownership granted", status=status.HTTP_200_OK)

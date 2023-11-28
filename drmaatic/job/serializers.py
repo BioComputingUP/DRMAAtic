@@ -46,13 +46,17 @@ class JobSerializer(serializers.ModelSerializer):
     depends_on = serializers.SlugRelatedField(many=True, read_only=True, required=False, slug_field='uuid',
                                               source='dependencies')
     files_name = serializers.JSONField(required=False, read_only=True)
+    has_owner = serializers.SerializerMethodField(read_only=True, method_name='get_has_owner')
 
     job_description = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Job
-        fields = ["uuid", "task", "descendants", "dependencies", "depends_on", "dependency_type",
+        fields = ["uuid", "task", "descendants", "dependencies", "depends_on", "dependency_type", "has_owner",
                   "job_description", "parent_job", "creation_date", "status", "files_name", "params"]
+
+    def get_has_owner(self, job):
+        return job.user is not None
 
     def get_descendants(self, job):
         """

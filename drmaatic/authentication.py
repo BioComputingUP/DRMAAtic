@@ -121,10 +121,15 @@ class SocialProviderAuthentication(BearerAuthentication):
             # Just raise authentication error
             raise AuthenticationFailed(_('Issued token is not valid'))
 
-        user, _ = User.objects.get_or_create(username=response.json()['sub'],
-                                             name=response.json()['given_name'],
-                                             surname=response.json()['family_name'],
-                                             defaults={'source': User.ORCID, 'active': True, 'group': Group.registered})
+        json_response = response.json()
+        user, is_created = User.objects.get_or_create(username=json_response['sub'],
+                                                      defaults={'source': User.ORCID, 'active': True,
+                                                                'group': Group.registered})
+        # Update user infos in case they changed on ORCID
+        user.name = json_response['given_name']
+        user.surname = json_response['family_name']
+        user.save()
+
         # Check that user is active
         if not user.active:
             # Just raise authentication error

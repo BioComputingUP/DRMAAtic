@@ -18,6 +18,7 @@ JobFileView = drmaatic.job.views.JobViewSet.as_view({'get': 'file'})
 JobDownloadView = drmaatic.job.views.JobViewSet.as_view({'get': 'download'})
 JobStopView = drmaatic.job.views.JobViewSet.as_view({'put': 'stop'})
 JobStatusView = drmaatic.job.views.JobViewSet.as_view({'get': 'status'})
+JobAssignOwnershipView = drmaatic.job.views.JobViewSet.as_view({'put': 'assign_ownership'})
 
 ExecutionTokenView = drmaatic.views.retrieve_execution_token
 
@@ -29,6 +30,7 @@ urlpatterns = [
     re_path(r'^job/(?P<uuid>[^/.]+)/file/(?P<path>.*)$', JobFileView),
     re_path(r'^job/(?P<uuid>[^/.]+)/stop/$', JobStopView),
     re_path(r'^job/(?P<uuid>[^/.]+)/status/$', JobStatusView),
+    re_path(r'^job/(?P<uuid>[^/.]+)/get_ownership/$', JobAssignOwnershipView),
 
     re_path(r'^execution-tokens/$', ExecutionTokenView, name='execution tokens'),
 
