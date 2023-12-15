@@ -15,7 +15,7 @@ from submission_lib.manage import get_job_status
 
 class Job(models.Model):
     # The name of the job should be one of the task names
-    task = models.ForeignKey('Task', to_field="name", on_delete=models.CASCADE, null=False)
+    task = models.ForeignKey('Task', on_delete=models.CASCADE, null=False)
     # Custom name that can be given to the job by the user
     _job_description = models.CharField(default=None, blank=True, max_length=200, null=True)
 

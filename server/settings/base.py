@@ -30,6 +30,8 @@ CORS_ALLOWED_ORIGINS = [
 
 ALLOWED_HOSTS = ['*']
 
+X_FRAME_OPTIONS = 'ALLOWALL'
+
 # Set true if you want to remove the task directory when the task is deleted
 REMOVE_TASK_FILES_ON_DELETE = True
 

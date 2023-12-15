@@ -109,7 +109,7 @@ class JobSerializer(serializers.ModelSerializer):
         if task.groups.count() > 0:
             user = validated_data.get("user")
             if not user or (user and not user.is_admin() and not task.groups.filter(name=user.group_name()).exists()):
-                raise exceptions.NotFound(detail="Job not found")
+                raise exceptions.NotFound(detail="Task not found")
 
         parent_job = None
         if "parent_job" in validated_data.keys():

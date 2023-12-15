@@ -9,13 +9,10 @@ from drmaatic.queue.models import Queue
 
 
 class Task(models.Model):
-    # Create your models here.
     # Identifier name of the script
     name = models.CharField(max_length=100, null=False, blank=False, unique=True)
     # Name of the command to execute (example.sh)
-    # Link to the DRM job template that will run the script
     command = models.CharField(max_length=500, null=False, blank=False)
-    # job = models.ForeignKey(DRMJobTemplate, on_delete=models.SET_NULL, null=True)
 
     required_tokens = models.IntegerField(default=1, validators=[MinValueValidator(0)])
 

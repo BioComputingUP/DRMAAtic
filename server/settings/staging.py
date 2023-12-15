@@ -28,7 +28,7 @@ SUBMISSION_OUTPUT_DIR = '/var/local/webservers/jobs/drmaatic-dev/'
 SUBMISSION_LOGGER_PTH = '/var/local/webservers/logs/drmaatic-dev/drmaatic-dev.log'
 
 # ORCID AUTH
-ORCID_AUTH_URL = r'https://sandbox.orcid.org/oauth/userinfo'  # Production
+ORCID_AUTH_URL = r'https://orcid.org/oauth/userinfo'  # Production
 
 DRMAATIC_WS_URL = 'https://dev.drmaatic.biocomputingup.it'
 
