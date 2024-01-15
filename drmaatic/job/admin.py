@@ -8,7 +8,7 @@ from rangefilter.filters import DateRangeFilter
 from django.conf import settings
 from drmaatic.job.models import Job
 from drmaatic.parameter.admin import JobParamAdminInline
-from submission_lib.manage import terminate_job
+from drmaatic_lib.manage import terminate_job
 
 
 def delete_jobs_from_file_system(jobs):

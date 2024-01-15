@@ -7,10 +7,9 @@ from django_filters import CharFilter, ChoiceFilter
 from django_filters.rest_framework import FilterSet
 
 from django.conf import settings
-from rest_framework.exceptions import ValidationError
 
 from drmaatic.models import User
-from submission_lib.manage import get_job_status
+from drmaatic_lib.manage import get_job_status
 
 
 class Job(models.Model):
@@ -129,7 +128,7 @@ class Job(models.Model):
         return "{} - {}".format(self.uuid, self.task.name)
 
     def get_job_path(self):
-        return join(settings.SUBMISSION_OUTPUT_DIR, str(self.uuid))
+        return join(settings.DRMAATIC_JOB_OUTPUT_DIR, str(self.uuid))
 
     def delete_from_file_system(self):
         if settings.REMOVE_TASK_FILES_ON_DELETE:

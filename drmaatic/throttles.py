@@ -33,7 +33,7 @@ class IPRateThrottleBurst(AnonRateThrottle):
         }
 
     def throttle_failure(self):
-        logger.warning('Request was throttled', extra={'ip': self.ident})
+        logger.warning(f'Request was throttled for {self.ident}')
 
 
 class UserBasedThrottleBurst(SimpleRateThrottle):
@@ -56,7 +56,7 @@ class UserBasedThrottleBurst(SimpleRateThrottle):
         }
 
     def throttle_failure(self):
-        logger.warning('Request was throttled', extra={'ip': self.ident})
+        logger.warning(f'Request was throttled for {self.ident}')
 
 
 class TokenBucketThrottle(SimpleRateThrottle):
@@ -102,9 +102,6 @@ class TokenBucketThrottle(SimpleRateThrottle):
         token_regen_interval = user.group.execution_token_regen_time if not is_anonymous else Group.anonymous.execution_token_regen_time
         token_regen_amount = user.group.execution_token_regen_amount if not is_anonymous else Group.anonymous.execution_token_regen_amount
 
-        print(
-            f'time_since_last_regen: {time_since_last_regen}, current_tokens: {current_tokens}, max_tokens: {max_tokens}, token_regen_interval: {token_regen_interval}, token_regen_amount: {token_regen_amount}')
-
         if time_since_last_regen >= token_regen_interval:
             cache.set(last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
 
@@ -112,7 +109,6 @@ class TokenBucketThrottle(SimpleRateThrottle):
             regenerated_tokens = int(time_since_last_regen / token_regen_interval) * token_regen_amount
 
             new_tokens = min(max_tokens, current_tokens + regenerated_tokens)
-            print(f'new_tokens: {new_tokens}')
             cache.set(user_tokens_key, new_tokens, None)
         else:
             self.wait_time = timedelta(seconds=token_regen_interval - time_since_last_regen)
@@ -161,4 +157,4 @@ class TokenBucketThrottle(SimpleRateThrottle):
         return True
 
     def throttle_failure(self):
-        logger.warning('Request was throttled', extra={'ip': self.ident})
+        logger.warning(f'Request was throttled for {self.ident}')

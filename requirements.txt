@@ -1,5 +1,5 @@
 # $ conda env create --file <this file>
-drmaa
+DRMAAtic-lib==1.0.7
 Django
 djangorestframework
 django-filter
@@ -13,3 +13,5 @@ PyYAML
 requests
 mysqlclient
 django-admin-rangefilter
+setuptools
+backports.zoneinfo

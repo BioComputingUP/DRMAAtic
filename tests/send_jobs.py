@@ -3,7 +3,7 @@ import requests
 FASTA_QUERY = ">DP0001\n" \
               "KADELERIRLRPGGKKKYRL"
 
-base_endpoint = 'http://10.69.69.152:8300/'
+base_endpoint = 'http://0.0.0.0:8301/'
 # base_endpoint = 'https://dev.scheduler.biocomputingup.it/'
 
 endpoint = {
@@ -24,10 +24,9 @@ if __name__ == '__main__':
     auth_header = {'Authorization': 'Bearer 714226e2-c151-4002-8845-caa41e754f5c'} if auth else None
 
     file = open('test.fasta', 'rb')
-    file2 = open('test.fasta', 'rb')
 
     # Send a new job to the scheduler
-    job = requests.post(endpoint['job'], data=[('task', 'test')], headers=auth_header, files=[('file', file), ('file', file2)])
+    job = requests.post(endpoint['job'], data=[('task', 'ring-v4')], headers=auth_header, files=[('input_file', file)])
 
     # Get the job id if the job was created
     if job.status_code == 201:

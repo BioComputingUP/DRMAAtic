@@ -1,15 +1,19 @@
+import hashlib
 import json
 import logging
 import os
-import shlex
+import random
+import uuid
 import zipfile
 from pathlib import Path
 from typing import List, Union, Dict
 
+import requests
 from django.http import QueryDict
 from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
 from rest_framework.settings import api_settings
+from urllib.parse import urlencode, quote
 
 from django.conf import settings
 from .job.models import Job
@@ -63,7 +67,7 @@ def get_extension(param_name, file_name):
 
 
 def write_files_mapping(files: Dict[str, str], j_uuid: str):
-    json_file = f"{settings.SUBMISSION_OUTPUT_DIR}/{j_uuid}/files.json"
+    json_file = f"{settings.DRMAATIC_JOB_OUTPUT_DIR}/{j_uuid}/files.json"
     # If the file exists, then update the dict
     if os.path.exists(json_file):
         with open(json_file, 'r') as f:
@@ -72,7 +76,7 @@ def write_files_mapping(files: Dict[str, str], j_uuid: str):
     else:
         renamed_files = files
 
-    with open(os.path.join(settings.SUBMISSION_OUTPUT_DIR, str(j_uuid), "files.json"), 'w') as f:
+    with open(os.path.join(settings.DRMAATIC_JOB_OUTPUT_DIR, str(j_uuid), "files.json"), 'w') as f:
         json.dump(renamed_files, f)
 
 
@@ -150,7 +154,7 @@ def check_values_length(user_params: QueryDict, param_name: str):
 
 
 def save_file(file, file_name, ancestor_job):
-    file_pth = os.path.join(settings.SUBMISSION_OUTPUT_DIR, str(ancestor_job.uuid), file_name)
+    file_pth = os.path.join(settings.DRMAATIC_JOB_OUTPUT_DIR, str(ancestor_job.uuid), file_name)
     # Save the file to the output directory
     with open(file_pth, "wb+") as f:
         for chunk in file.chunks():
@@ -158,7 +162,7 @@ def save_file(file, file_name, ancestor_job):
 
 
 def create_job_folder(wd):
-    os.makedirs(os.path.join(settings.SUBMISSION_OUTPUT_DIR, wd), exist_ok=True)
+    os.makedirs(os.path.join(settings.DRMAATIC_JOB_OUTPUT_DIR, wd), exist_ok=True)
 
 
 def zip_dir(dir_pth: Union[Path, str], filename: Union[Path, str]):
@@ -208,3 +212,120 @@ def is_user_admin(context):
     """
     user = getattr(context.get('request'), 'user', None)
     return user is not None and user.is_admin()
+
+
+def build_matomo_track_url(
+        request, account, path=None, referer=None, title=None,
+        user_id=None, custom_params: Dict[str, str] = None):
+    VERSION = '1'
+    COOKIE_NAME = '__matomo'
+
+    def get_visitor_id(cookie, client_ip, request):
+        """Generate a visitor id for this hit.
+        If there is a visitor id in the cookie, use that, otherwise
+        use the authenticated user or as a last resort the IP.
+        """
+        if cookie:
+            return cookie
+        if hasattr(request, 'user') and request.user and request.user.is_authenticated:
+            # create the visitor id from the username
+            cid = hashlib.md5(request.user.username.encode('utf-8')).hexdigest()
+        elif client_ip:
+            cid = hashlib.md5(client_ip.encode('utf-8')).hexdigest()
+        else:
+            # otherwise this is a new user, create a new random id.
+            cid = str(uuid.uuid4())
+        return cid[:16]
+
+    meta = request.META
+    # determine the referrer
+    referer = referer or request.GET.get('r', '')
+
+    custom_uip = None
+    if hasattr(settings, 'CUSTOM_UIP_HEADER') and settings.CUSTOM_UIP_HEADER:
+        custom_uip = meta.get(settings.CUSTOM_UIP_HEADER)
+    path = path or request.GET.get('p', '/')
+    path = request.build_absolute_uri(quote(path.encode('utf-8')))
+
+    # get client ip address
+    if 'HTTP_X_FORWARDED_FOR' in meta and meta.get('HTTP_X_FORWARDED_FOR', ''):
+        client_ip = meta.get('HTTP_X_FORWARDED_FOR', '')
+        if client_ip:
+            # The values in a proxied environment are usually presented in the
+            # following format:
+            # X-Forwarded-For: client, proxy1, proxy2
+            # In this case, we want the client IP Only
+            client_ip = client_ip.split(',')[0]
+    else:
+        client_ip = meta.get('REMOTE_ADDR', '')
+
+    # try and get visitor cookie from the request
+    cookie = request.COOKIES.get(COOKIE_NAME)
+    visitor_id = get_visitor_id(cookie, client_ip, request)
+
+    # build the parameter collection
+    params = {
+        'apiv': VERSION,
+        'idsite': account,
+        'rec': 1,
+        'rand': str(random.randint(0, 0x7fffffff)),
+        '_id': visitor_id,
+        'urlref': referer,
+        'url': path,
+    }
+
+    # add user ID if exists
+    if user_id:
+        params.update({'uid': user_id})
+
+    # if token_auth is specified, we can add the cip parameter (visitor's IP)
+    try:
+        token_auth = settings.MATOMO_API_TRACKING['token_auth']
+        params.update({'token_auth': token_auth, 'cip': custom_uip or client_ip})
+    except KeyError:
+        pass
+
+    # add custom parameters
+    if custom_params:
+        params.update(custom_params)
+
+    # add page title if supplied
+    if title:
+        u_title = title.decode('utf-8') if isinstance(title, bytes) else title
+        params.update({'action_name': quote(u_title.encode('utf-8'))})
+
+    try:
+        track_url = settings.MATOMO_API_TRACKING['url']
+    except KeyError:
+        raise Exception("Matomo configuration incomplete")
+
+    track_url += "?&" + urlencode(params)
+
+    return track_url
+
+
+def track_matomo_job_creation(job: Job, request):
+    """
+    Track the job creation on Matomo using the API
+    """
+    try:
+        account = settings.MATOMO_API_TRACKING['site_id']
+    except (AttributeError, KeyError):
+        raise Exception("Matomo configuration incomplete")
+
+    if job.user:
+        user_id = job.user.username
+    else:
+        user_id = get_ip(request)
+
+    track_url = build_matomo_track_url(
+        request, account, path=request.path, referer=request.META.get('HTTP_REFERER', ''),
+        title=job.task.name,
+        user_id=user_id,
+    )
+
+    logger.debug("Matomo tracking url: {}".format(track_url))
+    try:
+        requests.get(track_url)
+    except Exception as e:
+        logger.warning("cannot send matomo tracking : {}".format(e))

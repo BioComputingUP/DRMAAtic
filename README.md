@@ -37,24 +37,20 @@ The staging environment is the environment that should be used to create a devel
 the server. This is very useful to test the application on the same environment that will be used in production.
 For example here there are all the queues and the connection to the Slurm cluster. 
 
-For this environment the database is a mysql database, called `submission_ws_dev`, and it can replicate the production
+For this environment the database is a mysql database, called `drmaatic_dev`, and it can replicate the production
 database.
 
 ### Production
 
 The production environment is the environment that is used in the production server (perse). This is the environment
 that is used by all the applications in production (e.g. RING-3, CAID WS, PED, etc.). This env also uses a mysql database
-called `submission_ws`.
+called `drmaatic`.
 
 ## Databases
 
 For the Staging and Production environments the database is a mysql database that is hosted on perse. The database
 can be accessed using the credentials defined in the `/home/django/.my.env` file. It's already configured in order to
 be also accessible with phpmyadmin as remote database from a machine inside the lab network.
-
-Here is reported the database schema as of 2023-04-14:
-
-<img width="650" src="/home/alessio/projects/submission_ws/figures/submission_scheme.png" alt="db scheme"/>
 
 ## Deploy
 

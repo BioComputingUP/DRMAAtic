@@ -7,8 +7,8 @@ from drmaatic.job.models import Job
 from drmaatic.parameter.models import Parameter
 from drmaatic.parameter.serializers import TaskParameterSerializer
 from drmaatic.task.models import Task
-from drmaatic.utils import get_ip, process_parameters, create_job_folder, format_job_params
-from submission_lib.manage import start_job
+from drmaatic.utils import get_ip, process_parameters, create_job_folder, format_job_params, track_matomo_job_creation
+from drmaatic_lib.manage import start_job
 
 logger = logging.getLogger(__name__)
 
@@ -175,8 +175,8 @@ class JobSerializer(serializers.ModelSerializer):
             j_id, name = start_job(**drm_params,
                                    task_name=task.name,
                                    # if the command is defined as absolute then do not add the submission script dir first
-                                   script_dir='' if task.command[0] == '/' else settings.SUBMISSION_SCRIPT_DIR,
-                                   out_dir=settings.SUBMISSION_OUTPUT_DIR,
+                                   script_dir='' if task.command[0] == '/' else settings.DRMAATIC_TASK_SCRIPT_DIR,
+                                   out_dir=settings.DRMAATIC_JOB_OUTPUT_DIR,
                                    command=task.command,
                                    script_args=formatted_params,
                                    working_dir=p_job.uuid,
@@ -212,6 +212,10 @@ class JobSerializer(serializers.ModelSerializer):
                         extra={'request': self.context.get('request')})
 
         job.save()
+
+        # If matomo is enabled, track the job creation
+        if settings.MATOMO_API_TRACKING:
+            track_matomo_job_creation(job, self.context.get('request'))
 
         return job
 
