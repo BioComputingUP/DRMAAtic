@@ -210,7 +210,7 @@ class JobViewSet(viewsets.ModelViewSet):
                 response['Content-Disposition'] = "inline"  # ; filename={}".format(os.path.basename(file))
                 return response
             else:
-                return Response("File not found", status=status.HTTP_404_NOT_FOUND)
+                raise exceptions.NotFound()
 
     @action(methods=['GET'], detail=True)
     def status(self, request, **kwargs):
