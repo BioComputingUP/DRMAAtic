@@ -143,3 +143,6 @@ migrations/*
 !migrations/__init__.py
 
 scripts/
+!/settings/.env
+
+settings/.dev.env
