@@ -145,4 +145,5 @@ migrations/*
 scripts/
 !/settings/.env
 
-settings/.dev.env
+/settings/.dev.env
+/settings/.staging.env

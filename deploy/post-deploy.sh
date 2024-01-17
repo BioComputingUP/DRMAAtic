@@ -17,12 +17,14 @@ then
     exit 1
 fi
 
+export DJANGO_ENV="$ENVIRONMENT"
+
 # Collect static files
 echo "Collect static files"
-./venv/bin/python manage.py collectstatic --noinput --settings=server.settings."$ENVIRONMENT"
+./venv/bin/python manage.py collectstatic --noinput
 
 # Migrate the database
 echo "Migrate the database"
-./venv/bin/python manage.py makemigrations --settings=server.settings."$ENVIRONMENT"
-./venv/bin/python manage.py makemigrations drmaatic --settings=server.settings."$ENVIRONMENT"
-./venv/bin/python manage.py migrate --settings=server.settings."$ENVIRONMENT"
+./venv/bin/python manage.py makemigrations
+./venv/bin/python manage.py makemigrations drmaatic
+./venv/bin/python manage.py migrate
