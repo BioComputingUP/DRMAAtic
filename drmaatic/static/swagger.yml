@@ -6,7 +6,7 @@ info:
   description: |
     <img src="/static/img/logo.png" alt="drmaatic logo" height="70">&nbsp;&nbsp;&nbsp;&nbsp;
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Slurm_logo.svg/839px-Slurm_logo.svg.png" alt="slurm logo" height="70">
-    
+  
     ### Introduction to DRMAAtic API
     
     The DRMAAtic API offers a comprehensive set of endpoints to facilitate authentication, job management, and task
