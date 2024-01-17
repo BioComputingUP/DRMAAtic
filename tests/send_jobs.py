@@ -3,7 +3,7 @@ import requests
 FASTA_QUERY = ">DP0001\n" \
               "KADELERIRLRPGGKKKYRL"
 
-base_endpoint = 'http://0.0.0.0:8301/'
+base_endpoint = 'http://ermes:8301/'
 # base_endpoint = 'https://dev.scheduler.biocomputingup.it/'
 
 endpoint = {
