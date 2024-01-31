@@ -44,4 +44,6 @@ class TaskAdmin(admin.ModelAdmin):
 
     form = TaskForm
 
+    save_as = True
+
     inlines = [ParamAdminInline, ]

@@ -3,6 +3,7 @@ import os
 
 from django.http import FileResponse, HttpResponseNotFound
 from django_filters.rest_framework import DjangoFilterBackend
+from drmaa import InternalException
 from rest_framework import exceptions, filters, status, viewsets
 from rest_framework.decorators import action, throttle_classes
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -148,12 +149,15 @@ class JobViewSet(viewsets.ModelViewSet):
         job: Job = self.get_object()
 
         if not job.has_finished():
-            terminate_job(job.drm_job_id)
+            try:
+                terminate_job(job.drm_job_id)
+            except InternalException:   # The job can be already finished
+                return Response(data={'detail': f'Job {job.uuid} is not running'}, status=status.HTTP_409_CONFLICT)
             job.status = Job.Status.STOPPED.value
             job.save()
-            return Response(data={'detail': 'Job successfully stopped'}, status=status.HTTP_200_OK)
+            return Response(data={'detail': f'Job {job.uuid} successfully stopped'}, status=status.HTTP_200_OK)
         else:
-            return Response(data={'detail': 'Job is not running'}, status=status.HTTP_409_CONFLICT)
+            return Response(data={'detail': f'Job {job.uuid} is not running'}, status=status.HTTP_409_CONFLICT)
 
     @action(methods=['GET'], detail=True)
     def download(self, request, **kwargs):
