@@ -63,16 +63,16 @@ info:
     url: "https://biocomputingup.it/"
 
 servers:
-  - url: http://10.69.69.152:8300/
-    description: Local development server
   - url: https://{environment}drmaatic.biocomputingup.it/
     description: Remote server
     variables:
       environment:
-        default: dev.
+        default: ""
         enum:
-          - dev. # Staging environment
           - ""   # Production environment
+          - dev. # Staging environment
+  - url: http://0.0.0.0:8300/
+    description: Local development server
 
 security:
   - DRMAAticJWTAuth: [ ]
@@ -565,14 +565,23 @@ components:
       in: header
       type: http
       description: 'The access token provided upon authentication with the social provider'
-    OAuth2:
+    OAuth2 prod:
       type: oauth2
-      description: 'OAuth2 authentication for the social provider. This will retrieve the access token from the social provider and this can be used to authenticate with DRMAAtic'
+      description: 'OAuth2 authentication for the social provider on production environment. This will retrieve the access token from the social provider and this can be used to authenticate with DRMAAtic'
+      flows:
+        implicit:
+          authorizationUrl: https://orcid.org/oauth/authorize
+          scopes:
+            openid: Grants access to openid
+    OAuth2 dev:
+      type: oauth2
+      description: 'OAuth2 authentication for the social provider on dev environment. This will retrieve the access token from the social provider and this can be used to authenticate with DRMAAtic'
       flows:
         implicit:
           authorizationUrl: https://sandbox.orcid.org/oauth/authorize
           scopes:
             openid: Grants access to openid
+
   responses:
     Unauthorized:
       description: 'Unauthorized'

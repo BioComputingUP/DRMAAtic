@@ -29,11 +29,23 @@
             return request;
         },
     })
+    // Define the clientId based on the environment
+    let clientId;
+    switch (window.location.hostname) {
+        case "dev.drmaatic.biocomputingup.it":  // staging
+            clientId = "APP-H456ILXFAV2PFA0X";
+            break;
+        case "drmaatic.biocomputingup.it":   // production
+            clientId = "APP-2V4C9S2X746EFPFF";
+            break;
+        default:
+            clientId = "APP-H456ILXFAV2PFA0X";  // local dev
+    }
+
     ui.initOAuth({
-        clientId: "APP-H456ILXFAV2PFA0X",
+        clientId: clientId,
         scopes: "openid",
     })
-    ui.InjectStyleSheet("{% static 'css/swagger-ui-dark.css' %}")
 </script>
 </body>
 </html>

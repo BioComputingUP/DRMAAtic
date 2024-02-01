@@ -57,6 +57,8 @@ CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', [])
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['*'])
 X_FRAME_OPTIONS = 'ALLOWALL'
+SECURE_BROWSER_XSS_FILTER = env.bool('SESSION_COOKIE_SECURE', default=False)
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 ORCID_AUTH_URL = env.str('ORCID_AUTH_URL', default='https://orcid.org/oauth/userinfo')
 
