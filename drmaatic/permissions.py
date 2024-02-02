@@ -51,8 +51,7 @@ class IsSuper(BasePermission):
 
 
 class IsOutputAccessible(BasePermission):
-
     def has_object_permission(self, request, view, obj):
-        if hasattr(obj, 'task_name') and obj.job.is_output_public:
+        if hasattr(obj, 'task') and obj.job.is_output_public:
             return True
         return False

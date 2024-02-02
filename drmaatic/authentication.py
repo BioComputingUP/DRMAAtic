@@ -67,9 +67,9 @@ class BearerAuthentication(BaseAuthentication):
                                options={'verify_exp': True})
                 except ExpiredSignatureError:
                     raise AuthenticationFailed(_('Authentication JWT token expired'))
-                except (InvalidKeyError, InvalidSignatureError, InvalidAudienceError, Exception):
+                except Exception:
                     logger.warning("Is trying to use an invalid token", extra={'ip': token.user.username})
-                    raise AuthenticationFailed(_('Authentication JWT token is not valid'))
+                    raise AuthenticationFailed(_('Authentication JWT token is not valid, please login again'))
 
                 return token
 
