@@ -50,10 +50,6 @@ class BearerAuthentication(BaseAuthentication):
         except Token.DoesNotExist:
             raise AuthenticationFailed(_('JWT token does not exist'))
 
-        if token.expires < timezone.now():
-            logger.warning("Is trying to use an expired token", extra={'ip': token.user.username})
-            raise AuthenticationFailed(_('Authentication token expired'))
-
         if token.user.active:
             # Decode payload from token
             if token.user.source == 'INTERNAL':
@@ -66,9 +62,9 @@ class BearerAuthentication(BaseAuthentication):
                                issuer=settings.DRMAATIC_WS_URL,
                                options={'verify_exp': True})
                 except ExpiredSignatureError:
-                    raise AuthenticationFailed(_('Authentication JWT token expired'))
+                    raise AuthenticationFailed(_('Authentication JWT token expired, please login again'))
                 except Exception:
-                    logger.warning("Is trying to use an invalid token", extra={'ip': token.user.username})
+                    logger.warning(f"{token.user.username} is trying to use an invalid token")
                     raise AuthenticationFailed(_('Authentication JWT token is not valid, please login again'))
 
                 return token
