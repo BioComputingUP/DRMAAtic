@@ -33,9 +33,10 @@ class JobAdmin(admin.ModelAdmin):
     ]
     search_fields = (
         "uuid",
-        "job__name",
+        "task__name",
         "user__username",
         "creation_date",
+        "_sender_ip_addr"
     )
 
     actions = ["delete_and_remove", "update_drm_status"]

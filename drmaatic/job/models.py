@@ -1,3 +1,4 @@
+import logging
 import shutil
 import uuid
 from os.path import join
@@ -10,6 +11,8 @@ from django.conf import settings
 
 from drmaatic.models import User
 from drmaatic_lib.manage import get_job_status
+
+logger = logging.getLogger(__name__)
 
 
 class Job(models.Model):
@@ -131,8 +134,11 @@ class Job(models.Model):
         return join(settings.DRMAATIC_JOB_OUTPUT_DIR, str(self.uuid))
 
     def delete_from_file_system(self):
-        if settings.REMOVE_TASK_FILES_ON_DELETE:
-            shutil.rmtree(self.get_job_path(), ignore_errors=True)
+        if settings.REMOVE_JOB_FILES_ON_DELETE:
+            try:
+                shutil.rmtree(self.get_job_path(), ignore_errors=False)
+            except Exception as e:
+                logger.error(f"Error while deleting job {self.uuid} from the file system: {e}")
 
     class Meta:
         ordering = ['-creation_date']
