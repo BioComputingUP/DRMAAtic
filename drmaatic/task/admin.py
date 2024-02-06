@@ -38,8 +38,9 @@ class TaskForm(forms.ModelForm):
 class TaskAdmin(admin.ModelAdmin):
     fields = (('name', 'command', 'required_tokens'), ('queue', 'cpus', 'mem'), 'is_output_public', "_max_clock_time", "groups",
               ('is_array', 'begin_index', 'end_index', 'step_index'))
-    list_display = ('name', 'command', "is_output_public")
+    list_display = ('name', 'command', "required_tokens", "queue", "is_output_public")
     search_fields = ('name', 'command')
+    list_filter = ('queue', 'is_output_public', 'groups')
     ordering = ('command', 'name')
 
     form = TaskForm

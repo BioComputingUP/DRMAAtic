@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.admin import display
 from django.contrib.auth import admin as auth
+from django.utils import timezone
 
 from drmaatic.models import *
 # noinspection PyUnresolvedReferences
@@ -15,6 +16,23 @@ from drmaatic.task.admin import *
 
 # Register user in the admin web interface, using the default interface
 admin.site.register(Admin, auth.UserAdmin)
+
+
+class ExpiredDateFilter(admin.SimpleListFilter):
+    title = 'Expired'
+    parameter_name = 'expired'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Yes'),
+            ('no', 'No'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(expires__lt=timezone.now())
+        elif self.value() == 'no':
+            return queryset.exclude(expires__lt=timezone.now())
 
 
 # Register external user in the admin web interface
@@ -35,7 +53,8 @@ class GroupForm(forms.ModelForm):
 class GroupAdmin(admin.ModelAdmin):
     # Define columns to show
     list_display = ('name', 'has_full_access', 'throttling_rate_burst',
-                    'token_renewal_time', 'execution_token_max_amount', 'execution_token_regen_amount', '_execution_token_regen_time')
+                    'token_renewal_time', 'execution_token_max_amount', 'execution_token_regen_amount',
+                    '_execution_token_regen_time')
     form = GroupForm
 
 
@@ -45,6 +64,8 @@ class TokenAdmin(admin.ModelAdmin):
     model = Token
     list_filter = [
         "user__username",
+        "created",
+        ExpiredDateFilter
     ]
     search_fields = [
         "user__username",
@@ -63,11 +84,11 @@ class TokenAdmin(admin.ModelAdmin):
         return '...{:s}'.format(obj.hash[-7::])
 
     # Add user's source
-    @display(ordering='user_source', description='User source')
+    @display(ordering='user__source', description='User source')
     def get_user_source(self, obj):
         return obj.user.source
 
     # Add user's username
-    @display(ordering='user_name', description='Username')
+    @display(ordering='user__name', description='Username')
     def get_user_name(self, obj):
         return obj.user.username

@@ -21,3 +21,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
 ]
+
+admin.site.site_header = "DRMAAtic Administration"
+admin.site.site_title = "DRMAAtic Administration"
+admin.site.index_title = "Welcome to DRMAAtic Administration"

@@ -36,7 +36,7 @@ else:
 os.environ["DRMAA_LIBRARY_PATH"] = env.str('DRMAA_LIBRARY_PATH', '/usr/lib/slurm-drmaa/lib/libdrmaa.so')
 os.environ["SLURM_DRMAA_USE_SLURMDBD"] = env.str('SLURM_DRMAA_USE_SLURMDBD', '1')
 # Set true if you want to remove the task directory when the task is deleted
-REMOVE_TASK_FILES_ON_DELETE = env.bool('REMOVE_TASK_FILES_ON_DELETE', False)
+REMOVE_JOB_FILES_ON_DELETE = env.bool('REMOVE_JOB_FILES_ON_DELETE', False)
 # Maximum length of the parameters values, after this length an error is raised on the job submission
 PARAMS_VALUES_MAX_LENGTH = env.int('PARAMS_VALUES_MAX_LENGTH', 5000)
 # Maximum number of items for a paginated response
