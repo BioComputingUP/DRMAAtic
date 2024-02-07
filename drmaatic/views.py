@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def retrieve_internal_token(request, **kwargs):
     # Define token
     internal_token: Token = request.auth
-    return Response({'jwt': internal_token.hash}, status=status.HTTP_200_OK)
+    return Response({'jwt': internal_token.jwt}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

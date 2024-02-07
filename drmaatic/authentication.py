@@ -17,6 +17,13 @@ from drmaatic.models import Token, User, Group
 logger = logging.getLogger(__name__)
 
 
+def get_user_data_from_jwt(jwt_token):
+    jwt_data = jwt.decode(jwt_token,
+                          algorithms=['HS256', ],
+                          options={'verify_signature': False})
+    return User.objects.get(username=jwt_data['sub'], source=jwt_data['aud'])
+
+
 # Extend token authentication in order to create Bearer authentication
 class BearerAuthentication(BaseAuthentication):
     # Override authenticate method
@@ -24,12 +31,10 @@ class BearerAuthentication(BaseAuthentication):
         # Authenticate token
         try:
             # Authenticate token
-            token = self.authenticate_token(request)
+            token, user = self.authenticate_token(request)
             # In case no header for authentication was provided
-            if token is None:
+            if token is None or user is None:
                 return None, None
-            # Define user
-            user = token.user
             # Catch authentication exceptions
         except AuthenticationFailed as e:
             # Unset both user and token
@@ -42,33 +47,39 @@ class BearerAuthentication(BaseAuthentication):
         header = get_authorization_header(request)
         match = re.match(r'^Bearer (.+)$', header.decode())
         if not match:
-            return None
+            return None, None
 
         jwt_token = match.group(1)
+        # Verify that the token exists
         try:
-            token = Token.objects.get(hash=jwt_token)
+            token = Token.objects.get(jwt=jwt_token)
         except Token.DoesNotExist:
-            raise AuthenticationFailed(_('JWT token does not exist'))
+            raise AuthenticationFailed(_('JWT token does not exist, please login again'))
 
-        if token.user.active:
-            # Decode payload from token
-            if token.user.source == 'INTERNAL':
-                return token
-            else:
-                try:
-                    jwt.decode(jwt_token, settings.SECRET_KEY,
-                               algorithms=['HS256', ],
-                               audience=token.user.source,
-                               issuer=settings.DRMAATIC_WS_URL,
-                               options={'verify_exp': True})
-                except ExpiredSignatureError:
-                    raise AuthenticationFailed(_('Authentication JWT token expired, please login again'))
-                except Exception:
-                    logger.warning(f"{token.user.username} is trying to use an invalid token")
-                    raise AuthenticationFailed(_('Authentication JWT token is not valid, please login again'))
+        try:
+            user: User = get_user_data_from_jwt(jwt_token)
+        except User.DoesNotExist:
+            raise AuthenticationFailed(_('User does not exist'))
 
-                return token
+        # Verify that the token is valid and not expired
+        try:
+            jwt.decode(jwt_token, settings.SECRET_KEY,
+                       algorithms=['HS256', ],
+                       audience=user.source,
+                       issuer=settings.DRMAATIC_WS_URL,
+                       options={'verify_signature': True})
+        except ExpiredSignatureError:
+            raise AuthenticationFailed(_('Authentication JWT token expired, please login again'))
+        except Exception:
+            logger.warning(f"{user.username} is trying to use an invalid token")
+            raise AuthenticationFailed(_('Authentication JWT token is not valid, please login again'))
 
+        # Check that user is active
+        if user.active:
+            # Authenticate user
+            return token, user
+
+        # Failsafe
         raise AuthenticationFailed(_('User is forbidden'))
 
 
@@ -146,6 +157,6 @@ class SocialProviderAuthentication(BearerAuthentication):
             'surname': user.surname
         }, settings.SECRET_KEY, algorithm='HS256')
         # Create token from user
-        token = Token.objects.create(user=user, hash=jwt_token, created=created, expires=expires)
+        token = Token.objects.create(jwt=jwt_token)
         # Return user's token
         return user, token
