@@ -29,17 +29,7 @@ class BearerAuthentication(BaseAuthentication):
     # Override authenticate method
     def authenticate(self, request):
         # Authenticate token
-        try:
-            # Authenticate token
-            token, user = self.authenticate_token(request)
-            # In case no header for authentication was provided
-            if token is None or user is None:
-                return None, None
-            # Catch authentication exceptions
-        except AuthenticationFailed as e:
-            # Unset both user and token
-            raise e
-
+        token, user = self.authenticate_token(request)
         # Return both user and token
         return user, token
 
