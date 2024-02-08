@@ -147,3 +147,5 @@ scripts/
 
 /settings/.dev.env
 /settings/.staging.env
+/drmaatic/migrations/
+!/drmaatic/migrations/__init__.py

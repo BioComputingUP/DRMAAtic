@@ -13,7 +13,7 @@
 </head>
 <body>
 <div id="swagger-ui"></div>
-<script src="//unpkg.com/swagger-ui-dist@5.9/swagger-ui-bundle.js"></script>
+<script src="{% static 'js/swagger-ui-bundle.js'%}"></script>
 <script>
     const ui = SwaggerUIBundle({
         oauth2RedirectUrl: window.location.origin + "/",
