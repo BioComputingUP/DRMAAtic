@@ -144,7 +144,7 @@ paths:
             minimum: 0
       responses:
         '200':
-          description: | 
+          description: |
             Number of execution tokens, and wait time if the user needs a specific number of tokens.  <br />
             **If the specified number of tokens exceeds the maximum number, "infinite" is returned as wait_time**
           content:
@@ -474,6 +474,22 @@ paths:
       description: |
         List all the available tasks with their parameters. Tasks can be associated with
       parameters:
+        - name: name
+          required: false
+          in: query
+          description: 'Filter by task name'
+          schema:
+            type: string
+        - name: name__in
+          required: false
+          in: query
+          description: 'Filter by task name'
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
         - name: page
           required: false
           in: query

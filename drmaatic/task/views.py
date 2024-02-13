@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import throttle_classes
 from rest_framework.response import Response
@@ -14,6 +15,9 @@ class TaskViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [api_settings.DEFAULT_AUTHENTICATION_CLASSES[0], BearerAuthentication]
     serializer_class = TaskSerializer
     lookup_field = "name"
+    filterset_fields = {
+        "name": ["in", "exact"],
+    }
 
     def get_serializer_class(self):
         if self.request.user and self.request.user.is_admin():
