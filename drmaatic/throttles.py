@@ -85,7 +85,7 @@ class TokenBucketThrottle(SimpleRateThrottle):
 
     @user.setter
     def user(self, user):
-        self._user = user if self.anonymous_request else self._user.pk
+        self._user = user
 
     @property
     def user_tokens_key(self):
@@ -142,9 +142,8 @@ class TokenBucketThrottle(SimpleRateThrottle):
     def extract_user_from_request(self, request):
         self.anonymous_request = False
         if request.user is not None and request.user.is_authenticated:
-            self.user = request.user
+            self.user = request.user.pk
         else:
-            # It is important to set the anonymous_request flag before setting the user
             self.anonymous_request = True
             self.user = self.get_ident(request=request)
 
