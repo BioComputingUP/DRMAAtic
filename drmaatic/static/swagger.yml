@@ -6,7 +6,7 @@ info:
   description: |
     <img src="/static/img/logo.png" alt="drmaatic logo" height="70">&nbsp;&nbsp;&nbsp;&nbsp;
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Slurm_logo.svg/839px-Slurm_logo.svg.png" alt="slurm logo" height="70">
-  
+    
     ### Introduction to DRMAAtic API
     
     The DRMAAtic API offers a comprehensive set of endpoints to facilitate authentication, job management, and task
@@ -134,9 +134,19 @@ paths:
         
         If the user is not logged, the user is identified with the IP address.
         Pass the JWT token in the Authorization header to identify the user.
+      parameters:
+        - name: required
+          in: query
+          required: false
+          description: 'If the user needs a specific number of execution tokens, it returns the time in seconds that the user has to wait to get the required number of tokens'
+          schema:
+            type: integer
+            minimum: 0
       responses:
         '200':
-          description: 'Number of execution tokens'
+          description: | 
+            Number of execution tokens, and wait time if the user needs a specific number of tokens.  <br />
+            **If the specified number of tokens exceeds the maximum number, "infinite" is returned as wait_time**
           content:
             application/json:
               schema:
@@ -145,6 +155,11 @@ paths:
                   available_execution_tokens:
                     type: integer
                     example: 10
+                  wait_time:
+                    type:
+                      - integer
+                      - string
+                    example: 200
       tags:
         - 'Execution tokens'
   /job/:

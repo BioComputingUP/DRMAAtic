@@ -1,4 +1,6 @@
 import logging
+
+from rest_framework import exceptions as rest_framework_exceptions
 from datetime import timedelta
 
 from django.core.cache import cache
@@ -67,75 +69,125 @@ class TokenBucketThrottle(SimpleRateThrottle):
 
     ident = None
 
+    def __init__(self):
+        super().__init__()
+        self.view_name = None
+        self._user = None
+        self.anonymous_request = False
+        self.ident = None
+
     def get_rate(self):
         return '1000/d'
 
-    def get_user_tokens_key(self, user, is_anonymous):
-        if not is_anonymous:
-            return f"{self.TOKENS_CACHE_PREFIX}{user.pk}"
-        else:
-            return f"{self.TOKENS_CACHE_PREFIX}{user}"
+    @property
+    def user(self):
+        return self._user
 
-    def get_max_tokens(self, user, is_anonymous):
-        if not is_anonymous:
-            return user.group.execution_token_max_amount
+    @user.setter
+    def user(self, user):
+        self._user = user if self.anonymous_request else self._user.pk
+
+    @property
+    def user_tokens_key(self):
+        return f"{self.TOKENS_CACHE_PREFIX}{self.user}"
+
+    @property
+    def user_current_tokens(self):
+        return cache.get(self.user_tokens_key, self.max_tokens)
+
+    @property
+    def max_tokens(self):
+        if not self.anonymous_request:
+            return self.user.group.execution_token_max_amount
         else:
             return Group.anonymous.execution_token_max_amount
 
-    def get_user_tokens(self, user, is_anonymous):
-        user_tokens_key = self.get_user_tokens_key(user, is_anonymous)
-        max_tokens = self.get_max_tokens(user, is_anonymous)
-        return cache.get(user_tokens_key, max_tokens)
+    @property
+    def token_regen_interval(self):
+        if not self.anonymous_request:
+            return self.user.group.execution_token_regen_time
+        else:
+            return Group.anonymous.execution_token_regen_time
 
-    def regenerate_tokens(self, user, is_anonymous):
-        user_tokens_key = self.get_user_tokens_key(user, is_anonymous)
-        max_tokens = self.get_max_tokens(user, is_anonymous)
-        last_regen_time_key = f"{self.TOKENS_CACHE_PREFIX}{user if is_anonymous else user.pk}_last_regen"
+    @property
+    def token_regen_amount(self):
+        if not self.anonymous_request:
+            return self.user.group.execution_token_regen_amount
+        else:
+            return Group.anonymous.execution_token_regen_amount
+
+    def regenerate_tokens(self):
+        max_tokens = self.max_tokens
+        last_regen_time_key = f"{self.TOKENS_CACHE_PREFIX}{self.user}_last_regen"
 
         if not cache.get(last_regen_time_key):
             cache.set(last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
         last_regen_time = cache.get(last_regen_time_key, timezone.now())
         time_since_last_regen = (timezone.now() - last_regen_time).total_seconds()
 
-        current_tokens = self.get_user_tokens(user, is_anonymous)
-
-        token_regen_interval = user.group.execution_token_regen_time if not is_anonymous else Group.anonymous.execution_token_regen_time
-        token_regen_amount = user.group.execution_token_regen_amount if not is_anonymous else Group.anonymous.execution_token_regen_amount
-
-        if time_since_last_regen >= token_regen_interval:
+        if time_since_last_regen >= self.token_regen_interval:
             cache.set(last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
 
-            current_tokens = self.get_user_tokens(user, is_anonymous)
-            regenerated_tokens = int(time_since_last_regen / token_regen_interval) * token_regen_amount
+            regenerated_tokens = int(time_since_last_regen / self.token_regen_interval) * self.token_regen_amount
 
-            new_tokens = min(max_tokens, current_tokens + regenerated_tokens)
-            cache.set(user_tokens_key, new_tokens, None)
+            new_tokens = min(max_tokens, self.user_current_tokens + regenerated_tokens)
+            cache.set(self.user_tokens_key, new_tokens, None)
         else:
-            self.wait_time = timedelta(seconds=token_regen_interval - time_since_last_regen)
+            self.wait_time = timedelta(seconds=self.token_regen_interval - time_since_last_regen)
 
-    def deduct_tokens(self, user, is_anon, tokens):
-        user_tokens_key = self.get_user_tokens_key(user, is_anon)
-        current_tokens = self.get_user_tokens(user, is_anon)
-        new_tokens = max(0, current_tokens - tokens)
-        cache.set(user_tokens_key, new_tokens, None)
+    def deduct_tokens(self, tokens):
+        new_tokens = max(0, self.user_current_tokens - tokens)
+        cache.set(self.user_tokens_key, new_tokens, None)
 
-    def get_request_user(self, request):
-        anonymous_request = False
+    def extract_user_from_request(self, request):
+        self.anonymous_request = False
         if request.user is not None and request.user.is_authenticated:
-            user = request.user
+            self.user = request.user
         else:
-            user = self.get_ident(request=request)
-            anonymous_request = True
-        return user, anonymous_request
+            # It is important to set the anonymous_request flag before setting the user
+            self.anonymous_request = True
+            self.user = self.get_ident(request=request)
+
+    def calculate_time_to_wait(self, tokens_requested) -> float:
+        """
+        Calculate the time to wait for the tokens to be available
+        :param tokens_requested: The number of tokens requested
+        :return: The time to wait, in seconds. If the time is infinite, then return float('inf')
+        """
+        # If the tokens requested exceed the maximum allowed, then wait time is infinite
+        if tokens_requested > self.max_tokens:
+            return float('inf')
+
+        tokens_to_wait = tokens_requested - self.user_current_tokens
+        # If there are enough tokens, then no need to wait
+        if tokens_to_wait <= 0:
+            return 0
+        # The time to wait is the number of tokens to wait divided by the number of tokens regenerated per interval, multiplied by the interval
+        time_to_wait = (tokens_to_wait / self.token_regen_amount) * self.token_regen_interval
+        return time_to_wait
 
     def allow_request(self, request, view):
-        user, anonymous_request = self.get_request_user(request)
+        self.view_name = view.__class__.__name__
+        self.extract_user_from_request(request)
 
-        self.ident = user.username if not anonymous_request else user
-        self.regenerate_tokens(user, is_anonymous=anonymous_request)
+        self.ident = self.user.username if not self.anonymous_request else self.user
+        self.regenerate_tokens()
 
-        available_tokens = self.get_user_tokens(user, is_anonymous=anonymous_request)
-        request.available_execution_tokens = available_tokens
+        request.available_execution_tokens = self.user_current_tokens
+
+        # If the request is for the view for retrieving the execution token, and the required parameter is present, then calculate the time to wait for
+        # the tokens to be available, if ever
+        if self.view_name == 'retrieve_execution_token' and 'required' in request.query_params:
+            try:
+                token_requested = int(request.query_params['required'])
+            except ValueError:
+                raise rest_framework_exceptions.ValidationError(
+                    f"Invalid required token amount '{request.query_params['required']}'")
+            if token_requested < 0:
+                raise rest_framework_exceptions.ValidationError("The required token amount must be a positive integer")
+
+            request.time_to_wait = self.calculate_time_to_wait(token_requested)
+            return True
 
         try:
             task = Task.objects.get(name=request.data['task'])
@@ -143,9 +195,8 @@ class TokenBucketThrottle(SimpleRateThrottle):
         except (Task.DoesNotExist, KeyError):
             return True
 
-        if available_tokens >= required_tokens:
-            self.deduct_tokens(user, anonymous_request, required_tokens)
-            request.tokens = available_tokens
+        if self.user_current_tokens >= required_tokens:
+            self.deduct_tokens(required_tokens)
             return self.throttle_success()
 
         return self.throttle_failure()

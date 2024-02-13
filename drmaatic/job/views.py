@@ -50,8 +50,7 @@ class JobViewSet(viewsets.ModelViewSet):
 
     def get_throttles(self):
         if self.action == "create":
-            _throttle_classes = [
-                TokenBucketThrottle]  # [IPRateThrottleBurst, IPRateThrottleSustained, UserBasedThrottleBurst,  UserBasedThrottleSustained]
+            _throttle_classes = [TokenBucketThrottle]
         else:
             _throttle_classes = [IPRateThrottleBurst, UserBasedThrottleBurst]
         return [throttle() for throttle in _throttle_classes]
@@ -151,7 +150,7 @@ class JobViewSet(viewsets.ModelViewSet):
         if not job.has_finished():
             try:
                 terminate_job(job.drm_job_id)
-            except InternalException:   # The job can be already finished
+            except InternalException:  # The job can be already finished
                 return Response(data={'detail': f'Job {job.uuid} is not running'}, status=status.HTTP_409_CONFLICT)
             job.status = Job.Status.STOPPED.value
             job.save()
