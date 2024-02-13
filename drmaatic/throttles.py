@@ -143,9 +143,11 @@ class TokenBucketThrottle(SimpleRateThrottle):
         self.anonymous_request = False
         if request.user is not None and request.user.is_authenticated:
             self.user = request.user.pk
+            self.ident = request.user.username
         else:
             self.anonymous_request = True
             self.user = self.get_ident(request=request)
+            self.ident = self.user
 
     def calculate_time_to_wait(self, tokens_requested) -> float:
         """
@@ -169,7 +171,6 @@ class TokenBucketThrottle(SimpleRateThrottle):
         self.view_name = view.__class__.__name__
         self.extract_user_from_request(request)
 
-        self.ident = self.user.username if not self.anonymous_request else self.user
         self.regenerate_tokens()
 
         request.available_execution_tokens = self.user_current_tokens
