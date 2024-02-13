@@ -122,17 +122,28 @@ class TokenBucketThrottle(SimpleRateThrottle):
         else:
             return Group.anonymous.execution_token_regen_amount
 
-    def regenerate_tokens(self):
-        max_tokens = self.max_tokens
-        last_regen_time_key = f"{self.TOKENS_CACHE_PREFIX}{self.user_id}_last_regen"
+    @property
+    def last_regen_time_key(self):
+        return f"{self.TOKENS_CACHE_PREFIX}{self.user_id}_last_regen"
 
-        if not cache.get(last_regen_time_key):
-            cache.set(last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
-        last_regen_time = cache.get(last_regen_time_key, timezone.now())
+    def time_since_last_regen(self):
+        """
+        Calculate the time since the last regeneration of tokens
+        :return: The time since the last regeneration of tokens, in seconds
+        """
+        if not cache.get(self.last_regen_time_key):
+            cache.set(self.last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
+        last_regen_time = cache.get(self.last_regen_time_key, timezone.now())
         time_since_last_regen = (timezone.now() - last_regen_time).total_seconds()
 
+        return time_since_last_regen
+
+    def regenerate_tokens(self):
+        max_tokens = self.max_tokens
+        time_since_last_regen = self.time_since_last_regen()
+
         if time_since_last_regen >= self.token_regen_interval:
-            cache.set(last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
+            cache.set(self.last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
 
             regenerated_tokens = int(time_since_last_regen / self.token_regen_interval) * self.token_regen_amount
 
@@ -170,7 +181,7 @@ class TokenBucketThrottle(SimpleRateThrottle):
         if tokens_to_wait <= 0:
             return 0
         # The time to wait is the number of tokens to wait divided by the number of tokens regenerated per interval, multiplied by the interval
-        time_to_wait = (tokens_to_wait / self.token_regen_amount) * self.token_regen_interval
+        time_to_wait = (tokens_to_wait / self.token_regen_amount) * self.token_regen_interval - self.time_since_last_regen()
         return time_to_wait
 
     def allow_request(self, request, view):
