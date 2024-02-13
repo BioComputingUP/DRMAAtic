@@ -83,13 +83,19 @@ class TokenBucketThrottle(SimpleRateThrottle):
     def user(self):
         return self._user
 
+    @property
+    def user_id(self):
+        if self.anonymous_request:
+            return self._user
+        return self._user.pk
+
     @user.setter
     def user(self, user):
         self._user = user
 
     @property
     def user_tokens_key(self):
-        return f"{self.TOKENS_CACHE_PREFIX}{self.user}"
+        return f"{self.TOKENS_CACHE_PREFIX}{self.user_id}"
 
     @property
     def user_current_tokens(self):
@@ -118,7 +124,7 @@ class TokenBucketThrottle(SimpleRateThrottle):
 
     def regenerate_tokens(self):
         max_tokens = self.max_tokens
-        last_regen_time_key = f"{self.TOKENS_CACHE_PREFIX}{self.user}_last_regen"
+        last_regen_time_key = f"{self.TOKENS_CACHE_PREFIX}{self.user_id}_last_regen"
 
         if not cache.get(last_regen_time_key):
             cache.set(last_regen_time_key, timezone.now(), self.CACHE_TIMEOUT)
@@ -142,7 +148,7 @@ class TokenBucketThrottle(SimpleRateThrottle):
     def extract_user_from_request(self, request):
         self.anonymous_request = False
         if request.user is not None and request.user.is_authenticated:
-            self.user = request.user.pk
+            self.user = request.user
             self.ident = request.user.username
         else:
             self.anonymous_request = True
