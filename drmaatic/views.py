@@ -23,14 +23,14 @@ def retrieve_internal_token(request, **kwargs):
 @authentication_classes([BearerAuthentication])
 @throttle_classes([TokenBucketThrottle])
 @renderer_classes([JSONRenderer])
-def retrieve_execution_token(request):
+def retrieve_cpu_credit(request):
     # If in the request there is a required number of tokens, then calculate in how many seconds the tokens will be available, if ever
     if 'required' in request.query_params:
         wait_time = request.time_to_wait
         wait_time_value = 'infinite' if wait_time == float('inf') else int(wait_time)
-        return Response(data={'available_execution_tokens': request.available_execution_tokens,
+        return Response(data={'available_cpu_credit': request.available_cpu_credit,
                               'wait_time': wait_time_value},
                         status=status.HTTP_200_OK)
 
     # Based on the renderers, the response will be either JSON or plain text
-    return Response(data={'available_execution_tokens': request.available_execution_tokens}, status=status.HTTP_200_OK)
+    return Response(data={'available_cpu_credit': request.available_cpu_credit}, status=status.HTTP_200_OK)

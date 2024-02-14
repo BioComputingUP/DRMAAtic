@@ -94,33 +94,33 @@ class TokenBucketThrottle(SimpleRateThrottle):
         self._user = user
 
     @property
-    def user_tokens_key(self):
+    def user_credit_key(self):
         return f"{self.TOKENS_CACHE_PREFIX}{self.user_id}"
 
     @property
-    def user_current_tokens(self):
-        return cache.get(self.user_tokens_key, self.max_tokens)
+    def user_current_credit(self):
+        return cache.get(self.user_credit_key, self.max_tokens)
 
     @property
     def max_tokens(self):
         if not self.anonymous_request:
-            return self.user.group.execution_token_max_amount
+            return self.user.group.cpu_credit_max_amount
         else:
-            return Group.anonymous.execution_token_max_amount
+            return Group.anonymous.cpu_credit_max_amount
 
     @property
     def token_regen_interval(self):
         if not self.anonymous_request:
-            return self.user.group.execution_token_regen_time
+            return self.user.group.cpu_credit_regen_time
         else:
-            return Group.anonymous.execution_token_regen_time
+            return Group.anonymous.cpu_credit_regen_time
 
     @property
     def token_regen_amount(self):
         if not self.anonymous_request:
-            return self.user.group.execution_token_regen_amount
+            return self.user.group.cpu_credit_regen_amount
         else:
-            return Group.anonymous.execution_token_regen_amount
+            return Group.anonymous.cpu_credit_regen_amount
 
     @property
     def last_regen_time_key(self):
@@ -147,14 +147,14 @@ class TokenBucketThrottle(SimpleRateThrottle):
 
             regenerated_tokens = int(time_since_last_regen / self.token_regen_interval) * self.token_regen_amount
 
-            new_tokens = min(max_tokens, self.user_current_tokens + regenerated_tokens)
-            cache.set(self.user_tokens_key, new_tokens, None)
+            new_tokens = min(max_tokens, self.user_current_credit + regenerated_tokens)
+            cache.set(self.user_credit_key, new_tokens, None)
         else:
             self.wait_time = timedelta(seconds=self.token_regen_interval - time_since_last_regen)
 
     def deduct_tokens(self, tokens):
-        new_tokens = max(0, self.user_current_tokens - tokens)
-        cache.set(self.user_tokens_key, new_tokens, None)
+        new_tokens = max(0, self.user_current_credit - tokens)
+        cache.set(self.user_credit_key, new_tokens, None)
 
     def extract_user_from_request(self, request):
         self.anonymous_request = False
@@ -176,7 +176,7 @@ class TokenBucketThrottle(SimpleRateThrottle):
         if tokens_requested > self.max_tokens:
             return float('inf')
 
-        tokens_to_wait = tokens_requested - self.user_current_tokens
+        tokens_to_wait = tokens_requested - self.user_current_credit
         # If there are enough tokens, then no need to wait
         if tokens_to_wait <= 0:
             return 0
@@ -190,11 +190,11 @@ class TokenBucketThrottle(SimpleRateThrottle):
 
         self.regenerate_tokens()
 
-        request.available_execution_tokens = self.user_current_tokens
+        request.available_cpu_credit = self.user_current_credit
 
         # If the request is for the view for retrieving the execution token, and the required parameter is present, then calculate the time to wait for
         # the tokens to be available, if ever
-        if self.view_name == 'retrieve_execution_token' and 'required' in request.query_params:
+        if self.view_name == 'retrieve_cpu_credit' and 'required' in request.query_params:
             try:
                 token_requested = int(request.query_params['required'])
             except ValueError:
@@ -212,7 +212,7 @@ class TokenBucketThrottle(SimpleRateThrottle):
         except (Task.DoesNotExist, KeyError):
             return True
 
-        if self.user_current_tokens >= required_tokens:
+        if self.user_current_credit >= required_tokens:
             self.deduct_tokens(required_tokens)
             return self.throttle_success()
 

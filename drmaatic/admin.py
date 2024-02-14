@@ -86,8 +86,8 @@ class GroupForm(forms.ModelForm):
 class GroupAdmin(admin.ModelAdmin):
     # Define columns to show
     list_display = ('name', 'has_full_access', 'throttling_rate_burst',
-                    'token_renewal_time', 'execution_token_max_amount', 'execution_token_regen_amount',
-                    '_execution_token_regen_time')
+                    'token_renewal_time', 'cpu_credit_max_amount', 'cpu_credit_regen_amount',
+                    '_cpu_credit_regen_time')
     form = GroupForm
 
 

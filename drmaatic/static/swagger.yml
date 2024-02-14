@@ -24,8 +24,8 @@ info:
     2. **Job Management**: DRMAAtic enables users to create, manage, and monitor jobs seamlessly. Users can define jobs
         with varying parameters and types, submit them to the DRM (Digital Rights Management), and access job-related information.
     
-    3. **Execution Tokens**: The system tracks and manages execution tokens, which are essential for job execution.
-        Users can check the number of available execution tokens, ensuring efficient resource utilization.
+    3. **CPU credit**: The system tracks and manages CPU credit, which are essential for job execution.
+        Users can check the number of available CPU credit, ensuring efficient resource utilization.
     
     4. **Task Catalog**: DRMAAtic offers a catalog of available tasks, providing users with detailed information about
         each task's parameters, requirements, and descriptions.
@@ -38,7 +38,7 @@ info:
     - **Retrieve Internal JWT**: Allows users to obtain JWT tokens for authenticating with DRMAAtic, using access tokens 
         from external providers.
     
-    - **Number of Execution Tokens**: Provides the count of available execution tokens for the user.
+    - **Amount of CPU credit**: Provides the count of available CPU credit for the user.
     
     - **Create a New Job**: Enables users to create new jobs, defining job parameters based on specific tasks.
     
@@ -125,12 +125,12 @@ paths:
                     example: 'Authentication header is not valid'
       tags:
         - 'Authentication'
-  /execution-tokens/:
+  /cpu-credit/:
     get:
-      operationId: get_execution_tokens_number
-      summary: 'Number of execution tokens'
+      operationId: get_cpu_credit_amount
+      summary: 'Amount of CPU credit'
       description: |
-        Get the number of execution tokens that the user has at the moment.
+        Get the amount of CPU credit that the user has at the moment.
         
         If the user is not logged, the user is identified with the IP address.
         Pass the JWT token in the Authorization header to identify the user.
@@ -138,21 +138,21 @@ paths:
         - name: required
           in: query
           required: false
-          description: 'If the user needs a specific number of execution tokens, it returns the time in seconds that the user has to wait to get the required number of tokens'
+          description: 'If the user needs a specific amount of CPU credit, it returns the time in seconds that the user has to wait to get the required number of tokens'
           schema:
             type: integer
             minimum: 0
       responses:
         '200':
           description: |
-            Number of execution tokens, and wait time if the user needs a specific number of tokens.  <br />
+            Amount of CPU credit, and wait time if the user needs a specific number of tokens.  <br />
             **If the specified number of tokens exceeds the maximum number, "infinite" is returned as wait_time**
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  available_execution_tokens:
+                  available_cpu_credit:
                     type: integer
                     example: 10
                   wait_time:
@@ -161,7 +161,7 @@ paths:
                       - string
                     example: 200
       tags:
-        - 'Execution tokens'
+        - 'CPU credit'
   /job/:
     post:
       operationId: createJob
@@ -806,7 +806,7 @@ components:
           type: string
           maxLength: 100
         required_tokens:
-          description: 'Number of execution tokens that the job will need to be executed'
+          description: 'Amount of CPU credit that the job will need to be executed'
           type: integer
           maximum: 2147483647
           minimum: 0

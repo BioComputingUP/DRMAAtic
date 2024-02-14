@@ -20,7 +20,7 @@ JobStopView = drmaatic.job.views.JobViewSet.as_view({'put': 'stop'})
 JobStatusView = drmaatic.job.views.JobViewSet.as_view({'get': 'status'})
 JobAssignOwnershipView = drmaatic.job.views.JobViewSet.as_view({'put': 'assign_ownership'})
 
-ExecutionTokenView = drmaatic.views.retrieve_execution_token
+CPUCreditView = drmaatic.views.retrieve_cpu_credit
 
 # Define URL patterns
 urlpatterns = [
@@ -32,7 +32,7 @@ urlpatterns = [
     re_path(r'^job/(?P<uuid>[^/.]+)/status/$', JobStatusView),
     re_path(r'^job/(?P<uuid>[^/.]+)/get_ownership/$', JobAssignOwnershipView),
 
-    re_path(r'^execution-tokens/$', ExecutionTokenView, name='execution tokens'),
+    re_path(r'^cpu-credit/$', CPUCreditView, name='CPU credit'),
 
     path(r'', TemplateView.as_view(
         template_name='swagger-ui.html',

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, OperationalError
 from django.utils.translation import gettext_lazy
 from pytimeparse.timeparse import timeparse
 
@@ -44,33 +44,33 @@ class Group(models.Model):
     has_full_access = models.BooleanField(default=False, blank=False, null=False)
     throttling_rate_burst = models.CharField(max_length=30, default="10/s", null=False, blank=False)
     token_renewal_time = models.CharField(default="1 day", null=False, blank=False, max_length=40)
-    execution_token_max_amount = models.IntegerField(default=100, blank=False, null=False)
-    _execution_token_regen_time = models.CharField(default="30 seconds", null=False, blank=False, max_length=40)
-    execution_token_regen_amount = models.IntegerField(default=1, blank=False, null=False)
+    cpu_credit_max_amount = models.IntegerField(default=100, blank=False, null=False)
+    _cpu_credit_regen_time = models.CharField(default="30 seconds", null=False, blank=False, max_length=40)
+    cpu_credit_regen_amount = models.IntegerField(default=1, blank=False, null=False)
 
     @property
-    def execution_token_regen_time(self):
-        return timeparse(self._execution_token_regen_time)
+    def cpu_credit_regen_time(self):
+        return timeparse(self._cpu_credit_regen_time)
 
     @classproperty
     def anonymous(self):
         if table_exists('drmaatic_group', 'default'):
             return self.objects.get_or_create(name='anonymous', defaults={'throttling_rate_burst': '20/s',
                                                                           'token_renewal_time': '3 days',
-                                                                          'execution_token_max_amount': 100})[0]
+                                                                          'cpu_credit_max_amount': 100})[0]
         else:
             return Group(name='anonymous', throttling_rate_burst='20/s', token_renewal_time='3 days',
-                         execution_token_max_amount=100)
+                         cpu_credit_max_amount=100)
 
     @classproperty
     def registered(self):
-        if table_exists('drmaatic_group', 'default'):
+        try:
             return self.objects.get_or_create(name='registered', defaults={'throttling_rate_burst': '30/s',
                                                                            'token_renewal_time': '5 days',
-                                                                           'execution_token_max_amount': 200})[0]
-        else:
-            return Group(name='anonymous', throttling_rate_burst='20/s', token_renewal_time='3 days',
-                         execution_token_max_amount=100)
+                                                                           'cpu_credit_max_amount': 200})[0]
+        except OperationalError:
+            return Group(name='registered', throttling_rate_burst='30/s', token_renewal_time='5 days',
+                         cpu_credit_max_amount=200)
 
     def __str__(self):
         return self.name
