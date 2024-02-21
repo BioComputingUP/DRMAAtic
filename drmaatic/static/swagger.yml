@@ -4,7 +4,7 @@ info:
     DRMAAtic
   version: 1.0.0
   description: |
-    <img src="/static/img/logo.png" alt="drmaatic logo" height="70">&nbsp;&nbsp;&nbsp;&nbsp;
+    <img src="/static/img/logo-dark.svg" alt="drmaatic logo" height="70">&nbsp;&nbsp;&nbsp;&nbsp;
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Slurm_logo.svg/839px-Slurm_logo.svg.png" alt="slurm logo" height="70">
     
     ### Introduction to DRMAAtic API
@@ -38,7 +38,7 @@ info:
     - **Retrieve Internal JWT**: Allows users to obtain JWT tokens for authenticating with DRMAAtic, using access tokens 
         from external providers.
     
-    - **Amount of CPU credit**: Provides the count of available CPU credit for the user.
+    - **Amount of CPU credit**: Provides the amount of available CPU credit for the user.
     
     - **Create a New Job**: Enables users to create new jobs, defining job parameters based on specific tasks.
     

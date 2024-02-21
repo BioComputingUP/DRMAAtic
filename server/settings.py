@@ -6,6 +6,8 @@ from pathlib import Path
 
 from environs import Env
 
+from server.utils import IpNetworks
+
 logger = logging.getLogger(__name__)
 env = Env()
 
@@ -130,6 +132,8 @@ dependencies = [
 ]
 
 ROOT_URLCONF = 'server.urls'
+
+INTERNAL_IPS = IpNetworks(env.list('INTERNAL_IPS', default=['0.0.0.0/0']))
 
 TEMPLATES = [
     {

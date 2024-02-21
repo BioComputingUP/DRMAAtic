@@ -3,5 +3,12 @@
 {% load static %}
 
 {% block extrahead %}
-    <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}" />
+    <link rel="shortcut icon" href="{% static 'favicon/favicon.svg' %}"/>
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    {% if debug %}
+        <link href="{% static 'css/admin-when-debug.css' %}" rel="stylesheet" type="text/css" media="screen,projection"/>
+    {% endif %}
 {% endblock %}

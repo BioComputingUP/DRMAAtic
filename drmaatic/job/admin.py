@@ -19,7 +19,7 @@ def delete_jobs_from_file_system(jobs):
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/mymodel_list.css',)}
+        css = {'all': ('css/job-list-admin.css',)}
 
     readonly_fields = ('uuid', 'task', 'creation_date', '_sender_ip_addr',
                        '_drm_job_id', 'parent_job', 'dependencies', 'dependency_type', '_files_name')

@@ -43,10 +43,10 @@ class Group(models.Model):
     name = models.CharField(max_length=50)
     has_full_access = models.BooleanField(default=False, blank=False, null=False)
     throttling_rate_burst = models.CharField(max_length=30, default="10/s", null=False, blank=False)
-    token_renewal_time = models.CharField(default="1 day", null=False, blank=False, max_length=40)
-    cpu_credit_max_amount = models.IntegerField(default=100, blank=False, null=False)
-    _cpu_credit_regen_time = models.CharField(default="30 seconds", null=False, blank=False, max_length=40)
-    cpu_credit_regen_amount = models.IntegerField(default=1, blank=False, null=False)
+    token_renewal_time = models.CharField(default="1 day", null=False, blank=False, max_length=40, verbose_name="JWT renewal time")
+    cpu_credit_max_amount = models.IntegerField(default=100, blank=False, null=False, verbose_name="CPU credit max amount")
+    _cpu_credit_regen_time = models.CharField(default="30 seconds", null=False, blank=False, max_length=40, verbose_name="CPU credit regen time")
+    cpu_credit_regen_amount = models.IntegerField(default=1, blank=False, null=False, verbose_name="CPU credit regen amount")
 
     @property
     def cpu_credit_regen_time(self):
@@ -54,11 +54,11 @@ class Group(models.Model):
 
     @classproperty
     def anonymous(self):
-        if table_exists('drmaatic_group', 'default'):
+        try:
             return self.objects.get_or_create(name='anonymous', defaults={'throttling_rate_burst': '20/s',
                                                                           'token_renewal_time': '3 days',
                                                                           'cpu_credit_max_amount': 100})[0]
-        else:
+        except OperationalError:
             return Group(name='anonymous', throttling_rate_burst='20/s', token_renewal_time='3 days',
                          cpu_credit_max_amount=100)
 
@@ -102,7 +102,7 @@ class User(models.Model):
     # Defines whether the user is enabled
     active = models.BooleanField(default=True, blank=False, null=False)
 
-    token_renewal_time = models.CharField(max_length=40, blank=True, null=True)
+    token_renewal_time = models.CharField(max_length=40, blank=True, null=True, verbose_name="JWT renewal time")
 
     group = models.ForeignKey('Group', on_delete=models.SET_DEFAULT, null=False, default=Group.registered.id)
 

@@ -1,10 +1,9 @@
-import uuid
-
 import jwt
 from django.contrib.admin import display
-from django.contrib.admin.widgets import AdminDateWidget, AdminSplitDateTime
+from django.contrib.admin.widgets import AdminSplitDateTime
 from django.contrib.auth import admin as auth
 from django.utils import timezone
+from django.core.cache import cache
 
 from drmaatic.models import *
 # noinspection PyUnresolvedReferences
@@ -15,6 +14,7 @@ from drmaatic.parameter.admin import *
 from drmaatic.queue.admin import *
 # noinspection PyUnresolvedReferences
 from drmaatic.task.admin import *
+from drmaatic.throttles import TokenBucketThrottle
 
 # Register user in the admin web interface, using the default interface
 admin.site.register(Admin, auth.UserAdmin)
@@ -77,9 +77,46 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class GroupForm(forms.ModelForm):
-    def clean(self):
+    def clean_token_renewal_time(self):
         if timeparse(self.cleaned_data["token_renewal_time"]) is None:
-            raise forms.ValidationError({'token_renewal_time': "Invalid time"})
+            raise forms.ValidationError("Invalid time")
+        return self.cleaned_data["token_renewal_time"]
+
+    def clean_throttling_rate_burst(self):
+        def parse_rate(rate):
+            num, period = rate.split('/')
+            num_requests = int(num)
+            duration = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400}[period[0]]
+            return num_requests, duration
+
+        try:
+            parse_rate(self.cleaned_data["throttling_rate_burst"])
+        except:
+            raise forms.ValidationError("Invalid rate, expected format: <number>/<s|m|h|d>")
+        return self.cleaned_data["throttling_rate_burst"]
+
+    def clean__cpu_credit_regen_time(self):
+        if timeparse(self.cleaned_data["_cpu_credit_regen_time"]) is None:
+            raise forms.ValidationError("Invalid time")
+        return self.cleaned_data["_cpu_credit_regen_time"]
+
+    def clean_cpu_credit_max_amount(self):
+        if self.cleaned_data["cpu_credit_max_amount"] < 0:
+            raise forms.ValidationError("Invalid amount")
+        return self.cleaned_data["cpu_credit_max_amount"]
+
+    def clean_cpu_credit_regen_amount(self):
+        if self.cleaned_data["cpu_credit_regen_amount"] < 0:
+            raise forms.ValidationError("Invalid amount")
+        return self.cleaned_data["cpu_credit_regen_amount"]
+
+    def save(self, commit=True):
+        super().save(commit=commit)
+        # If the cpu_credit_max_amount is changed, invalidate the cache
+        if 'cpu_credit_max_amount' in self.changed_data:
+            cache_keys_to_invalidate = [key.split(':')[-1] for key in cache._cache.keys() if TokenBucketThrottle.TOKENS_CACHE_PREFIX in key]
+            cache.delete_many(cache_keys_to_invalidate)
+        return self.instance
 
 
 @admin.register(Group)

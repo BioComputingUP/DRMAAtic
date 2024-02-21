@@ -75,6 +75,10 @@ class Job(models.Model):
         self.deleted = True
         self.save()
 
+    def delete(self, using=None, keep_parents=False):
+        self.delete_from_file_system()
+        super().delete(using, keep_parents)
+
     def get_first_ancestor(self):
         current_job = self
         while current_job.parent_job is not None:
