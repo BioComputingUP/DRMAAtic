@@ -15,6 +15,13 @@ then
     done
     echo "-- slurmctld is now active ..."
 
+    {
+      echo "-- Importing the test database ..."
+      mysql --host=mysql --port=3306 --user=root --password=pwd < ./docker/testing/drmaatic_test.sql 2>/dev/null
+    } || {
+      echo "-- The test database already exists ..."
+    }
+
     echo "---> Starting the django application ..."
     exec /opt/venv/bin/python manage.py runserver 0.0.0.0:8300
 fi

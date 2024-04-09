@@ -29,22 +29,9 @@ Also, all the other containers will have their logs available in the same way.
 
 ### First run
 
-Upon the first run, the database for DRMAAtic needs to be created, and the migrations executed.
-This can be done by accessing the [phpMyAdmin interface](http://localhost:8080) as root (password is `pwd`), and
-creating a database named `drmaatic`.
-
-Then, the migrations can be executed by running the following command on the drmaatic container:
-
-```bash
-docker exec -it drmaatic python manage.py makemigrations
-docker exec -it drmaatic python manage.py migrate
-```
-
-You should also create a superuser for the Django admin interface:
-
-```bash
-docker exec -it drmaatic python manage.py createsuperuser
-```
+Upon the first run, a test database for DRMAAtic will be imported into the mysql container. This database has already
+a configured superuser (username: `admin`, password: `admin`) and a test task `wait_task` that can be used to test the
+functionality of the application.
 
 ### Configurations
 The configuration files for DRMAAtic are `.env` files located in the settings folder, and are loaded by
