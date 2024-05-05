@@ -1,3 +1,3 @@
 [submodule "docker/deploy"]
 	path = docker/deploy
-	url = https://github.com/BioComputingUP/DRMAAtic-deploy
+	url = git@github.com/BioComputingUP/DRMAAtic-deploy
