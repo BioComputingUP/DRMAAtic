@@ -1,7 +1,8 @@
 import threading
+from typing import List
 
 from django.contrib import admin
-from django.db.models import BLANK_CHOICE_DASH
+from django.db.models import BLANK_CHOICE_DASH, QuerySet
 from django.utils.safestring import mark_safe
 from rangefilter.filters import DateRangeFilter
 
@@ -39,7 +40,7 @@ class JobAdmin(admin.ModelAdmin):
         "_sender_ip_addr"
     )
 
-    actions = ["delete_and_remove", "update_drm_status"]
+    actions = ["delete_folder", "delete_and_remove", "update_drm_status"]
 
     list_display = ('uuid', 'task', '_status', 'outputs', 'deleted', 'creation_date', 'user', 'ip_address')
 
@@ -76,14 +77,14 @@ class JobAdmin(admin.ModelAdmin):
         job.delete()
 
     # Overrides the default delete of bulk jobs from the admin interface with the setting of the deleted flag and removal of files from the file system
-    def delete_queryset(self, request, queryset):
+    def delete_queryset(self, request, queryset: QuerySet[Job]):
         for job in queryset:
             job.update_drm_status()
             # Stop the job if it is running
             if not job.has_finished() and job.drm_job_id:
                 terminate_job(job.drm_job_id)
             # Delete job folder and all files
-            job.delete_from_file_system()
+            # job.delete_from_file_system()
 
         # Run a thread to delete all the jobs from the file system
         t = threading.Thread(target=delete_jobs_from_file_system, args=(queryset,), daemon=True)
@@ -95,6 +96,10 @@ class JobAdmin(admin.ModelAdmin):
     def delete_and_remove(self, request, queryset):
         self.delete_queryset(request, queryset)
         queryset.delete()
+
+    @admin.action(description="Delete jobs in filesystem")
+    def delete_folder(self, request, queryset):
+        self.delete_queryset(request, queryset)
 
     @admin.action(description="Update DRM status")
     def update_drm_status(self, request, queryset):

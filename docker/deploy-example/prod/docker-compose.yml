@@ -1,0 +1,44 @@
+version: '3.5'
+name: drmaatic-prod
+
+services:
+  drmaatic:
+    image: registry.yourRegistry.com/drmaatic/drmaatic:latest
+    command: [ "runserver" ]
+    container_name: drmaatic
+    restart: unless-stopped
+    env_file:
+      - ../.env
+      - .prod.env
+    ports:
+      - "8302:80"
+    volumes:
+      - type: bind
+        source: ./apache-config.conf
+        target: /etc/apache2/sites-available/000-default.conf
+      # Mount the directories for the scripts, jobs and logs
+      - scriptdir:/scripts
+      - jobdir:/mnt/shared/DRMAAtic/jobsDirectory
+      - loggerdir:/logs
+    extra_hosts: # Add the controller machine to the hosts file so we can access it by name from the container
+      - "machineName:172.10.2.90"
+
+volumes:
+  scriptdir:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /scriptDirectory
+  jobdir:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/shared/DRMAAtic/jobsDirectory
+  loggerdir:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /logsDirectory
