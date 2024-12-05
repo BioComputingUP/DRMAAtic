@@ -7,15 +7,15 @@ import uuid
 import zipfile
 from pathlib import Path
 from typing import List, Union, Dict
+from urllib.parse import urlencode, quote
 
 import requests
+from django.conf import settings
 from django.http import QueryDict
 from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
 from rest_framework.settings import api_settings
-from urllib.parse import urlencode, quote
 
-from django.conf import settings
 from .job.models import Job
 from .parameter.models import Parameter, JobParameter
 
@@ -66,6 +66,11 @@ def get_extension(param_name, file_name):
         return extension[-1]
 
 
+def opener(path, flags):
+    # Open the file with the right permissions
+    return os.open(path, flags, 0o755)
+
+
 def write_files_mapping(files: Dict[str, str], j_uuid: str):
     json_file = f"{settings.DRMAATIC_JOB_OUTPUT_DIR}/{j_uuid}/files.json"
     # If the file exists, then update the dict
@@ -76,7 +81,7 @@ def write_files_mapping(files: Dict[str, str], j_uuid: str):
     else:
         renamed_files = files
 
-    with open(os.path.join(settings.DRMAATIC_JOB_OUTPUT_DIR, str(j_uuid), "files.json"), 'w') as f:
+    with open(os.path.join(settings.DRMAATIC_JOB_OUTPUT_DIR, str(j_uuid), "files.json"), 'w', opener=opener) as f:
         json.dump(renamed_files, f)
 
 
@@ -156,7 +161,7 @@ def check_values_length(user_params: QueryDict, param_name: str):
 def save_file(file, file_name, ancestor_job):
     file_pth = os.path.join(settings.DRMAATIC_JOB_OUTPUT_DIR, str(ancestor_job.uuid), file_name)
     # Save the file to the output directory
-    with open(file_pth, "wb+") as f:
+    with open(file_pth, "wb+", opener=opener) as f:
         for chunk in file.chunks():
             f.write(chunk)
 
