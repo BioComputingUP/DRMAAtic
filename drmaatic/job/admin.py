@@ -1,3 +1,4 @@
+import logging
 import threading
 from typing import List
 
@@ -10,6 +11,8 @@ from django.conf import settings
 from drmaatic.job.models import Job
 from drmaatic.parameter.admin import JobParamAdminInline
 from drmaatic_lib.manage import terminate_job
+
+logger = logging.getLogger(__name__)
 
 
 def delete_jobs_from_file_system(jobs):
@@ -40,9 +43,11 @@ class JobAdmin(admin.ModelAdmin):
         "_sender_ip_addr"
     )
 
-    actions = ["delete_folder", "delete_and_remove", "update_drm_status"]
+    actions = ["delete_and_remove", "update_drm_status", "delete_folder"]
 
     list_display = ('uuid', 'task', '_status', 'outputs', 'deleted', 'creation_date', 'user', 'ip_address')
+
+    list_per_page = 1000
 
     inlines = [JobParamAdminInline]
 
@@ -83,14 +88,13 @@ class JobAdmin(admin.ModelAdmin):
             # Stop the job if it is running
             if not job.has_finished() and job.drm_job_id:
                 terminate_job(job.drm_job_id)
-            # Delete job folder and all files
-            # job.delete_from_file_system()
+            job.deleted = True
 
         # Run a thread to delete all the jobs from the file system
         t = threading.Thread(target=delete_jobs_from_file_system, args=(queryset,), daemon=True)
         t.start()
         # Set the jobs to deleted
-        queryset.update(deleted=True)
+        Job.objects.abulk_update(queryset, ['deleted'], 1000)
 
     @admin.action(description="Delete and remove from database")
     def delete_and_remove(self, request, queryset):
@@ -99,6 +103,7 @@ class JobAdmin(admin.ModelAdmin):
 
     @admin.action(description="Delete jobs in filesystem")
     def delete_folder(self, request, queryset):
+        logger.warning(f"Deleting {len(queryset)} jobs in filesystem")
         self.delete_queryset(request, queryset)
 
     @admin.action(description="Update DRM status")

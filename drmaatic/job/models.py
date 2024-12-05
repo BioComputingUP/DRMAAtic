@@ -139,10 +139,13 @@ class Job(models.Model):
 
     def delete_from_file_system(self):
         if settings.REMOVE_JOB_FILES_ON_DELETE:
-            try:
-                shutil.rmtree(self.get_job_path(), ignore_errors=False)
-            except Exception as e:
-                logger.error(f"Error while deleting job {self.uuid} from the file system: {e}")
+            if self.parent_job is None:
+                try:
+                    shutil.rmtree(self.get_job_path(), ignore_errors=False)
+                except Exception as e:
+                    logger.error(f"Error while deleting job {self.uuid} from the file system: {e}")
+            else:
+                logger.info(f"Job {self.uuid} is a child job, it will not be deleted from the file system")
 
     class Meta:
         ordering = ['-creation_date']
