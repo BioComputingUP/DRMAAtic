@@ -43,6 +43,8 @@ REMOVE_JOB_FILES_ON_DELETE = env.bool('REMOVE_JOB_FILES_ON_DELETE', False)
 PARAMS_VALUES_MAX_LENGTH = env.int('PARAMS_VALUES_MAX_LENGTH', 5000)
 # Maximum number of items for a paginated response
 MAX_PAGE_SIZE = env.int('MAX_PAGE_SIZE', 100)
+# Maximum number of fields for a request
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 102400
 
 CORS_ORIGIN_ALLOW_ALL = env.bool('CORS_ORIGIN_ALLOW_ALL', default=True)
 
@@ -222,12 +224,12 @@ LOGGING = {
     'loggers': {
         'drmaatic_lib': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'DEBUG' if DEBUG else 'WARNING',
             'propagate': True,
         },
         'drmaatic': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'DEBUG' if DEBUG else 'WARNING',
             'propagate': True,
         },
         'django': {
