@@ -144,10 +144,8 @@ class JobSerializer(serializers.ModelSerializer):
         drm_params = {
             'queue': task.queue.name,
             'cpus_per_task': str(task.cpus),
+            'mem_per_node': task.mem,
         }
-
-        if task.queue.name != 'local':
-            drm_params['mem_per_node']: task.mem
 
         p_job = job.get_first_ancestor()
 
