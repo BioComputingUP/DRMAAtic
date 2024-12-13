@@ -1,5 +1,5 @@
 # $ conda env create --file <this file>
-DRMAAtic-lib==1.0.7
+DRMAAtic-lib==1.0.8
 Django
 djangorestframework
 django-filter
