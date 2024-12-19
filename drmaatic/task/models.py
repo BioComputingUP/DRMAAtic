@@ -24,7 +24,7 @@ class Task(models.Model):
     step_index = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(1)])
 
     # Resources parameters
-    queue = models.ForeignKey(Queue, on_delete=models.SET_NULL, null=True, blank=False)
+    _queues = models.ManyToManyField(Queue, blank=False, related_name="queues")
     # Number of cpus for the task
     cpus = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)],
                                        verbose_name="CPUs per task")
@@ -38,6 +38,10 @@ class Task(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def queues(self):
+        return ",".join([q.name for q in self._queues.all()])
 
     @property
     def max_clock_time(self) -> [str, None]:

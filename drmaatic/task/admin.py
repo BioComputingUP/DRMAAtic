@@ -13,16 +13,22 @@ class TaskForm(forms.ModelForm):
 
     def clean_cpus(self):
         # Get the queue and check that for that queue the number of cpus is not exceeded
-        queue = self.cleaned_data["queue"] if "queue" in self.cleaned_data else None
-        if queue is not None and self.cleaned_data["cpus"] > queue.max_cpu:
-            raise forms.ValidationError(f"Number of CPUs exceeds the maximum for the queue {queue.max_cpu}")
+        queues = self.cleaned_data.get("_queues")
+        if queues:
+            max_cpus = max([q.max_cpu for q in queues.all()])
+            if self.cleaned_data["cpus"] > max_cpus:
+                raise forms.ValidationError(f"Number of CPUs exceeds the maximum for the queues {max_cpus}")
+
         return self.cleaned_data["cpus"]
 
     def clean_mem(self):
         # Get the queue and check that for that queue the amount of memory is not exceeded
-        queue = self.cleaned_data["queue"] if "queue" in self.cleaned_data else None
-        if queue is not None and self.cleaned_data["mem"] > queue.max_mem:
-            raise forms.ValidationError(f"Amount of memory exceeds the maximum for the queue {queue.max_mem}MB")
+        queues = self.cleaned_data.get("_queues")
+        if queues:
+            max_mem = max([q.max_mem for q in queues.all()])
+            if self.cleaned_data["mem"] > max_mem:
+                raise forms.ValidationError(f"Amount of memory exceeds the maximum for the queues {max_mem}MB")
+
         return self.cleaned_data["mem"]
 
     def clean__max_clock_time(self):
@@ -36,11 +42,11 @@ class TaskForm(forms.ModelForm):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    fields = (('name', 'command', 'required_tokens'), ('queue', 'cpus', 'mem'), 'is_output_public', "_max_clock_time", "groups",
+    fields = (('name', 'command', 'required_tokens'), ('_queues', 'cpus', 'mem'), 'is_output_public', "_max_clock_time", "groups",
               ('is_array', 'begin_index', 'end_index', 'step_index'))
-    list_display = ('name', 'command', "required_tokens", "queue", "is_output_public")
+    list_display = ('name', 'command', "required_tokens", "queues", "is_output_public")
     search_fields = ('name', 'command')
-    list_filter = ('queue', 'is_output_public', 'groups')
+    list_filter = ('_queues' , 'is_output_public', 'groups')
     ordering = ('command', 'name')
 
     form = TaskForm

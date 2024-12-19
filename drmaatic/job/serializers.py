@@ -142,7 +142,7 @@ class JobSerializer(serializers.ModelSerializer):
         formatted_params = format_job_params(job_params)
 
         drm_params = {
-            'queue': task.queue.name,
+            'queue': task.queues,
             'cpus_per_task': str(task.cpus),
             'mem_per_node': task.mem,
         }
