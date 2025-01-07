@@ -94,7 +94,7 @@ class JobAdmin(admin.ModelAdmin):
         t = threading.Thread(target=delete_jobs_from_file_system, args=(queryset,), daemon=True)
         t.start()
         # Set the jobs to deleted
-        Job.objects.abulk_update(queryset, ['deleted'], 1000)
+        Job.objects.bulk_update(queryset, ['deleted'], 1000)
 
     @admin.action(description="Delete and remove from database")
     def delete_and_remove(self, request, queryset):
