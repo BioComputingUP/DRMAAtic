@@ -1,6 +1,6 @@
 {% load static %}
 {% block style %}
-    <link rel="icon" type="image/ico" href="{% static 'favicon/favicon.svg' %}" />
+    <link rel="icon" type="image/ico" href="{% static 'favicon/favicon.svg' %}"/>
 {% endblock %}
 <!DOCTYPE html>
 <html>
@@ -9,11 +9,42 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="{% static 'css/swagger-ui.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/swagger-ui-dark.css' %}"/>
+    {#    <link rel="stylesheet" type="text/css" href="{% static 'css/swagger-ui-dark.css' %}"/>#}
 </head>
 <body>
+{# Add selector for theme #}
+<div id="theme-selector" style="position: absolute; top: 0; right: 0; z-index: 1000; padding: 1rem; font-family: sans-serif">
+    <label for="theme-selector-select">Select theme:</label>
+    <select id="theme-selector-select" onInput='selectTheme()' style="min-width: 70px; font-size: 16px">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+    </select>
+</div>
+
 <div id="swagger-ui"></div>
-<script src="{% static 'js/swagger-ui-bundle.js'%}"></script>
+
+<script>
+    function selectTheme() {
+        let theme = document.getElementById("theme-selector-select").value;
+        // if the theme is dark add the dark css
+        if (theme === "dark") {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = "{% static 'css/swagger-ui-dark.css' %}";
+            document.getElementsByTagName('head')[0].appendChild(link);
+        } else {
+            // remove the dark css
+            const darkCss = document.querySelector('link[href="{% static 'css/swagger-ui-dark.css' %}"]');
+            if (darkCss) {
+                darkCss.remove();
+            }
+        }
+    }
+</script>
+
+<script src="{% static 'js/swagger-ui-bundle.js' %}"></script>
+
 <script>
     const ui = SwaggerUIBundle({
         oauth2RedirectUrl: window.location.origin + "/",
@@ -47,5 +78,6 @@
         scopes: "openid",
     })
 </script>
+
 </body>
 </html>
