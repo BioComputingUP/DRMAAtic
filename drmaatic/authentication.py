@@ -4,6 +4,7 @@ from datetime import timedelta
 
 import jwt
 import requests
+from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jwt import ExpiredSignatureError
@@ -11,7 +12,6 @@ from rest_framework import status
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed
 
-from django.conf import settings
 from drmaatic.models import Token, User, Group
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,9 @@ class BearerAuthentication(BaseAuthentication):
 # Extend Bearer token authentication to exchange it with an external service
 class SocialProviderAuthentication(BearerAuthentication):
     # Define URL to remote service
-    verification_url = settings.ORCID_AUTH_URL
+    verification_url = {
+        'orcid': settings.ORCID_AUTH_URL
+    }
     allowed_providers = ['orcid']
     provider = None
 
@@ -112,7 +114,9 @@ class SocialProviderAuthentication(BearerAuthentication):
         if not match:
             raise AuthenticationFailed(_('Authentication header is not valid'))
         access_token = match.group(1)
-        response = requests.get(self.verification_url, headers={'Authorization': f'Bearer {access_token}'})
+
+        response = requests.get(self.verification_url[self.provider],
+                                headers={'Authorization': f'Bearer {access_token}'})
 
         if not status.is_success(response.status_code):
             # Just raise authentication error

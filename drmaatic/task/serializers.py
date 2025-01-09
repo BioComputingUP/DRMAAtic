@@ -46,7 +46,7 @@ class SuperTaskSerializer(TaskSerializer):
     """
     groups = GroupSerializer(many=True, read_only=True)
 
-    queue = serializers.CharField(source="queue.name")
+    queues = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name", source="_queues")
     memory_mb = serializers.ReadOnlyField(source="mem")
 
     # Array task fields
@@ -63,6 +63,6 @@ class SuperTaskSerializer(TaskSerializer):
     class Meta:
         model = Task
         fields = [
-            "command", "name", "required_tokens", "groups", "queue", "cpus", "memory_mb", "is_array", "begin_index",
+            "command", "name", "required_tokens", "groups", "queues", "cpus", "memory_mb", "is_array", "begin_index",
             "end_index", "step_index", "max_clock_time", "is_output_public", "param",
         ]
