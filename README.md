@@ -10,7 +10,7 @@ Full references to the available APIs in DRMAAtic are available [here](https://d
 
 ## Deployment
 
-It is highly suggested to deploy DRMAAtic as Docker container, for full reference guide and examples on how to do that you can read the README in `docker/example` and `docker/deploy-example`. In the first case the enitre cluster structure is created with a `docker compose`, while in the latter only the DRMAAtic container is created.
+It is highly suggested to deploy DRMAAtic as Docker container, for full reference guide and examples on how to do that you can read the README in `docker/testing` and `docker/deploy-example`. In the first case the enitre cluster structure is created with a `docker compose`, while in the latter only the DRMAAtic container is created and it shows how to connect with an existing cluster and database.
 
 ## Manage.py
 
