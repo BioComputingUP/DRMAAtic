@@ -1,107 +1,16 @@
-# DRMAAtic Admin guide
-
-This is a reference guide for the admin to configure and deploy DRMAAtic.
-
-## Environments
-
-There are three types of environments that defines the configuration and settings for the application. These 
-settings comprehend the database connection, the logging level, the debug mode, the secret key, the allowed hosts,
-and many others.
-The environments are defined according to the setting file that is selected when the application is started.
-Regarding the settings for now there are 4 different settings files:
- - `settings.py` - Base settings file. This file contains settings that are common to all environments.
- - `settings_dev.py` - Settings file for the development environment.
- - `settings_staging.py` - Settings file for the staging environment.
- - `settings_prod.py` - Settings file for the production environment.
-
-### Dev
-
-The dev environment is the environment that should be used in the developer machine. This can define a local database
-like sqlite or mysql, it's running in debug mode, and it's logging level is set to DEBUG.
-
-When developing the application, the developer should use the following commands to start the application with the 
-correct settings (and environment):
-
-        $ python manage.py makemigrations --settings=server.settings_dev
-        $ python manage.py makemigrations drmaatic --settings=server.settings_dev
-        $ python manage.py migrate --settings=server.settings_dev
-        $ python manage.py runserver 0.0.0.0:8300 --settings=server.settings_dev
-
-Note the use of the `--settings` parameter to specify the settings file to use. Moreover, this triggers also the 
-creation of the migrations (if needed) and the database migration. This is useful to keep the database schema in sync
-with the models. This chain of commands can be set up in the PyCharm run configurations.
-
-### Staging
-
-The staging environment is the environment that should be used to create a development version of the application on 
-the server. This is very useful to test the application on the same environment that will be used in production.
-For example here there are all the queues and the connection to the Slurm cluster. 
-
-For this environment the database is a mysql database, called `drmaatic_dev`, and it can replicate the production
-database.
-
-### Production
-
-The production environment is the environment that is used in the production server (perse). This is the environment
-that is used by all the applications in production (e.g. RING-3, CAID WS, PED, etc.). This env also uses a mysql database
-called `drmaatic`.
-
-## Databases
-
-For the Staging and Production environments the database is a mysql database that is hosted on perse. The database
-can be accessed using the credentials defined in the `/home/django/.my.env` file. It's already configured in order to
-be also accessible with phpmyadmin as remote database from a machine inside the lab network.
-
-## Deploy
-
-### We moved from conda to venv for managing the environment
-#### How to create the venv
- - **Python 3.8** is a requirement since it needs to be compatible with the version of WSGI that is installed on the server.
- - `sudo apt install python3.8-venv` to install venv
- - `sudo apt install sudo apt-get install python3-dev default-libmysqlclient-dev build-essential` is needed to install mysqlclient
- - Enter the directory of the project (`cd /var/django/apps/drmaatic_dev`)
- - Then you can create the venv with `python3.8 -m venv venv`
- - Activate the venv with `source venv/bin/activate`
- - Install the requirements with `pip install -r requirements.txt`
-
-To deploy on Staging or Production, locations are used. These are:
- - Staging: `/var/django/apps/drmaatic_dev`
- - Production: `/var/django/submission` (for now, this will be changed in the future)
-
-You can use the two scripts in the deploy folder to deploy the application on the server. The scripts are:
- - `deploy_staging.sh` - Deploy the application on the staging environment.
- - `deploy_prod.sh` - Deploy the application on the production environment.
-
-These scripts will also trigger the post-deploy script that will perform the **migrations** and the **collectstatic**.
-
-### Apache WSGI
-
-On our configuration, we use Apache as web server and mod_wsgi as WSGI module. The configuration for the WSGI application
-is located in `/etc/apache2/sites-available/scheduler-dev.conf` (for the dev version).
-This file contains the configuration for the WSGI application, the virtual host, and the SSL configuration.
-Here is reported the configuration for the WSGI application for the staging environment:
-        
-    Define server_name drmaatic-dev
-    Define app_home /var/django/apps/${server_name}
-    Define env_root ${app_home}/venv
-    
-    WSGIPythonHome ${env_root}
-    WSGIPythonPath ${app_home}
-    ....
-    SetEnv DJANGO_ENV staging
-    SetEnv DJANGO_SECRET_KEY super-secret-key
-    SetEnv DJANGO_WS_URL ${server_url}
-    # wsgi app
-    WSGIPassAuthorization On
-    WSGIScriptAlias / ${app_home}/server/wsgi.py
-    WSGIDaemonProcess ${server_name} python-home=${env_root} python-path=${app_home} user=django group=users
-    WSGIProcessGroup ${server_name}
+# DRMAAtic: dramatically improve your cluster potential
 
 
-Note as the SetEnv directive is used to set the environment to staging. This is used by the wsgi.py file to load the
-correct settings file and then start the application. For the production environment, the directive should be:
+The core of the DRMAAtic architecture is the execution of a job in a DRM (such as SLURM). Each job must be defined as an executable task with pre-configured parameters specifying how and where the task will be executed. These parameters also include a set of user-defined options provided at execution time. Users initiate job execution by selecting a task, providing necessary inputs, and submitting the job. The job is subsequently created and forwarded to the DRM for execution. A universally unique identifier (UUID) is generated for the job, allowing users to track its state and interact with it as needed.
 
-    SetEnv DJANGO_ENV production
+DRMAAtic provides a REST API interface to submit and control jobs, as well as downloading its results. The connection of with the DRM is provided through the [DRMAA APIs](https://en.wikipedia.org/wiki/DRMAA), implemented for SLURM in this [repository](https://github.com/natefoo/slurm-drmaa).
+
+DRMAAtic APIs where built using the Django REST Framework, and [drmaa-python](https://github.com/pygridtools/drmaa-python?tab=readme-ov-file) as interface between python and the implementation of the SLURM-DRMAA APIs.
+Full references to the available APIs in DRMAAtic are available [here](https://drmaatic.biocomputingup.it/).
+
+## Deployment
+
+It is highly suggested to deploy DRMAAtic as Docker container, for full reference guide and examples on how to do that you can read the README in `docker/testing` and `docker/deploy-example`. In the first case the enitre cluster structure is created with a `docker compose`, while in the latter only the DRMAAtic container is created and it shows how to connect with an existing cluster and database.
 
 ## Manage.py
 
@@ -115,16 +24,19 @@ sync with the models.
 Some useful commands for the `manage.py` script are:
         
         # Creates a new superuser (admin) in interactive mode
-        $ python manage.py createsuperuser --settings=server.settings_dev
+        $ python manage.py createsuperuser
 
-        # Migrate the database to the migration 0023 (to go back to previous migrations)
-        $ python manage.py migrate 0023 --settings=server.settings_dev
+        # Create the migrations
+        $ python manage.py makemigrations
 
+        # Migrate the database 
+        $ python manage.py migrate
+        
+In the case of the container, after a change is made in the application, one can access the container shell and run the migrations.
 
-## Changelog Version 2.0.1
+## Authentication
 
- 1. The **Task** model has now been renamed **Job**, along with its related fields (e.g. parent_task is now parent_job and task_description to job_description. These changes also include the change in the endpoint, so /task/XYZ is now /job/XYZ. In the task you can also now configure the queue to use, how many processors and the amount of memory required for that task.
- 2. The **Script** model has now been renamed **Task**. These changes also include the change in the endpoint, so /script/XYZ is now /task/XYZ.
- 3. The **DRMJobTemplate** model no longer exists, and it has been divided into the new **Queue** model and the Task.
- 4. The **Queue** model now hosts all the active queue (or partitions) reflecting the configuration of the cluster (Slurm in our case), and here the max amout of memory and the number of cpus available are configured. These confs will be used as validation when creating a new Task.
- 5. We have a DEV scheduler WS! You can reach it at [dev.scheduler.biocomputingup.it](), and from now on it should be the endpoint that you will use while developing your application that needs a connection to the scheduler from your machine or from dev environment hosted in our server. **Only for in-production application the application can use the non-dev version of the scheduler.**
+The implemented authentication scheme is based on an OAuth authentication with a social provider (e.g. ORCID), then a JWT token is issued to the user and the user can use the token in order to perform authorized requests to DRMAAtic.
+Additional social provider can be added by modifying the `SocialProviderAuthentication` class and adding a new social provider. The current Oauth authentication with ORCID was based on this [guide](https://github.com/ORCID/ORCID-Source/blob/main/orcid-api-web/README.md).
+The authentication process and an example is provided in the API reference describe above.
+
