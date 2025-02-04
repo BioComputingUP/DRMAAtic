@@ -68,6 +68,10 @@ ORCID_AUTH_URL = env.str('ORCID_AUTH_URL', default='https://orcid.org/oauth/user
 
 DRMAATIC_WS_URL = env.str('DRMAATIC_WS_URL', default='http://localhost:8000')
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+
+
 DEFAULT_RENDERER_CLASSES = (
     'rest_framework.renderers.JSONRenderer',
 )
