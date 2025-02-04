@@ -129,7 +129,7 @@ class JobViewSet(viewsets.ModelViewSet):
         """
         job: Job = self.get_object()
 
-        if not job.has_finished():
+        if not job.has_finished() and job.drm_job_id:
             terminate_job(job.drm_job_id)
 
         job.delete_from_user()
@@ -147,7 +147,7 @@ class JobViewSet(viewsets.ModelViewSet):
         """
         job: Job = self.get_object()
 
-        if not job.has_finished():
+        if not job.has_finished() and job.drm_job_id:
             try:
                 terminate_job(job.drm_job_id)
             except InternalException:  # The job can be already finished
