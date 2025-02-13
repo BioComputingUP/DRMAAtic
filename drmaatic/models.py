@@ -58,7 +58,7 @@ class Group(models.Model):
             return self.objects.get_or_create(name='anonymous', defaults={'throttling_rate_burst': '20/s',
                                                                           'token_renewal_time': '3 days',
                                                                           'cpu_credit_max_amount': 100})[0]
-        except OperationalError:
+        except:
             return Group(name='anonymous', throttling_rate_burst='20/s', token_renewal_time='3 days',
                          cpu_credit_max_amount=100)
 
@@ -68,7 +68,7 @@ class Group(models.Model):
             return self.objects.get_or_create(name='registered', defaults={'throttling_rate_burst': '30/s',
                                                                            'token_renewal_time': '5 days',
                                                                            'cpu_credit_max_amount': 200})[0]
-        except OperationalError:
+        except:
             return Group(name='registered', throttling_rate_burst='30/s', token_renewal_time='5 days',
                          cpu_credit_max_amount=200)
 
