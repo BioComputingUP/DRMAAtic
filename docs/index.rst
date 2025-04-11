@@ -1,4 +1,4 @@
-.. include:: /path/to/project_logo.rst   # (optional project logo if available)
+.. image:: https://drmaatic.biocomputingup.it/static/img/logo-dark.svg
 
 =============================
  DRMAAtic Documentation
