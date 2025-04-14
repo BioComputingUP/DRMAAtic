@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; DRAMAAtic  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User Guide" href="user_guide.html" />
+    <link rel="prev" title="DRMAAtic Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DRAMAAtic
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-docker-recommended">Using Docker (Recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-installation">Manual Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DRAMAAtic</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<p>This section describes how to get DRMAAtic up and running on your system.</p>
+<p><strong>Prerequisites:</strong>
+- Linux environment
+- SLURM with DRMAA library (or the provided Docker setup)
+- Python 3.8+ or Docker Engine</p>
+<section id="using-docker-recommended">
+<h2>Using Docker (Recommended)<a class="headerlink" href="#using-docker-recommended" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Clone the repository and navigate to the docker directory:
+git clone <a class="reference external" href="https://github.com/BioComputingUP/DRMAAtic.git">https://github.com/BioComputingUP/DRMAAtic.git</a>
+cd DRMAAtic/docker</p></li>
+<li><p>Deploy a test cluster (including a SLURM simulator, database, and DRMAAtic) using the provided docker compose file:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>testing
+docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</pre></div>
+</div>
+<p>This will start a local SLURM controller, a compute node, a MySQL database, and the DRMAAtic REST API service in containers, creating a self-contained test cluster environment.</p>
+<ol class="arabic simple" start="3">
+<li><p>OR deploy with an existing cluster:</p></li>
+</ol>
+<ul class="simple">
+<li><p>Edit configuration files (like <code class="docutils literal notranslate"><span class="pre">slurm.conf</span></code>, database settings, etc.) in <code class="docutils literal notranslate"><span class="pre">/deploy/deploy-example/</span></code> to match your cluster.</p></li>
+<li><p>Start the DRMAAtic container and connect it to your cluster’s SLURM and database:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>../deploy-example
+docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>After the container(s) are running, proceed to initial setup (database migrations and creating an admin user) as described below:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>drmaatic<span class="w"> </span>/opt/venv/bin/python3<span class="w"> </span>manage.py<span class="w"> </span>migrate
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>drmaatic<span class="w"> </span>/opt/venv/bin/python3<span class="w"> </span>manage.py<span class="w"> </span>createsuperuser
+</pre></div>
+</div>
+</section>
+<section id="manual-installation">
+<h2>Manual Installation<a class="headerlink" href="#manual-installation" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Clone the repository and install Python dependencies:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/BioComputingUP/DRMAAtic.git
+<span class="nb">cd</span><span class="w"> </span>DRMAAtic
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>Ensure you have SLURM installed on the host and its DRMAA library available (the drmaa Python package will interface with it).</p>
+<ol class="arabic simple" start="2">
+<li><p>Configure the database: By default DRMAAtic uses MySQL/MariaDB. Set up a database and update the Django settings (or <code class="docutils literal notranslate"><span class="pre">.env</span></code> files in <code class="docutils literal notranslate"><span class="pre">server/settings/</span></code>) with the DB credentials. For example, create a MySQL database named drmaatic and update <code class="docutils literal notranslate"><span class="pre">server/settings/.env</span></code> accordingly.</p></li>
+<li><p>Run database migrations to set up the schema:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>makemigrations
+python<span class="w"> </span>manage.py<span class="w"> </span>migrate
+</pre></div>
+</div>
+<p>This will create the necessary tables for tasks, users, etc. in the database.</p>
+<ol class="arabic simple" start="4">
+<li><p>Create a superuser account for the Django admin (to manage tasks, etc.):</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>createsuperuser
+</pre></div>
+</div>
+<p>Follow the prompts to set up an admin username and password</p>
+<ol class="arabic simple" start="5">
+<li><p>Start the DRMAAtic server:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>runserver
+</pre></div>
+</div>
+<p>By default, this will run the development server at <code class="docutils literal notranslate"><span class="pre">http://127.0.0.1:8000/</span></code>. You should now have the DRMAAtic API available (though without a running SLURM, job submission will not function).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Accessing the Web API: Once running, the API endpoints can be accessed via <code class="docutils literal notranslate"><span class="pre">http://&lt;server&gt;/api/...</span></code> (if using the development server or appropriate host/port for Docker). You can also log into the Django admin UI at <code class="docutils literal notranslate"><span class="pre">http://&lt;server&gt;/admin/</span></code> using the superuser credentials, to configure tasks and view job records.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="DRMAAtic Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="user_guide.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hamidreza Ghafouri.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

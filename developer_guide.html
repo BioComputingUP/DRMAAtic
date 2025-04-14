@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Guide &mdash; DRAMAAtic  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="User Guide" href="user_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DRAMAAtic
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-development-environment">Setting Up a Development Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-tests">Running Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DRAMAAtic</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Developer Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/developer_guide.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="developer-guide">
+<h1>Developer Guide<a class="headerlink" href="#developer-guide" title="Link to this heading"></a></h1>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<p>DRMAAtic is a Django-based web application structured as follows:</p>
+<ul class="simple">
+<li><p><strong>Django Project:</strong> The <code class="docutils literal notranslate"><span class="pre">server/</span></code> directory contains the Django project configuration (settings, URLs, WSGI/ASGI entry points). It’s a standard Django project that configures the REST API endpoints and integrates with the DRMAA backend.</p></li>
+<li><p><strong>DRMAAtic App (``drmaatic/``):</strong> This is the main Django app providing core functionality. Within this package:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">task/</span></code> – a sub-app defining the <strong>Task</strong> model (the template for jobs), its serializer, and viewset. This app handles listing available tasks and (for admins) creating/editing tasks.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">job/</span></code> – a sub-app (or module) for <strong>Job</strong> management. It includes the <strong>JobViewSet</strong> (registered at the <code class="docutils literal notranslate"><span class="pre">/api/job/</span></code> endpoint) which allows job submission and status retrieval. The Job model and logic interface with DRMAA to actually submit jobs to SLURM and fetch their status.</p></li>
+<li><p>Other modules in <code class="docutils literal notranslate"><span class="pre">drmaatic/</span></code> – e.g., <code class="docutils literal notranslate"><span class="pre">authentication.py</span></code> (custom OAuth2 logic for ORCID login), <code class="docutils literal notranslate"><span class="pre">permissions.py</span></code> (access control classes), <code class="docutils literal notranslate"><span class="pre">utils.py</span></code> (helper functions for job submission, file handling, etc.), and Django standard files like <code class="docutils literal notranslate"><span class="pre">models.py</span></code>, <code class="docutils literal notranslate"><span class="pre">views.py</span></code> (for miscellaneous API views), <code class="docutils literal notranslate"><span class="pre">urls.py</span></code> (wiring the routers).</p></li>
+<li><p><strong>Dependencies:</strong> Key dependencies include <strong>Django REST Framework</strong> (for building the API views/serializers) and <strong>drmaa-python</strong> (Python bindings for the DRMAA library, enabling DRMAAtic to communicate with SLURM’s job scheduler). Ensure the SLURM DRMAA library is installed on the system or container so that <code class="docutils literal notranslate"><span class="pre">drmaa-python</span></code> can connect to it.</p></li>
+</ul>
+<p>DRMAAtic’s design follows a typical pattern: the Task and Job viewsets together provide a full cycle of job management. <strong>TaskViewSet</strong> (read-only to users) exposes what can be run, and <strong>JobViewSet</strong> handles creation of jobs and retrieval of their status/output. Under the hood, when a job is submitted, the system generates a shell script or command based on the Task, then uses <cite>drmaa</cite> to submit this to Slurm. The job’s unique ID (UUID) and possibly the cluster’s job ID are recorded. The DRMAA interface is then used to poll job status and fetch results, which are stored under a designated output directory on the server.</p>
+<ul class="simple">
+<li><p>Django project under <cite>server/</cite></p></li>
+<li><p>Main app: <cite>drmaatic/</cite> with <cite>task/</cite> and <cite>job/</cite> modules</p></li>
+<li><p>Uses Django REST Framework and drmaa-python</p></li>
+</ul>
+</section>
+<section id="setting-up-a-development-environment">
+<h2>Setting Up a Development Environment<a class="headerlink" href="#setting-up-a-development-environment" title="Link to this heading"></a></h2>
+<p>If you are planning to modify DRMAAtic or contribute, follow these steps:</p>
+<ol class="arabic simple">
+<li><p><strong>Fork and Clone</strong> the repository to your GitHub account, then clone your fork locally.</p></li>
+<li><p><strong>Install dependencies</strong> in a virtual environment:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+<span class="nb">source</span><span class="w"> </span>env/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>-r<span class="w"> </span>dev-requirements.txt
+</pre></div>
+</div>
+<p>(Assume dev-requirements.txt might include additional tools like linters or test frameworks.)</p>
+<ol class="arabic simple" start="3">
+<li><p><strong>Database and DRMAA setup:</strong> For development, you can use the Docker-based SLURM cluster in <code class="docutils literal notranslate"><span class="pre">docker/testing</span></code> to have a local scheduler and database. Start that environment and configure your local Django to connect to the provided DB, or alternately install SLURM locally (which can be complex). Using the Docker test cluster is often easiest: after <code class="docutils literal notranslate"><span class="pre">docker-compose</span></code> up in <code class="docutils literal notranslate"><span class="pre">docker/testing</span></code>, your local DRMAAtic code can connect to <code class="docutils literal notranslate"><span class="pre">localhost:3306</span></code> (MySQL) and <code class="docutils literal notranslate"><span class="pre">localhost:6818</span></code> (SLURM’s DRMAA) if properly configured.</p></li>
+<li><p>Apply migrations and create superuser (same as in Installation steps) to set up the database.</p></li>
+<li><p>Run the server in development mode and ensure you can hit the API and that jobs submitted go to the test SLURM.</p></li>
+</ol>
+</section>
+<section id="running-tests">
+<h2>Running Tests<a class="headerlink" href="#running-tests" title="Link to this heading"></a></h2>
+<p>The repository includes a <code class="docutils literal notranslate"><span class="pre">tests/</span></code> directory (Django tests) to verify functionality. To run the test suite:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span><span class="nb">test</span>
+</pre></div>
+</div>
+<p>Make sure the test environment can access a SLURM instance or consider using a simulated DRMAA environment. Some tests might be integration tests that expect the DRMAA backend to be available (perhaps the CI uses the Docker test cluster in headless mode). Continuous integration (GitHub Actions) is configured (see <code class="docutils literal notranslate"><span class="pre">.github/workflows/</span></code>) to run tests and build Docker images on new commits. As a contributor, ensure that all tests pass before submitting a pull request.</p>
+</section>
+<section id="advanced-configuration">
+<h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
+<p>A few configuration points for advanced users or sysadmins:</p>
+<ul class="simple">
+<li><p>Settings and <code class="docutils literal notranslate"><span class="pre">.env</span></code> files: DRMAAtic’s Django settings are likely split for different environments. The server/settings/ may contain multiple settings files (production, development) and rely on .env files for secrets/keys (the deploy docs mention environment files. Check <code class="docutils literal notranslate"><span class="pre">server/settings.py</span></code> or <code class="docutils literal notranslate"><span class="pre">server/utils.py</span></code> for how environment variables are loaded. To customize, you can override these in your deployment (for example, set environment variables in your Docker compose or host).</p></li>
+<li><p>Authentication providers: By default, ORCID OAuth is enabled. You can add other OAuth2 providers by extending the SocialProviderAuthentication class or adding Django Allauth configurations. Ensure to update the front-end/client to support any new providers.</p></li>
+<li><p>Job execution environment: The DRMAAtic container or server must have access to the cluster’s scheduling commands (e.g., <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> if not using DRMAA, or the DRMAA library configured properly). In Docker, this is handled via the custom entrypoint script that sets up the environment for DRMAA. If you need to integrate with a different scheduler or a different DRMAA implementation, you might use Breathe and Doxygen to document any C/C++ components or interfaces (for example, if part of the DRMAA integration was written in C, Breathe would allow incorporating its documentation into Sphinx – however, in DRMAAtic’s case, the DRMAA usage is through drmaa-python, so standard autodoc covers it).</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="user_guide.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hamidreza Ghafouri.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide &mdash; DRAMAAtic  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developer Guide" href="developer_guide.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DRAMAAtic
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#authenticating-and-obtaining-an-api-token">Authenticating and Obtaining an API Token</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tasks">Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submitting-a-job">Submitting a Job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-status">Monitoring Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#retrieving-outputs">Retrieving Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drmaatic-api-endpoints">DRMAAtic API endpoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DRAMAAtic</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">User Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/user_guide.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading"></a></h1>
+<p>This guide explains how to use DRMAAtic to run jobs on the cluster through its REST API. We assume DRMAAtic is installed and running (see Installation), and you have access to an account.</p>
+<section id="authenticating-and-obtaining-an-api-token">
+<h2>Authenticating and Obtaining an API Token<a class="headerlink" href="#authenticating-and-obtaining-an-api-token" title="Link to this heading"></a></h2>
+<p>DRMAAtic uses OAuth for user authentication. In a typical setup, you will log in via an external provider (such as <strong>ORCID</strong>) to obtain a JWT access token. If using the provided front-end or Swagger UI, follow the login link to authenticate; otherwise, you can obtain a token by making a request to the authentication endpoint (as configured by the DRMAAtic server).</p>
+<p>Use the token in Authorization headers for API requests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Authorization</span><span class="p">:</span> <span class="n">Bearer</span> <span class="o">&lt;</span><span class="n">your_token</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Without a valid token, most API endpoints (besides any public ones) will be inaccessible.</p>
+</section>
+<section id="tasks">
+<h2>Tasks<a class="headerlink" href="#tasks" title="Link to this heading"></a></h2>
+<p>A <strong>Task</strong> in DRMAAtic represents a predefined job template or script that can be executed on the cluster. Each task includes the command or script to run and defines what input parameters are required. Tasks are usually configured by an administrator via the Django admin interface (or via an API, if provided).</p>
+<ul class="simple">
+<li><p>List available tasks:</p></li>
+</ul>
+<p>Send a GET request to <code class="docutils literal notranslate"><span class="pre">/api/task/</span></code> to retrieve the list of tasks you can execute.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://&lt;server&gt;/api/task/
+</pre></div>
+</div>
+<p>This returns a JSON array of tasks, each with an id, name, description, and information on required inputs (for instance, a task might indicate it needs a FASTA file input or certain parameters).</p>
+<ul class="simple">
+<li><p>View a task’s detail:</p></li>
+</ul>
+<p>You can GET <code class="docutils literal notranslate"><span class="pre">/api/task/&lt;id&gt;/</span></code> to see details of a specific task, including default parameters or documentation on what it does.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://&lt;server&gt;/api/task/&lt;id&gt;/
+</pre></div>
+</div>
+</section>
+<section id="submitting-a-job">
+<h2>Submitting a Job<a class="headerlink" href="#submitting-a-job" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Upload input data (if needed)</p></li>
+</ol>
+<p>Ensure you have the required input files accessible (if needed). Depending on configuration, you may upload inputs via the API or ensure the files are accessible on a shared filesystem. In many cases, DRMAAtic provides an endpoint or method to upload input files as part of the job submission.</p>
+<ol class="arabic simple" start="2">
+<li><p>Submit job: Make a POST request to the job submission endpoint. DRMAAtic’s API supports job submissions via the <code class="docutils literal notranslate"><span class="pre">/api/job/</span></code> endpoint.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>-F<span class="w"> </span><span class="s2">&quot;task=&lt;TASK_ID&gt;&quot;</span><span class="w"> </span>-F<span class="w"> </span><span class="s2">&quot;input=@input.dat&quot;</span><span class="w"> </span>https://&lt;server&gt;/api/job/
+</pre></div>
+</div>
+<p>In this example, we use a multipart form (<code class="docutils literal notranslate"><span class="pre">-F</span></code>) to send both the chosen task ID and an input file. You might also include other form fields or JSON parameters depending on the task (e.g., parameters like number of threads, etc.). The exact API contract for job submission (field names, upload method) will be defined in the API reference.</p>
+<ol class="arabic simple" start="3">
+<li><p>Receive job UUID: If the submission is successful, the API will respond with a JSON containing the newly created job’s unique identifier (UUID) and initial status. For instance:</p></li>
+</ol>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123e4567-e89b-12d3-a456-426614174000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;task&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;QUEUED&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;submit_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04-09T14:30:00Z&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="err">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Note the <code class="docutils literal notranslate"><span class="pre">id</span></code> field, which is the job’s UUID. You will use this to query the job status or results.</p>
+</section>
+<section id="monitoring-status">
+<h2>Monitoring Status<a class="headerlink" href="#monitoring-status" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Check job status: GET <code class="docutils literal notranslate"><span class="pre">/api/job/&lt;job_uuid&gt;/</span></code> to retrieve the current status and details of the job. The status may be QUEUED, RUNNING, COMPLETED, FAILED, etc., reflecting the scheduler’s state. For example:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://&lt;server&gt;/api/job/&lt;uuid&gt;/
+</pre></div>
+</div>
+<p>The response might include fields like status, <code class="docutils literal notranslate"><span class="pre">exit_code</span></code>, <code class="docutils literal notranslate"><span class="pre">start_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_time</span></code>, and any output metadata.</p>
+<ul class="simple">
+<li><p>Auto-refresh: (If using a web front-end or the browsable API interface, you might see the status update periodically. Otherwise, you can poll the status with the above GET call.)</p></li>
+</ul>
+<p>DRMAAtic uses the DRMAA library under the hood to query the cluster about the job’s state, rather than maintaining its own separate job tracking database. This means the status is always in sync with the cluster scheduler.</p>
+</section>
+<section id="retrieving-outputs">
+<h2>Retrieving Outputs<a class="headerlink" href="#retrieving-outputs" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>List output files: Once status is COMPLETED, you can GET <code class="docutils literal notranslate"><span class="pre">/api/job/&lt;job_uuid&gt;/output/</span></code> (endpoint name may vary) to get a listing of output files produced by the job. DRMAAtic typically aggregates outputs under a directory named after the job’s UUID on the server. A JSON response may list file names, sizes, and possibly URLs.</p></li>
+<li><p>Download output: for convenience, an endpoint may provide a packaged download (e.g., a zip archive of the job’s output directory). For example:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-OJ<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://&lt;server&gt;/api/job/&lt;uuid&gt;/download/
+</pre></div>
+</div>
+<p>It would download a file (e.g., &lt;uuid&gt;.zip) containing all results. Alternatively, the API might give URLs per file which you can download individually.</p>
+</section>
+<section id="example-workflow">
+<h2>Example Workflow<a class="headerlink" href="#example-workflow" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Authenticate via ORCID, obtain <code class="docutils literal notranslate"><span class="pre">TOKEN</span></code>.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://api.drmaatic.example.org/api/task/
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>List tasks to find your desired computation:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>-F<span class="w"> </span><span class="s2">&quot;task=5&quot;</span><span class="w"> </span>-F<span class="w"> </span><span class="s2">&quot;input=@seq.fasta&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>https://api.drmaatic.example.org/api/job/
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Submit job (e.g., task 5 with an input file):</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>-F<span class="w"> </span><span class="s2">&quot;task=5&quot;</span><span class="w"> </span>-F<span class="w"> </span><span class="s2">&quot;input=@seq.fasta&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>https://api.drmaatic.example.org/api/job/
+</pre></div>
+</div>
+<p>-&gt; returns <code class="docutils literal notranslate"><span class="pre">{&quot;id&quot;:</span> <span class="pre">&quot;...UUID...&quot;,</span> <span class="pre">&quot;status&quot;:</span> <span class="pre">&quot;QUEUED&quot;,</span> <span class="pre">...}</span></code></p>
+<ol class="arabic simple" start="4">
+<li><p>Monitor status until completion:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://api.drmaatic.example.org/api/job/&lt;UUID&gt;/
+</pre></div>
+</div>
+<p>(repeat until <code class="docutils literal notranslate"><span class="pre">&quot;status&quot;:</span> <span class="pre">&quot;COMPLETED&quot;</span></code>)</p>
+<ol class="arabic simple" start="5">
+<li><p>Download results:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-OJ<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>https://api.drmaatic.example.org/api/job/&lt;UUID&gt;/download/
+</pre></div>
+</div>
+<p>(The <code class="docutils literal notranslate"><span class="pre">-OJ</span></code> flags instruct curl to save the file with the server-provided filename.)</p>
+</section>
+<section id="drmaatic-api-endpoints">
+<h2>DRMAAtic API endpoints<a class="headerlink" href="#drmaatic-api-endpoints" title="Link to this heading"></a></h2>
+<p>The DRMAAtic API provides a comprehensive set of endpoints for authentication, job management, and task retrieval within the DRMAAtic system. To learn more, please refer to the Swagger documentation available here: <a class="reference external" href="https://drmaatic.biocomputingup.it/">https://drmaatic.biocomputingup.it/</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="developer_guide.html" class="btn btn-neutral float-right" title="Developer Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hamidreza Ghafouri.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
