@@ -138,3 +138,8 @@ Example Workflow
    curl -OJ -H "Authorization: Bearer $TOKEN" https://api.drmaatic.example.org/api/job/<UUID>/download/
    
 (The ``-OJ`` flags instruct curl to save the file with the server-provided filename.)
+
+DRMAAtic API endpoints
+----------------------
+
+The DRMAAtic API provides a comprehensive set of endpoints for authentication, job management, and task retrieval within the DRMAAtic system. To learn more, please refer to the Swagger documentation available here: https://drmaatic.biocomputingup.it/
