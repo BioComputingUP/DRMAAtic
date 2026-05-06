@@ -14,5 +14,5 @@ requests
 mysqlclient
 django-admin-rangefilter
 setuptools
-backports.zoneinfo; python_version < "3.9"
+#backports.zoneinfo; python_version < "3.9"
 tzdata
