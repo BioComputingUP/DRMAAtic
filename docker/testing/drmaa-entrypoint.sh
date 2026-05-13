@@ -17,10 +17,13 @@ then
 
     {
       echo "-- Importing the test database ..."
-      mysql --host=mysql --port=3306 --user=root --password=pwd < ./docker/testing/drmaatic_test.sql 2>/dev/null
+      mysql -h mysql -P 3306 -u root -ppwd < ./docker/testing/drmaatic_test.sql 2>/dev/null
     } || {
       echo "-- The test database already exists ..."
     }
+
+    echo "---> Applying Django migrations ..."
+    /opt/venv/bin/python manage.py migrate --noinput
 
     echo "---> Starting the django application ..."
     exec /opt/venv/bin/python manage.py runserver 0.0.0.0:8300

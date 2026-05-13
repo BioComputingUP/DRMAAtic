@@ -1,28 +1,46 @@
-FROM giovtorres/slurm-docker-cluster:latest
+FROM ubuntu:20.04
 
-RUN yum -y update && yum install -y gnupg2 curl python3-virtualenv libpq-dev
-# Clean yum cache
-RUN yum clean all
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
-# Install the dependencies for the slurm-drmaa1 package
-RUN wget https://github.com/natefoo/slurm-drmaa/releases/download/1.1.4/slurm-drmaa-1.1.4.tar.gz \
-    && tar -xvzf slurm-drmaa-1.1.4.tar.gz \
-    && cd slurm-drmaa-1.1.4 \
-    && ./configure && make && make install && ldconfig
+RUN apt-get update && apt-get install -y software-properties-common gnupg2 curl
+RUN add-apt-repository ppa:natefoo/slurm-drmaa
+RUN apt-get update && apt-get install -y \
+    munge \
+    libmunge-dev \
+    slurm-client \
+    libslurm-dev \
+    slurm-drmaa-dev \
+    python3 \
+    python3-venv \
+    python3-dev \
+    python3-pip \
+    build-essential \
+    pkg-config \
+    default-libmysqlclient-dev \
+    mysql-client \
+    gosu \
+    && rm -rf /var/lib/apt/lists/*
 
-# Clean the installation files
-RUN rm -rf slurm-drmaa-1.1.4.tar.gz slurm-drmaa-1.1.4
+RUN groupmod -g 998 munge && usermod -u 998 -g 998 munge
 
-# Create a virtual environment for Python 3 and use th requirements.txt file to install the dependencies
+RUN mkdir -p /run/munge /var/log/munge /var/lib/munge \
+    && chown -R munge: /etc/munge/ /var/log/munge/ /run/munge/ /var/lib/munge/ \
+    && chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/
+
 RUN python3 -m venv /opt/venv
 RUN /opt/venv/bin/pip install --upgrade pip
 
-# Copy the files from the host to the container
 COPY . /app
 WORKDIR /app
-RUN ls -la
 
 RUN /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
-COPY docker/testing/drmaa-entrypoint.sh /usr/local/bin/dramaa-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/dramaa-entrypoint.sh"]
+RUN drmaa_lib="$(find /usr/lib -name 'libdrmaa.so*' | head -n 1)" \
+    && test -n "$drmaa_lib" \
+    && ln -sf "$drmaa_lib" /usr/local/lib/libdrmaa.so \
+    && ldconfig
+
+COPY docker/testing/drmaa-entrypoint.sh /usr/local/bin/drmaa-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/drmaa-entrypoint.sh"]
