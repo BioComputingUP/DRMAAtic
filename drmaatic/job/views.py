@@ -58,7 +58,33 @@ class JobViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        """
+        Override create to return detailed error information on validation/submission failures.
+        """
+        try:
+            return super().create(request, *args, **kwargs)
+        except exceptions.ValidationError as e:
+            # Return validation errors with full detail
+            return Response(
+                {'detail': 'Validation error', 'errors': e.detail},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except exceptions.APIException as e:
+            # Return API errors with exact message
+            return Response(
+                {'detail': str(e.detail) if hasattr(e, 'detail') else str(e)},
+                status=e.status_code if hasattr(e, 'status_code') else status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            # Catch any unexpected errors and return detailed message
+            return Response(
+                {'detail': f'Unexpected error during job creation: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     def get_response(self, queryset):
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             # If pagination is enabled, return the paginated response
@@ -113,6 +139,8 @@ class JobViewSet(viewsets.ModelViewSet):
         """
         Retrieve the job and update the status of the DRM job
         """
+
+
         job = self.get_object()
         # Update the drm status before returning the job
         job.update_drm_status()

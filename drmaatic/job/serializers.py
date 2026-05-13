@@ -1,4 +1,5 @@
 import logging
+import os
 
 from rest_framework import exceptions, serializers
 
@@ -85,8 +86,14 @@ class JobSerializer(serializers.ModelSerializer):
         """
         try:
             task = Task.objects.get(name=task)
-        except Exception:
-            raise exceptions.NotFound(detail=f"Task \'{task}\' not found")
+        except Task.DoesNotExist:
+            raise exceptions.ValidationError({
+                'task': f"Task '{task}' does not exist. Use GET /task to see available tasks."
+            })
+        except Exception as e:
+            raise exceptions.ValidationError({
+                'task': f"Error validating task '{task}': {str(e)}"
+            })
         return task
 
     def create(self, validated_data):
@@ -101,6 +108,9 @@ class JobSerializer(serializers.ModelSerializer):
 
         A job can have a parent if necessary, in this case the working directory of the new job is the same as the parent job.
         """
+
+
+        
 
         # Check if user passed the params keyword
         task = validated_data["task"]
@@ -133,9 +143,12 @@ class JobSerializer(serializers.ModelSerializer):
 
         try:
             job_params, renamed_files = process_parameters(self.initial_data, job, parameters_of_job)
-        except (exceptions.NotAcceptable, Exception) as e:
+        except (exceptions.NotAcceptable, exceptions.ValidationError) as e:
             job.delete_from_file_system()
             raise e
+        except Exception as e:
+            job.delete_from_file_system()
+            raise exceptions.ValidationError({'detail': f"Parameter processing error: {str(e)}"})
 
         # job.files_name = renamed_files
 
@@ -155,19 +168,55 @@ class JobSerializer(serializers.ModelSerializer):
 
         # Get all the dependencies of the job and the type of dependency
         if "dependencies" in validated_data.keys():
-            job.dependencies.set([Job.objects.get(uuid=dep) for dep in validated_data["dependencies"].split(",")])
+            dep_uuids = validated_data["dependencies"].split(",")
+            try:
+                dep_jobs = []
+                for dep_uuid in dep_uuids:
+                    dep_uuid_clean = dep_uuid.strip()
+                    try:
+                        dep_job = Job.objects.get(uuid=dep_uuid_clean)
+                        dep_jobs.append(dep_job)
+                    except Job.DoesNotExist:
+                        job.delete_from_file_system()
+                        raise exceptions.ValidationError({
+                            'dependencies': f"Dependency job '{dep_uuid_clean}' does not exist."
+                        })
+                job.dependencies.set(dep_jobs)
+            except exceptions.ValidationError:
+                raise
+            except Exception as e:
+                job.delete_from_file_system()
+                raise exceptions.ValidationError({
+                    'dependencies': f"Error processing dependencies: {str(e)}"
+                })
 
             if "dependency_type" in validated_data.keys():
-                dependency_type = validated_data["dependency_type"]
-                if dependency_type in Job.DependencyTypes.values:
-                    job.dependency_type = dependency_type
-                else:
-                    raise exceptions.NotAcceptable("The dependency_type parameter is not valid")
+                dependency_type = validated_data["dependency_type"].strip()
+                if dependency_type not in Job.DependencyTypes.values:
+                    valid_types = ", ".join(Job.DependencyTypes.values)
+                    raise exceptions.ValidationError({
+                        'dependency_type': f"Invalid dependency_type '{dependency_type}'. Valid options: {valid_types}"
+                    })
+                job.dependency_type = dependency_type
             else:
                 job.dependency_type = Job.DependencyTypes.AFTER_ANY
 
         dependencies = [t.drm_job_id for t in job.dependencies.all()] if job.dependencies.exists() else None
         dependency_type = job.dependency_type if dependencies else None
+
+        # Validate command path before asking Slurm to submit the job.
+        # This prevents opaque "slurm_submit_batch_job" errors when the script path is wrong.
+        if task.command and task.command[0] != '/':
+            submission_script = os.path.join(str(settings.DRMAATIC_TASK_SCRIPT_DIR), task.command)
+            if not os.path.exists(submission_script):
+                job.delete_from_file_system()
+                raise exceptions.ValidationError({
+                    'task': (
+                        f"Task command '{task.command}' was not found under "
+                        f"DRMAATIC_TASK_SCRIPT_DIR='{settings.DRMAATIC_TASK_SCRIPT_DIR}'. "
+                        "Check task command and environment settings."
+                    )
+                })
 
         try:
             j_id, name = start_job(**drm_params,
@@ -190,17 +239,21 @@ class JobSerializer(serializers.ModelSerializer):
                                    stderr_file=err_file)
         except Exception as e:
             job.delete_from_file_system()
-            logger.warning(
-                "Job {}, {}, something went wrong starting this job: {}".format(job.uuid, task.name, e),
-                extra={'request': self.context.get('request')})
+            error_detail = str(e).strip()
+            logger.error(
+                f"Job {job.uuid} ({task.name}) failed to start in DRM: {error_detail}",
+                extra={'request': self.context.get('request')}, exc_info=True)
             job.status = Job.Status.FAILED.value
-            raise exceptions.APIException(detail='An error occurred while starting the job')
+            job.save()
+            raise exceptions.APIException(detail=error_detail)
 
         if j_id is None:
             # If the start of the job had some problem then j_id is none, set the status of the job as rejected
             job.status = Job.Status.REJECTED.value
-            logger.warning("Job {}, {}, was rejected".format(job.uuid, task.name),
+            job.save()
+            logger.warning(f"Job {job.uuid} ({task.name}) was rejected by DRM/SLURM. Check job status and error logs for details.",
                            extra={'request': self.context.get('request')})
+            raise exceptions.APIException(detail=f"Job {job.uuid} was rejected by the DRM system. This may indicate resource constraints or invalid job parameters. Check with your system administrator.")
 
         else:
             # Otherwise, we associate the job id of the DRM and set the status to CREATED
