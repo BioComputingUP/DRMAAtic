@@ -1,4 +1,5 @@
-FROM giovtorres/slurm-docker-cluster:latest
+FROM giovtorres/slurm-docker-cluster:25.11.4-2.3.0
+#FROM giovtorres/slurm-docker-cluster:latest
 
 RUN yum -y update
 RUN yum -y groupinstall development
