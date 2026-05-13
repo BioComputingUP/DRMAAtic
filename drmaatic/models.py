@@ -144,7 +144,7 @@ class User(models.Model):
 # Define internal token (associated to external user)
 class Token(models.Model):
     # Define hash
-    jwt = models.CharField(max_length=1000)
+    jwt = models.CharField(max_length=1000, null=True, blank=True, default="")
 
     def __repr__(self):
         return self.jwt[-8:]
