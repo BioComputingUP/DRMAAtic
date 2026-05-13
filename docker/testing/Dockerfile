@@ -2,7 +2,7 @@ FROM giovtorres/slurm-docker-cluster:latest
 
 RUN yum -y update
 RUN yum -y groupinstall development
-RUN yum install -y --allowerasing gnupg2 curl python-devel libpq-devel wget slurm-libs mysql-devel
+RUN yum install -y --allowerasing gnupg2 curl python3-devel libpq-devel wget slurm-libs mysql-devel
 # Clean yum cache
 RUN yum clean all
 
