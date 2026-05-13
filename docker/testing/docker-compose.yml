@@ -101,7 +101,7 @@ services:
       - ../../settings/.env
       - .testing-docker.env
     ports:
-      - "8301:8300"
+      - "8300:8300"
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
