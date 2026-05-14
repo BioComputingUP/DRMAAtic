@@ -31,6 +31,7 @@ services:
 
   slurmdbd:
     image: giovtorres/slurm-docker-cluster:latest
+    init: true
     command: [ "slurmdbd" ]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -48,6 +49,7 @@ services:
 
   slurmctld:
     image: giovtorres/slurm-docker-cluster:latest
+    init: true
     command: [ "slurmctld" ]
     container_name: slurmctld
     hostname: slurmctld
@@ -63,6 +65,7 @@ services:
 
   c1:
     image: giovtorres/slurm-docker-cluster:latest
+    init: true
     command: [ "slurmd" ]
     hostname: c1
     container_name: c1
@@ -78,6 +81,7 @@ services:
 
   c2:
     image: giovtorres/slurm-docker-cluster:latest
+    init: true
     command: [ "slurmd" ]
     hostname: c2
     container_name: c2
@@ -95,6 +99,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/testing/Dockerfile
+    init: true
     command: [ "runserver" ]
     container_name: drmaatic
     env_file:
